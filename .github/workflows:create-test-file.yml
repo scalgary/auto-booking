@@ -1,0 +1,17 @@
+
+name: Create simple text file
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  create-file:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Create test.txt
+      run: echo "bonjour" > test.txt
+    
+    - name: Show content
+      run: cat test.txt
