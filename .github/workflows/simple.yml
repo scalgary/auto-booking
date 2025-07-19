@@ -16,7 +16,7 @@ jobs:
       run: cat test.txt
     
     - name: Upload file
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: my-test-file
         path: test.txt
