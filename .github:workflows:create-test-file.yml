@@ -1,0 +1,40 @@
+name: Create test file with secret
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  create-file:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Run Python script
+      env:
+        MY_SECRET: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+      run: |
+        python -c "
+        import os
+        secret_value = os.environ.get('MY_SECRET', 'Secret not found')
+        with open('test.txt', 'w') as f:
+            f.write(f'Secret value: {secret_value}')
+        print('File test.txt created successfully')
+        "
+    
+    - name: Display file content
+      run: cat test.txt
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-file
+        path: test.txt
