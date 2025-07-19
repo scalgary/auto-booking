@@ -1,22 +1,27 @@
-name: Create file as artifact
+name: Run Python script and upload file
 
 on: 
   push:
   workflow_dispatch:
 
 jobs:
-  create-file:
+  run-python:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Create test.txt
-      run: echo "bonjour" > test.txt
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    - name: Show content
-      run: cat test.txt
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
     
-    - name: Upload file
+    - name: Run Python script
+      run: python create_file.py
+    
+    - name: Upload created file
       uses: actions/upload-artifact@v4
       with:
-        name: my-test-file
-        path: test.txt
+        name: generated-file
+        path: output.txt
