@@ -1,7 +1,6 @@
+name: Create and save file
 
-name: Create simple text file
-
-on:
+on: 
   push:
   workflow_dispatch:
 
@@ -10,8 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
     - name: Create test.txt
       run: echo "bonjour" > test.txt
     
     - name: Show content
       run: cat test.txt
+    
+    - name: Commit file
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add test.txt
+        git commit -m "Add test.txt file" || echo "No changes to commit"
+        git push
