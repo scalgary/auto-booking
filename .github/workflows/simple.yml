@@ -2,11 +2,10 @@ name: Saturday Evening Job
 
 on:
   schedule:
-    # Runs at 6:50 PM Calgary time (MDT/MST) on Saturdays
-    # Calgary is UTC-6 (MST) in winter, UTC-7 (MDT) in summer
-    # 6:50 PM MDT = 1:50 AM UTC (next day)
-    # 6:50 PM MST = 12:50 AM UTC (next day)
-    - cron: '45 1 * * 0'  # Sunday 1:50 AM UTC (Saturday 6:50 PM MDT)
+    # Runs at 6:50 PM Calgary time (MDT) on Saturdays
+    # Calgary summer time (MDT) is UTC-6
+    # 6:50 PM MDT = 12:50 AM UTC (next day, Sunday)
+    - cron: '50 0 * * 0'  # Sunday 12:50 AM UTC = Saturday 6:50 PM MDT Calgary
   
   # Optional: Allow manual trigger
   workflow_dispatch:
