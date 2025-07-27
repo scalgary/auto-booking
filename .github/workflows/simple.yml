@@ -1,27 +1,18 @@
 name: Run Python script and upload file
 
-on: 
-  push:
-  workflow_dispatch:
+#on: 
+#  push:
+#  workflow_dispatch:
 
+on:
+  schedule:
+  - cron '*/5/ * * * *'
 jobs:
-  run-python:
+  test-horaire:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Run Python script
-      run: python create_file.py
-    
-    - name: Upload created file
-      uses: actions/upload-artifact@v4
-      with:
-        name: generated-file
-        path: output.txt
+    - name: Afficher les heures
+      run |
+      echo "=== info"
+      echo "$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
