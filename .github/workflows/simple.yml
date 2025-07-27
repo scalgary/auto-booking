@@ -1,11 +1,11 @@
-name: Sunday Evening Job
+name: test registration Pickleball
 
 on:
   schedule:
     # Runs at 6:50 PM Calgary time (MDT) on Saturdays
     # Calgary summer time (MDT) is UTC-6
     # 6:50 PM MDT = 12:50 AM UTC (next day, Sunday)
-    - cron: '08 22 * * 0'  # Sunday 12:50 AM UTC = Saturday 6:50 PM MDT Calgary
+    - cron: '5 0 * * 1'  # Sunday 12:50 AM UTC = Saturday 6:50 PM MDT Calgary
   
   # Optional: Allow manual trigger
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
         echo "Running scheduled task for Saturday evening!"
         # Add your specific commands here
         # For example:
-        python test.py
+        python execution.py
         # npm run build
         # docker build -t myapp .
     
