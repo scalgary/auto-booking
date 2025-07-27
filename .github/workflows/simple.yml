@@ -1,17 +1,38 @@
-name: Run Python script and upload file
+name: Saturday Evening Job
 
-# Trigger options (uncomment as needed)
 on:
-  # push:
-  # workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    # Runs at 6:50 PM Calgary time (MDT/MST) on Saturdays
+    # Calgary is UTC-6 (MST) in winter, UTC-7 (MDT) in summer
+    # 6:50 PM MDT = 1:50 AM UTC (next day)
+    # 6:50 PM MST = 12:50 AM UTC (next day)
+    - cron: '50 1 * * 0'  # Sunday 1:50 AM UTC (Saturday 6:50 PM MDT)
+  
+  # Optional: Allow manual trigger
+  workflow_dispatch:
 
 jobs:
-  test-horaire:
+  saturday-evening-task:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Afficher les heures
-        run: |
-          echo "=== info ==="
-          echo "$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Display current time
+      run: |
+        echo "Current UTC time: $(date -u)"
+        echo "Calgary time (approximate): $(TZ='America/Edmonton' date)"
+    
+    - name: Run your Saturday evening task
+      run: |
+        echo "Running scheduled task for Saturday evening!"
+        # Add your specific commands here
+        # For example:
+        # python scripts/weekly_report.py
+        # npm run build
+        # docker build -t myapp .
+    
+    - name: Notify completion
+      run: |
+        echo "Saturday evening task completed successfully!"
