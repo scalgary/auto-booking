@@ -1,18 +1,17 @@
 name: Run Python script and upload file
 
-#on: 
-#  push:
-#  workflow_dispatch:
-
+# Trigger options (uncomment as needed)
 on:
+  # push:
+  # workflow_dispatch:
   schedule:
-  - cron '*/5/ * * * *'
+    - cron: '*/5 * * * *'  # Every 5 minutes
+
 jobs:
   test-horaire:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Afficher les heures
-      run |
-      echo "=== info"
-      echo "$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
+      - name: Afficher les heures
+        run: |
+          echo "=== info ==="
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S %Z')"
