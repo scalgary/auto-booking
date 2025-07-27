@@ -13,7 +13,13 @@ on:
 jobs:
   saturday-evening-task:
     runs-on: ubuntu-latest
-    
+    env:
+      YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
+      YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
+      YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
+      YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+      YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
+      YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
