@@ -6,7 +6,7 @@ on:
     # Calgary is UTC-6 (MST) in winter, UTC-7 (MDT) in summer
     # 6:50 PM MDT = 1:50 AM UTC (next day)
     # 6:50 PM MST = 12:50 AM UTC (next day)
-    - cron: '50 1 * * 0'  # Sunday 1:50 AM UTC (Saturday 6:50 PM MDT)
+    - cron: '45 1 * * 0'  # Sunday 1:50 AM UTC (Saturday 6:50 PM MDT)
   
   # Optional: Allow manual trigger
   workflow_dispatch:
