@@ -11,7 +11,7 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists/*
 
 # Installer les packages Python nécessaires
-RUN pip install --no-cache-dir selenium webdriver-manager python-dotenv
+RUN pip install --no-cache-dir selenium webdriver-manager python-dotenv pillow
 
 # (Optionnel) Tester l'installation
 RUN python3 -c "from selenium import webdriver; from webdriver_manager.chrome import ChromeDriverManager; from selenium.webdriver.chrome.service import Service; from selenium.webdriver.chrome.options import Options; options = Options(); options.add_argument('--headless'); options.add_argument('--no-sandbox'); options.add_argument('--disable-dev-shm-usage'); service = Service(ChromeDriverManager().install()); driver = webdriver.Chrome(service=service, options=options); driver.get('https://www.google.com'); print('✅ Test réussi! Titre:', driver.title); driver.quit()"
