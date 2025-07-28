@@ -4,12 +4,10 @@
     "dockerfile": "Dockerfile"
   },
   "settings": {
-    "python.defaultInterpreterPath": "/usr/local/bin/python"
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "locale": "en"
   },
   "postCreateCommand": "pip install --upgrade pip",
-  "features": {
-    "ghcr.io/devcontainers/features/github-copilot:1": {}
-  },
   "customizations": {
     "vscode": {
       "extensions": [
