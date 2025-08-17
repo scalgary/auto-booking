@@ -14,3 +14,4 @@ from PIL import Image
 
 
 print("All dependencies imported successfully!")
+print("Test")
