@@ -37,7 +37,9 @@ load_dotenv()  # Charge le fichier .env
 
 email = os.getenv('YOUR_SECRET_EMAIL')
 password = os.getenv('YOUR_SECRET_PASSWORD')
-logon_url = os.getenv('YOUR_SECRET_LOGON_URL')
+logon_url = os.environ.get("YOUR_SECRET_LOGON_URL")
+if not isinstance(logon_url, str) or not logon_url:
+    raise ValueError("YOUR_SECRET_LOGON_URL is missing or not a string")
 planning_url = os.getenv('YOUR_SECRET_PLANNING_URL')
 login_url = os.getenv('YOUR_SECRET_LOGIN_URL')
 my_name = os.getenv('YOUR_SECRET_My_NAME')
