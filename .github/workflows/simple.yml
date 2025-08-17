@@ -34,7 +34,7 @@ jobs:
         echo "Running scheduled task for Saturday evening!"
         # Add your specific commands here
         # For example:
-        python execution.py
+        python3 execution.py "19-Aug-25" "4:30"
         # npm run build
         # docker build -t myapp .
     

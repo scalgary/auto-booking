@@ -11,10 +11,25 @@ from dotenv import load_dotenv
 import os
 
 
-# Modifiez juste ces valeurs :
-TARGET_DATE = "04-Aug-25"  # ← VOTRE DATE ICI
+import sys
+
+# Récupérer les arguments
+if len(sys.argv) != 3:
+    print("Usage: python mon_script.py <variable1> <variable2> ")
+    sys.exit(1)
+
+TARGET_DATE = sys.argv[1]
 COURSE_TYPE = "Indoor Pickleball Intermediate"
-TARGET_TIME = "10:30"
+TARGET_TIME = sys.argv[2]
+
+print(f"Variable 1: {TARGET_DATE}")
+#print(f"Variable 2: {COURSE_TYPE}")
+print(f"Variable 2: {TARGET_TIME}")
+
+# Modifiez juste ces valeurs :
+#TARGET_DATE = "19-Aug-25"  # ← VOTRE DATE ICI
+#COURSE_TYPE = "Indoor Pickleball Intermediate"
+#TARGET_TIME = "4:30"
 
 
 
@@ -27,7 +42,7 @@ planning_url = os.getenv('YOUR_SECRET_PLANNING_URL')
 login_url = os.getenv('YOUR_SECRET_LOGIN_URL')
 my_name = os.getenv('YOUR_SECRET_My_NAME')
 import time
-from PIL import Image
+#from PIL import Image
 import io
 
 def take_full_page_screenshot(driver, filename):
