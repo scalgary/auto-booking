@@ -1,13 +1,15 @@
-name:  Test registration Pickleball
-on: 
+name: Test registration Pickleball
 
-# Déclenchement automatique à une heure précise
+on:
+  # Automatic trigger at precise time
   schedule:
-    - cron: '25 17 * * 2'  # Tous les lundis à 00:25 Calgary time (UTC-7/UTC-6)
-    # Calgary time: 00:25 samedi = 07:25 UTC samedi (heure standard)
-    # Note: GitHub Actions utilise UTC, Calgary = UTC-7 (hiver) ou UTC-6 (été)
-  
-# Déclenchement manuel avec paramètres personnalisables
+    - cron: '0 18 * * 1'  # Every Monday at 12:00 PM Calgary time
+    # Calgary time: 12:00 PM Monday = 18:00 UTC Monday (MDT, UTC-6)
+    # Note: GitHub Actions uses UTC, Calgary = UTC-7 (MST winter) or UTC-6 (MDT summer)
+    # During summer (MDT): 12:00 PM Calgary = 18:00 UTC
+    # During winter (MST): 12:00 PM Calgary = 19:00 UTC
+    
+  # Manual trigger with customizable parameters
   workflow_dispatch:
     inputs:
       target_date:
@@ -18,21 +20,36 @@ on:
       target_time:
         description: 'Target time (format: H:MM or HH:MM, e.g., 4:30 or 14:30)'
         required: true
-        default: '4:30'
+        default: '12:00'
         type: string
-        
-# Valeurs par défaut pour les exécutions automatiques
+
+# Default values for automatic executions
 env:
   DEFAULT_DATE: "19-Aug-25"
-  DEFAULT_TIME: "4:30"
+  DEFAULT_TIME: "12:00"
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+        
+      - name: Set parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "date=${{ github.event.inputs.target_date }}" >> $GITHUB_OUTPUT
+            echo "time=${{ github.event.inputs.target_time }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=manual" >> $GITHUB_OUTPUT
+            echo "environment=manual" >> $GITHUB_OUTPUT
+          else
+            echo "date=${{ env.DEFAULT_DATE }}" >> $GITHUB_OUTPUT
+            echo "time=${{ env.DEFAULT_TIME }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
+            echo "environment=scheduled" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Run Python test in devcontainer
         uses: devcontainers/ci@v0.3
         env:
@@ -41,11 +58,10 @@ jobs:
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
-          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}         
-          # Variables d'environnement supplémentaires
+          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          # Additional environment variables
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
-
         with:
           runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
           push: never
