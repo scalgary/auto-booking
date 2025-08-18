@@ -1,13 +1,18 @@
 name: Test registration Pickleball
-
 on:
-  # Automatic trigger at precise time
+  # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:
-    - cron: '0 18 * * 1'  # Every Monday at 12:00 PM Calgary time
-    # Calgary time: 12:00 PM Monday = 18:00 UTC Monday (MDT, UTC-6)
-    # Note: GitHub Actions uses UTC, Calgary = UTC-7 (MST winter) or UTC-6 (MDT summer)
-    # During summer (MDT): 12:00 PM Calgary = 18:00 UTC
-    # During winter (MST): 12:00 PM Calgary = 19:00 UTC
+    # Monday at 12:00 PM Calgary time (summer MDT)
+    # - cron: '0 18 * * 1'
+    # Monday at 12:00 PM Calgary time (winter MST) - uncomment when needed
+    # - cron: '0 19 * * 1'
+    
+    # Additional common times (all for Mondays, Calgary time):
+    # - cron: '0 17 * * 1'  # 11:00 AM Calgary (summer)
+    # - cron: '0 19 * * 1'  # 1:00 PM Calgary (summer)
+    # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
+    - cron: '0 18 * * 1'  # 1:00 PM Calgary (summer)
+
     
   # Manual trigger with customizable parameters
   workflow_dispatch:
