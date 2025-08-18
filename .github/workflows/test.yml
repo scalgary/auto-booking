@@ -1,7 +1,6 @@
 name:  Test registration Pickleball
 on: 
-  push:
-    branches: [ main]
+
 # Déclenchement automatique à une heure précise
   schedule:
     - cron: '25 7 * * 1'  # Tous les samedis à 00:25 Calgary time (UTC-7/UTC-6)
