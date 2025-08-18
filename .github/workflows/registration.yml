@@ -31,7 +31,7 @@ on:
 # Default values for automatic executions
 env:
   DEFAULT_DATE: "19-Aug-25"
-  DEFAULT_TIME: "12:00"
+  DEFAULT_TIME: "4:30"
 
 jobs:
   test:
