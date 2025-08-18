@@ -3,7 +3,7 @@ on:
 
 # Déclenchement automatique à une heure précise
   schedule:
-    - cron: '25 7 * * 1'  # Tous les samedis à 00:25 Calgary time (UTC-7/UTC-6)
+    - cron: '25 7 * * 1'  # Tous les lundis à 00:25 Calgary time (UTC-7/UTC-6)
     # Calgary time: 00:25 samedi = 07:25 UTC samedi (heure standard)
     # Note: GitHub Actions utilise UTC, Calgary = UTC-7 (hiver) ou UTC-6 (été)
   
