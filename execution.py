@@ -13,7 +13,7 @@ import os
 
 import sys
 
-# Récupérer les arguments
+# Get arguments from command line or environment variables
 if len(sys.argv) != 3:
     print("Usage: python mon_script.py <variable1> <variable2> ")
     sys.exit(1)
@@ -33,7 +33,7 @@ print(f"Variable 2: {TARGET_TIME}")
 
 
 
-#load_dotenv()  # Charge le fichier .env
+#load_dotenv()  # Charge le fichier .env when running in codespace
 
 email = os.getenv('YOUR_SECRET_EMAIL')
 password = os.getenv('YOUR_SECRET_PASSWORD')
@@ -43,9 +43,9 @@ login_url = os.getenv('YOUR_SECRET_LOGIN_URL')
 my_name = os.getenv('YOUR_SECRET_My_NAME')
 
 print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
-print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MANQUANT'}")
-print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MANQUANT'}")
-print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MANQUANT'}")
+print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
+print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
+print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
 print()
 import time
 #from PIL import Image
