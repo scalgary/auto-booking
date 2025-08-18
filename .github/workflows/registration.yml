@@ -11,7 +11,7 @@ on:
     # - cron: '0 17 * * 1'  # 11:00 AM Calgary (summer)
     # - cron: '0 19 * * 1'  # 1:00 PM Calgary (summer)
     # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
-    - cron: '0 18 * * 1'  # 1:00 PM Calgary (summer)
+    - cron: '5 17 * * 1'  # 1:00 PM Calgary (summer)
 
     
   # Manual trigger with customizable parameters
