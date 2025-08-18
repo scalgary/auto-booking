@@ -11,7 +11,12 @@ on:
     # - cron: '0 17 * * 1'  # 11:00 AM Calgary (summer)
     # - cron: '0 19 * * 1'  # 1:00 PM Calgary (summer)
     # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
-    - cron: '30 19 * * 1'  # 1:30 PM Calgary (summer) Monday
+    # - cron: '30 19 * * 1'  # 1:30 PM Calgary (summer) Monday
+     - cron: '5 6 * * 6'  # 00:05 AM Calgary (summer) Saturday
+    # - cron: '5 6 * * 0'  # 00:05 AM Calgary (summer) Dimanche
+    # - cron: '5 7 * * 0'   # Sunday 00:05 Calgary (winter)
+
+
 
     
   # Manual trigger with customizable parameters
@@ -30,8 +35,8 @@ on:
 
 # Default values for automatic executions
 env:
-  DEFAULT_DATE: "19-Aug-25"
-  DEFAULT_TIME: "4:30"
+  DEFAULT_DATE: "06-Sep-25"
+  DEFAULT_TIME: "8:30"
 
 jobs:
   test:
