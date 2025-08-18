@@ -21,6 +21,5 @@ jobs:
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
           YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
         with:
-          runCmd: |
-            python3 execution.py "19-Aug-25" "4:30"
+          runCmd: python3 execution.py "19-Aug-25" "4:30"
           push: never
