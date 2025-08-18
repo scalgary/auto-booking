@@ -18,9 +18,9 @@ if len(sys.argv) != 3:
     print("Usage: python mon_script.py <variable1> <variable2> ")
     sys.exit(1)
 
-TARGET_DATE = sys.argv[1]
+TARGET_DATE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else os.getenv("DEFAULT_DATE", "19-Aug-25")
 COURSE_TYPE = "Indoor Pickleball Intermediate"
-TARGET_TIME = sys.argv[2]
+TARGET_TIME = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else os.getenv("DEFAULT_TIME", "4:30")
 
 print(f"Variable 1: {TARGET_DATE}")
 #print(f"Variable 2: {COURSE_TYPE}")
