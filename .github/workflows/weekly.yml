@@ -3,9 +3,11 @@ name: Registration Pickleball
 on:
   schedule:
     # Saturday 00:05 Calgary (summer MDT: UTC-6)
-    # - cron: '5 6 * * 6'
+     #- cron: '5 6 * * 6'
     # Sunday 00:05 Calgary (summer MDT: UTC-6)  
     - cron: '5 6 * * 0'
+    # Monday 00:05 Calgary (summer MDT: UTC-6)  
+    - cron: '5 6 * * 1'
     
   workflow_dispatch:
     inputs:
@@ -26,55 +28,55 @@ on:
         type: choice
         options:
           - manual
-          - saturday
+          - monday
           - sunday
 
 env:
   # Dates and times to update regularly
-  SATURDAY_DATE: "06-Sep-25"
-  SATURDAY_TIME: "08:30"
+  MONDAY_DATE: "08-Sep-25"
+  MONDAY_TIME: "04:15"
   SUNDAY_DATE: "07-Sep-25"
-  SUNDAY_TIME: "10:30"
+  SUNDAY_TIME: "4:00"
   # Default for manual runs
   DEFAULT_DATE: "19-Aug-25"
   DEFAULT_TIME: "12:00"
 
 jobs:
-  # Job for Saturday scheduled runs
-  saturday-registration:
-    if: github.event.schedule == '5 6 * * 6' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'saturday')
+  # Job for Monday scheduled runs
+  monday-registration:
+    if: github.event.schedule == '5 6 * * 1' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'monday')
     runs-on: ubuntu-latest
-    name: Saturday Registration (00:05 Calgary)
+    name: Monday Registration (00:05 Calgary)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Set parameters for Saturday
+      - name: Set parameters for Monday
         id: params
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "date=${{ github.event.inputs.target_date }}" >> $GITHUB_OUTPUT
             echo "time=${{ github.event.inputs.target_time }}" >> $GITHUB_OUTPUT
             echo "trigger_type=manual" >> $GITHUB_OUTPUT
-            echo "environment=saturday-manual" >> $GITHUB_OUTPUT
+            echo "environment=monday-manual" >> $GITHUB_OUTPUT
           else
             # Use environment variables for easy updates
-            echo "date=${{ env.SATURDAY_DATE }}" >> $GITHUB_OUTPUT
-            echo "time=${{ env.SATURDAY_TIME }}" >> $GITHUB_OUTPUT
+            echo "date=${{ env.MONDAY_DATE }}" >> $GITHUB_OUTPUT
+            echo "time=${{ env.MONDAY_TIME }}" >> $GITHUB_OUTPUT
             echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
-            echo "environment=saturday-auto" >> $GITHUB_OUTPUT
+            echo "environment=monday-auto" >> $GITHUB_OUTPUT
           fi
-          echo "job_day=saturday" >> $GITHUB_OUTPUT
+          echo "job_day=monday" >> $GITHUB_OUTPUT
           
       - name: Display execution info
         run: |
-          echo "🎾 Saturday Pickleball Registration"
+          echo "🎾 Monday Pickleball Registration"
           echo "📅 Date: ${{ steps.params.outputs.date }}"
           echo "🕐 Time: ${{ steps.params.outputs.time }}"
           echo "🔄 Trigger: ${{ steps.params.outputs.trigger_type }}"
           echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
           
-      - name: Run Saturday registration
+      - name: Run Monday registration
         uses: devcontainers/ci@v0.3
         env:
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
