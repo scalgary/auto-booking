@@ -5,9 +5,12 @@ on:
     # Saturday 00:05 Calgary (summer MDT: UTC-6)
      #- cron: '5 6 * * 6'
     # Sunday 00:05 Calgary (summer MDT: UTC-6)  
-    - cron: '5 6 * * 0'
+    # - cron: '5 6 * * 0'
     # Monday 00:05 Calgary (summer MDT: UTC-6)  
-    - cron: '5 6 * * 1'
+    # - cron: '5 6 * * 1'
+    # Wednesday 00:05 Calgary (summer MDT: UTC-6)  
+    # try Tuesday 23:55 UTC (5:55 PM Calgary summer)
+    - cron: '55 5 * * 2'
     
   workflow_dispatch:
     inputs:
@@ -30,6 +33,7 @@ on:
           - manual
           - monday
           - sunday
+          - wednesday
 
 env:
   # Dates and times to update regularly
@@ -37,6 +41,8 @@ env:
   MONDAY_TIME: "04:15"
   SUNDAY_DATE: "07-Sep-25"
   SUNDAY_TIME: "4:00"
+  WEDNESDAY_DATE: "17-Sep-25"
+  WEDNESDAY_TIME: "6:30"
   # Default for manual runs
   DEFAULT_DATE: "19-Aug-25"
   DEFAULT_TIME: "12:00"
@@ -141,7 +147,55 @@ jobs:
         with:
           runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
           push: never
-
+# Job for Wednesday scheduled runs
+  wednesday-registration:
+    if: github.event.schedule == '5 6 * * 3' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'wednesday')
+    runs-on: ubuntu-latest
+    name: Wednesday Registration (00:05 Calgary)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set parameters for Wednesday
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "date=${{ github.event.inputs.target_date }}" >> $GITHUB_OUTPUT
+            echo "time=${{ github.event.inputs.target_time }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=manual" >> $GITHUB_OUTPUT
+            echo "environment=wednesday-manual" >> $GITHUB_OUTPUT
+          else
+            # Use environment variables for easy updates
+            echo "date=${{ env.WEDNESDAY_DATE }}" >> $GITHUB_OUTPUT
+            echo "time=${{ env.WEDNESDAY_TIME }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
+            echo "environment=wednesday-auto" >> $GITHUB_OUTPUT
+          fi
+          echo "job_day=wednesday" >> $GITHUB_OUTPUT
+          
+      - name: Display execution info
+        run: |
+          echo "🎾 Wednesday Pickleball Registration"
+          echo "📅 Date: ${{ steps.params.outputs.date }}"
+          echo "🕐 Time: ${{ steps.params.outputs.time }}"
+          echo "🔄 Trigger: ${{ steps.params.outputs.trigger_type }}"
+          echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
+          
+      - name: Run Wednesday registration
+        uses: devcontainers/ci@v0.3
+        env:
+          YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
+          YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
+          YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
+          YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+          YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
+          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
+          TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
+          JOB_DAY: ${{ steps.params.outputs.job_day }}
+        with:
+          runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+          push: never
   # Manual execution job
   manual-registration:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'manual'

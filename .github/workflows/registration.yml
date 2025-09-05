@@ -1,4 +1,4 @@
-name: Registration Pickleball
+name: Registration Pickleball Saturday
 on:
   # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:
