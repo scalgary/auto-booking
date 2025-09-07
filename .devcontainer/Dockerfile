@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/devcontainers/python:3.11
 
 # Installer les dépendances système
 RUN apt-get update -qq && \
-    apt-get install -y wget gnupg unzip && \
+    apt-get install -y wget gnupg unzip jq && \
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | \
     gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg && \
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
