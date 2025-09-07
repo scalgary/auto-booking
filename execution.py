@@ -20,6 +20,7 @@ if len(sys.argv) != 3:
 
 TARGET_DATE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else os.getenv("DEFAULT_DATE", "19-Aug-25")
 COURSE_TYPE = "Indoor Pickleball Intermediate"
+COURSE_LEVEL = "Intermediate"
 TARGET_TIME = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else os.getenv("DEFAULT_TIME", "4:30")
 
 print(f"Variable 1: {TARGET_DATE}")
@@ -222,7 +223,7 @@ def click_for_me(driver, target_date, my_name):
             print(f"📸 Screenshot final: reservation_moi_{target_date.replace('-', '_')}.png")
             return True
     return False
-def look_for_slots(driver, target_date, target_name, target_time):
+def look_for_slots(driver, target_date, target_level, target_time):
     print("🔍 Recherche de boutons avec données de cours...")
 
     # Chercher tous les boutons avec data-class-time (structure de votre site)
@@ -250,7 +251,7 @@ def look_for_slots(driver, target_date, target_name, target_time):
             
             # Vérifier si c'est le bon jour ET contient 6:30 PM
             date_match = target_date in class_date
-            name_match = target_name in class_name
+            level_match = target_level in class_name
             time_match = target_time in class_time.split("-")[0] or target_time.lstrip() in class_time.split("-")[0]
             
             if date_match:
@@ -261,7 +262,7 @@ def look_for_slots(driver, target_date, target_name, target_time):
                 #print(f"    Heure: {class_time}")
                 #print(f"    Places: {class_spaces}")
             
-            if date_match and time_match and name_match:
+            if date_match and time_match and level_match:
                 print(f"    ✅ CORRESPONDANCE TROUVÉE!")
                 spaces_available = int(class_spaces)
                 print(spaces_available)
@@ -326,7 +327,7 @@ if possible_to_book:
         # Screenshot
         driver.save_screenshot("5_planning_page.png")
         print("📸 Screenshot: planning_page.png")
-        slot_available = look_for_slots(driver, TARGET_DATE, COURSE_TYPE, TARGET_TIME)
+        slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
         if slot_available:
             if click_on_slot(driver, slot_available):
                 if click_for_me(driver, TARGET_DATE, my_name):
