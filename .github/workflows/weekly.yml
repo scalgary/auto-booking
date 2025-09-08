@@ -122,7 +122,7 @@ jobs:
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}
-             with:
+        with:
           runCmd: |
             python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
             echo "PYTHON_EXIT_CODE=$?" >> $GITHUB_ENV
