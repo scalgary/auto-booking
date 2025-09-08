@@ -60,8 +60,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fetch-depth: 1  # Fetch dernier commit only
+         token: ${{ secrets.GITHUB_TOKEN }}
+         fetch-depth: 1  # Fetch dernier commit only
       
       - name: Configure Git
         run: |
