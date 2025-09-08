@@ -41,7 +41,7 @@ password = os.getenv('YOUR_SECRET_PASSWORD')
 logon_url = os.getenv("YOUR_SECRET_LOGON_URL")
 planning_url = os.getenv('YOUR_SECRET_PLANNING_URL')
 login_url = os.getenv('YOUR_SECRET_LOGIN_URL')
-my_name = os.getenv('YOUR_SECRET_My_NAME')
+my_name = os.getenv('YOUR_SECRET_MY_NAME')
 
 print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
 print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
@@ -333,7 +333,7 @@ if possible_to_book:
             if click_on_slot(driver, slot_available):
                 if click_for_me(driver, TARGET_DATE, my_name):
                     click_confirm_basket(driver)
-                    success = click_confirm_basket(driver)
+                    success = True
 
 driver.quit()
 
