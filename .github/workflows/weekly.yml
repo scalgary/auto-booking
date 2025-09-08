@@ -6,6 +6,9 @@ on:
      #- cron: '5 6 * * 6'
     # Sunday 00:05 Calgary (summer MDT: UTC-6)  
     # - cron: '5 6 * * 0'
+     - cron: '40 5 * * 1'
+    # Monday 00:01 Calgary (summer MDT: UTC-6)  
+     - cron: '50 5 * * 1'
     # Monday 00:01 Calgary (summer MDT: UTC-6)  
      - cron: '1 6 * * 1'
     # Wednesday 00:05 Calgary (summer MDT: UTC-6)  
@@ -50,7 +53,7 @@ env:
 jobs:
   # Job for Monday scheduled runs
   monday-registration:
-    if: github.event.schedule == '1 6 * * 1' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'monday')
+    if: contains(fromJson(['["40 5 * * 1","50 5 * * 1","1 6 * * 1"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'monday')
     runs-on: ubuntu-latest
     name: Monday Registration (00:01 Calgary)
     steps:
@@ -81,8 +84,23 @@ jobs:
             echo "environment=monday-auto" >> $GITHUB_OUTPUT
           fi
           echo "job_day=monday" >> $GITHUB_OUTPUT
+      - name: Check if success tag already exists
+        id: tag_check
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          tag_name="success_${target_date}"
           
+          if git tag -l | grep -q "^${tag_name}$"; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag already exists: $tag_name"
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag does not exist: $tag_name"
+          fi
+    
       - name: Display execution info
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         run: |
           echo "🎾 Monday Pickleball Registration"
           echo "📅 Date: ${{ steps.params.outputs.date }}"
@@ -91,6 +109,8 @@ jobs:
           echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
           
       - name: Run Monday registration
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         uses: devcontainers/ci@v0.3
         env:
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
@@ -110,6 +130,8 @@ jobs:
 
 
       - name: Create success tag if registration succeeded
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         run: |
           target_date="${{ steps.params.outputs.date }}"
           
