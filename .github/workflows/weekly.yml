@@ -53,7 +53,7 @@ env:
 jobs:
   # Job for Monday scheduled runs
   monday-registration:
-    if: contains(fromJson(['["40 5 * * 1","50 5 * * 1","1 6 * * 1"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'monday')
+    if: contains(fromJson('["40 5 * * 1","50 5 * * 1","1 6 * * 1"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'monday')
     runs-on: ubuntu-latest
     name: Monday Registration (00:01 Calgary)
     steps:
