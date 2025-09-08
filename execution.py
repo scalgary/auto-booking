@@ -278,11 +278,11 @@ def look_for_slots(driver, target_date, target_level, target_time):
                             'available': spaces_available > 0
                         }
                         
-                found_slots = slot_info
+                
                         
                 if spaces_available > 0:
                     print(f"    ✅ DISPONIBLE - {spaces_available} place(s)")
-                    
+                    found_slots = slot_info
                 else:
                     print(f"    ❌ COMPLET - 0 place")
                 break
@@ -290,7 +290,13 @@ def look_for_slots(driver, target_date, target_level, target_time):
         print(f"    ❌ NO CORRESPONDANCE TROUVÉE!")
     return found_slots
             
-
+def safe_screenshot(driver, filename):
+    try:
+        driver.save_screenshot(filename)
+        print(f"Screenshot saved: {filename}")
+    except Exception as e:
+        print(f"Failed to take screenshot {filename}: {str(e)}")
+        # Continue execution without crashing
 def click_confirm_basket(driver):
     basket = driver.find_elements(By.XPATH, "//*[contains(text(), 'Checkout')]")
     if basket:
@@ -308,7 +314,7 @@ def click_on_slot(driver, slot_available):
         print(f"✅ Bouton 'Book Now' trouvé dans le même conteneur")
         book_buttons[0].click()
         time.sleep(3)
-        driver.save_screenshot("6_click_on_slot.png")
+        safe_screenshot(driver,"6_click_on_slot.png")
         return True
     return False
 
@@ -329,7 +335,8 @@ if possible_to_book:
         driver.save_screenshot("5_planning_page.png")
         print("📸 Screenshot: planning_page.png")
         slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
-        if slot_available:
+        print(slot_available)
+        if slot_available is not None:
             if click_on_slot(driver, slot_available):
                 if click_for_me(driver, TARGET_DATE, my_name):
                     click_confirm_basket(driver)
