@@ -3,4 +3,5 @@
 - use of cron
 - use selenium
 
-Run code to book me to play Pickleball
+Code to book me to play Pickleball
+Very interesting playground for Git Actions usage
