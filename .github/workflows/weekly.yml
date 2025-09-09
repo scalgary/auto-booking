@@ -15,8 +15,8 @@ on:
     # try Tuesday 23:55 UTC (5:55 PM Calgary summer)
     # - cron: '55 5 * * 2'
     # Wednesday registration 00:01 Calgary (summer MDT: UTC-6)  
-     - cron: '51 5 * * 2'
-     - cron: '56 5 * * 2'
+     - cron: '51 5 * * 3'
+     - cron: '56 5 * * 3'
      - cron: '1 6 * * 3'
     
   workflow_dispatch:
@@ -212,7 +212,7 @@ jobs:
           push: never
 # Job for Wednesday scheduled runs
   wednesday-registration:
-    if: contains(fromJson('["51 5 * * 2","56 5 * * 2","1 6 * * 3"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'wednesday')
+    if: contains(fromJson('["51 5 * * 3","56 5 * * 3","1 6 * * 3"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'wednesday')
     runs-on: ubuntu-latest
     name: Wednesday Registration (00:01 Calgary)
     steps:
