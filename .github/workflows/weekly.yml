@@ -14,6 +14,10 @@ on:
     # Wednesday 00:05 Calgary (summer MDT: UTC-6)  
     # try Tuesday 23:55 UTC (5:55 PM Calgary summer)
     # - cron: '55 5 * * 2'
+    # Wednesday registration 00:01 Calgary (summer MDT: UTC-6)  
+     - cron: '51 5 * * 2'
+     - cron: '56 5 * * 2'
+     - cron: '1 6 * * 3'
     
   workflow_dispatch:
     inputs:
@@ -208,12 +212,20 @@ jobs:
           push: never
 # Job for Wednesday scheduled runs
   wednesday-registration:
-    if: github.event.schedule == '5 6 * * 3' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'wednesday')
+    if: contains(fromJson('["51 5 * * 2","56 5 * * 2","1 6 * * 3"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'wednesday')
     runs-on: ubuntu-latest
-    name: Wednesday Registration (00:05 Calgary)
+    name: Wednesday Registration (00:01 Calgary)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+         token: ${{ secrets.GITHUB_TOKEN }}
+         fetch-depth: 1  # Fetch dernier commit only
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
       - name: Set parameters for Wednesday
         id: params
@@ -231,8 +243,23 @@ jobs:
             echo "environment=wednesday-auto" >> $GITHUB_OUTPUT
           fi
           echo "job_day=wednesday" >> $GITHUB_OUTPUT
+      - name: Check if success tag already exists
+        id: tag_check
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          tag_name="success_${target_date}"
           
+          if git tag -l | grep -q "^${tag_name}$"; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag already exists: $tag_name"
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag does not exist: $tag_name"
+          fi
+    
       - name: Display execution info
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         run: |
           echo "🎾 Wednesday Pickleball Registration"
           echo "📅 Date: ${{ steps.params.outputs.date }}"
@@ -241,6 +268,8 @@ jobs:
           echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
           
       - name: Run Wednesday registration
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         uses: devcontainers/ci@v0.3
         env:
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
@@ -253,9 +282,39 @@ jobs:
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}
         with:
-          runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+          runCmd: |
+            python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+            echo "PYTHON_EXIT_CODE=$?" >> $GITHUB_ENV
           push: never
-  # Manual execution job
+
+
+      - name: Create success tag if registration succeeded
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          
+          # Check if Python exited with code 0
+          if [ "${PYTHON_EXIT_CODE:-1}" = "0" ]; then
+            echo "✅ Python script succeeded (exit code 0)"
+            
+            # Create success tag from target_date
+            tag_name="success_${target_date}"
+            
+            # Create empty commit for the tag
+            git commit --allow-empty -m "✅ Wednesday registration succeeded for ${target_date}"
+            
+            # Create and push tag
+            git tag -a "$tag_name" -m "Wednesday registration success for ${target_date} - $(date -u)"
+            git push origin ${{ github.ref_name }}
+            git push origin "$tag_name"
+            
+            echo "🏷️ Success tag created: $tag_name"
+          else
+            echo "❌ Python script failed (exit code: ${PYTHON_EXIT_CODE:-unknown})"
+            echo "No success tag will be created"
+          fi
+
   manual-registration:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'manual'
     runs-on: ubuntu-latest
