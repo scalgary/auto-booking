@@ -122,7 +122,7 @@ jobs:
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
-          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}
@@ -203,7 +203,7 @@ jobs:
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
-          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}
@@ -277,7 +277,7 @@ jobs:
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
-          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}
@@ -349,7 +349,7 @@ jobs:
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
-          YOUR_SECRET_My_NAME: ${{ secrets.YOUR_SECRET_My_NAME }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
           JOB_DAY: ${{ steps.params.outputs.job_day }}

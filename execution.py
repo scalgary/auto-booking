@@ -48,6 +48,13 @@ print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
 print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
 print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
 print()
+if not all([email, password, logon_url, planning_url, login_url, my_name]):
+    print("❌ ERREUR: UN OU PLUSIEURS SECRETS SONT MANQUANTS. VÉRIFIEZ VOS VARIABLES D'ENVIRONNEMENT.")
+    print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
+    for var in [email, password, logon_url, planning_url, login_url, my_name]:
+            if not var:
+                print(f"{var} ❌ MISSING'")
+    sys.exit(1)
 import time
 #from PIL import Image
 import io
