@@ -2,3 +2,4 @@ bugs possible
 plus de place -> done
 verifie sys.code 0 si bien enregistre
 deja inscrite
+simple workflow --> commit with tag functionne

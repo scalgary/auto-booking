@@ -1,4 +1,9 @@
 name: Registration Pickleball Saturday
+
+permissions:
+  contents: write
+  actions: read
+
 on:
   # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:
@@ -13,10 +18,14 @@ on:
     # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
     # - cron: '30 19 * * 1'  # 1:30 PM Calgary (summer) Monday
     
-     - cron: '57 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+     - cron: '0 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+     - cron: '15 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+     - cron: '30 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+     - cron: '45 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+
     # - cron: '5 6 * * 0'  # 00:05 AM Calgary (summer) Dimanche
     # - cron: '5 7 * * 0'   # Sunday 00:05 Calgary (winter)
-     - cron: '5 6 * * 6'  # 00:05 AM Calgary (summer) Saturday
+     - cron: '0 6 * * 6'  # 00:05 AM Calgary (summer) Saturday
 
 
 
@@ -27,12 +36,12 @@ on:
       target_date:
         description: 'Target date (format: DD-MMM-YY, e.g., 19-Aug-25)'
         required: true
-        default: '19-Aug-25'
+        default: '15-Sep-25'
         type: string
       target_time:
         description: 'Target time (format: H:MM or HH:MM, e.g., 4:30 or 14:30)'
         required: true
-        default: '12:00'
+        default: '8:00'
         type: string
 
 # Default values for automatic executions
@@ -46,6 +55,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
         
       - name: Set parameters
         id: params
@@ -61,8 +80,34 @@ jobs:
             echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
             echo "environment=scheduled" >> $GITHUB_OUTPUT
           fi
+    
+      - name: Check if success tag already exists
+        id: tag_check
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          tag_name="success_${target_date}"
           
+          if git tag -l | grep -q "^${tag_name}$"; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag already exists: $tag_name"
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag does not exist: $tag_name"
+          fi
+        
+      - name: Display execution info
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
+        run: |
+          echo "🎾 Monday Pickleball Registration"
+          echo "📅 Date: ${{ steps.params.outputs.date }}"
+          echo "🕐 Time: ${{ steps.params.outputs.time }}"
+          echo "🔄 Trigger: ${{ steps.params.outputs.trigger_type }}"
+          echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
+
       - name: Run Python test in devcontainer
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         uses: devcontainers/ci@v0.3
         env:
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
@@ -77,3 +122,23 @@ jobs:
         with:
           runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
           push: never
+
+
+      - name: Create success tag if registration succeeded
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          
+          if [ "${PYTHON_EXIT_CODE:-1}" = "0" ]; then
+            echo "✅ Registration succeeded"
+            
+            tag_name="success_${target_date}"
+            
+            git commit --allow-empty -m "✅ Registration succeeded for ${target_date}"
+            git tag -a "$tag_name" -m "Registration success for ${target_date} - $(date -u)"
+            git push origin ${{ github.ref_name }}
+            git push origin "$tag_name"
+            
+            echo "🏷️ Success tag created: $tag_name"
+          else
+            echo "❌ Registration failed (exit code: ${PYTHON_EXIT_CODE:-unknown})"
+          fi
