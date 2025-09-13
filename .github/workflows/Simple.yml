@@ -1,5 +1,9 @@
 name: Simple Registration
 
+permissions:
+  contents: write
+  actions: read
+  
 on:
   workflow_dispatch:
     inputs:
