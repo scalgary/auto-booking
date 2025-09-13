@@ -28,12 +28,12 @@ on:
       target_date:
         description: 'Target date (format: DD-MMM-YY, e.g., 19-Aug-25)'
         required: true
-        default: '19-Aug-25'
+        default: '15-Sep-25'
         type: string
       target_time:
         description: 'Target time (format: H:MM or HH:MM, e.g., 4:30 or 14:30)'
         required: true
-        default: '12:00'
+        default: '8:00'
         type: string
 
 # Default values for automatic executions
@@ -54,7 +54,6 @@ jobs:
           
           # Minutes actuelles depuis 00:00
           current_total_minutes=$((current_hour * 60 + current_minute))
-          
           # Minutes jusqu'à 6AM (360 minutes = 6h00)
           minutes_until_6am=$((360 - current_total_minutes))
           
@@ -66,16 +65,18 @@ jobs:
             echo "❌ Trop d'attente ($minutes_until_6am min > 15) → EXIT"
             exit 0
             
-          if [ $minutes_until_6am -gt 0 ]; then
+          elif [ $minutes_until_6am -gt 0 ]; then
             # Moins de 15 min à attendre → SLEEP
             sleep_seconds=$((minutes_until_6am * 60))
             echo "⌛ Sleep $minutes_until_6am minutes jusqu'à 6AM"
             sleep $sleep_seconds
             echo "🌅 6AM atteint !"
             echo "should_run=true" >> $GITHUB_OUTPUT
-            
-
-
+          else
+            # Déjà après 6AM → Continue
+            echo "✅ Déjà après 6AM → Continue"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
         
