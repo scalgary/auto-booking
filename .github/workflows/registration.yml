@@ -1,6 +1,6 @@
 name: Registration Pickleball Saturday
+
 on:
-  # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:
     # Monday at 12:00 PM Calgary time (summer MDT)
     # - cron: '0 18 * * 1'
@@ -13,11 +13,11 @@ on:
     # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
     # - cron: '30 19 * * 1'  # 1:30 PM Calgary (summer) Monday
     
-    - cron: '0 5 * * 6'   # 00:05 AM Calgary (summer) Saturday
-    - cron: '15 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-    - cron: '30 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-    - cron: '45 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-    - cron: '0 6 * * 6'   # 00:05 AM Calgary (summer) Saturday
+   - cron: '0 5 * * 6'   # 00:05 AM Calgary (summer) Saturday
+   - cron: '15 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+   - cron: '30 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+   - cron: '45 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
+   - cron: '0 6 * * 6'   # 00:05 AM Calgary (summer) Saturday
 
     # - cron: '5 6 * * 0'  # 00:05 AM Calgary (summer) Dimanche
     # - cron: '5 7 * * 0'  # Sunday 00:05 Calgary (winter)
