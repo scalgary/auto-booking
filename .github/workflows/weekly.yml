@@ -5,9 +5,11 @@ on:
     # Saturday 00:05 Calgary (summer MDT: UTC-6)
      #- cron: '5 6 * * 6'
     # Sunday 00:05 Calgary (summer MDT: UTC-6)  
-     - cron: '53 5 * * 0'
-     - cron: '58 5 * * 0'
-     - cron: '1 6 * * 0'
+     - cron: '0 5 * * 0'
+     - cron: '15 5 * * 0'
+     - cron: '30 5 * * 0'
+     - cron: '45 5 * * 0'
+     - cron: '0 6 * * 0'
 
     # Monday 00:01 Calgary (summer MDT: UTC-6)  
      - cron: '50 5 * * 1'
@@ -269,10 +271,43 @@ jobs:
 
 # Job for Sunday scheduled runs
   sunday-registration:
-    if: contains(fromJson('["53 5 * * 0","58 5 * * 0","1 6 * * 0"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'sunday')
+    if: contains(fromJson('["0 5 * * 0","15 5 * * 0","30 5 * * 0","45 5 * * 5","0 6 * * 0"]'),github.event.schedule) || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'sunday')
     runs-on: ubuntu-latest
     name: Wednesday Registration (00:01 Calgary)
     steps:
+
+      - name: Logique 6AM avec vérification tag
+        id: check-6am
+        run: |
+          # Forcer base 10 pour éviter l'erreur octal
+          current_hour=$((10#$(date -u +%H)))
+          current_minute=$((10#$(date -u +%M)))
+          
+          # Minutes actuelles depuis 00:00
+          current_total_minutes=$((current_hour * 60 + current_minute))
+          # Minutes jusqu'à 6AM (360 minutes = 6h00)
+          minutes_until_6am=$((360 - current_total_minutes))
+          
+          echo "⏰ Il est ${current_hour}h${current_minute}m UTC"
+          echo "📊 Minutes jusqu'à 6AM: $minutes_until_6am"
+          
+          if [ $minutes_until_6am -gt 15 ]; then
+            # Plus de 15 min à attendre → EXIT
+            echo "❌ Trop d'attente ($minutes_until_6am min > 15) → EXIT"
+            exit 0
+            
+          elif [ $minutes_until_6am -gt 0 ]; then
+            # Moins de 15 min à attendre → SLEEP
+            sleep_seconds=$((minutes_until_6am * 60))
+            echo "⌛ Sleep $minutes_until_6am minutes jusqu'à 6AM"
+            sleep $sleep_seconds
+            echo "🌅 6AM atteint !"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            # Déjà après 6AM → Continue
+            echo "✅ Déjà après 6AM → Continue"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
         with:
