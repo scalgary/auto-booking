@@ -66,7 +66,7 @@ jobs:
             echo "❌ Trop d'attente ($minutes_until_6am min > 15) → EXIT"
             exit 0
             
-          elif [ $minutes_until_6am -gt 0 ]; then
+          if [ $minutes_until_6am -gt 0 ]; then
             # Moins de 15 min à attendre → SLEEP
             sleep_seconds=$((minutes_until_6am * 60))
             echo "⌛ Sleep $minutes_until_6am minutes jusqu'à 6AM"
@@ -74,28 +74,7 @@ jobs:
             echo "🌅 6AM atteint !"
             echo "should_run=true" >> $GITHUB_OUTPUT
             
-          else
-            # Déjà 6AM ou après → Vérifier le tag
-            echo "⚠️  Déjà après 6AM → Vérification du tag"
-            
-            # Récupérer la date cible
-            target_date="${{ steps.params.outputs.date }}"
-            tag_name="success_${target_date}"
-            
-            echo "🔍 Vérification du tag: $tag_name"
-            
-            # Vérifier si le tag existe
-            if git tag -l | grep -q "^${tag_name}$"; then
-              echo "🏷️  Tag déjà présent: $tag_name"
-              echo "❌ Traitement déjà effectué aujourd'hui → EXIT"
-              echo "should_run=false" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "🏷️  Aucun tag trouvé: $tag_name"
-              echo "✅ Traitement pas encore effectué → Continue"
-              echo "should_run=true" >> $GITHUB_OUTPUT
-            fi
-          fi
+
 
       - name: Checkout code
         uses: actions/checkout@v4
