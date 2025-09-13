@@ -44,31 +44,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Logique conditionnelle précise
+      - name: Simple 6AM logic
         run: |
-          current_hour=$(date -u +%H)
-          current_minute=$(date -u +%M)
-          diff_minutes=$(( ((current_hour * 60) + current_minute) - 360 ))
-          
-          echo "Différence: $diff_minutes minutes"
-          
-          if [ $diff_minutes -lt -15 ]; then
-            # Plus de 15 min avant → STOP
-            echo "❌ STOP: $diff_minutes < -15"
-            exit 0
-            
-          elif [ $diff_minutes -lt 0 ]; then
-            # Entre -15 et -1 (inclus) → SLEEP
-            abs_diff=$((-diff_minutes))
-            sleep_seconds=$((abs_diff * 60))
-            echo "⌛ SLEEP: $abs_diff minutes"
-            sleep $sleep_seconds
-            echo "✅ Continue après sleep"
-            
-          else
-            # 0 ou positif → CONTINUE
-            echo "✅ CONTINUE: $diff_minutes >= 0"
-          fi
+         h=$((10#$(date -u +%H)))
+         m=$((10#$(date -u +%M)))
+         until_6am=$((360 - (h * 60 + m)))
+    
+         echo "Minutes jusqu'à 6AM: $until_6am"
+    
+         if [ $until_6am -gt 15 ]; then
+          echo "❌ EXIT: Trop d'attente"
+          exit 0
+         elif [ $until_6am -gt 0 ]; then
+          echo "⌛ Sleep $until_6am minutes"
+          sleep $((until_6am * 60))
+          echo "🌅 6AM !"
+         else
+          echo "✅ Continue"
+         fi
 
       - name: Checkout code
         uses: actions/checkout@v4
