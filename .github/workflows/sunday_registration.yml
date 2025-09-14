@@ -56,8 +56,42 @@ jobs:
           echo "📋 Available tags:"
           git tag -l
 
+      - name: Set parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "date=${{ github.event.inputs.target_date }}" >> $GITHUB_OUTPUT
+            echo "time=${{ github.event.inputs.target_time }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=manual" >> $GITHUB_OUTPUT
+            echo "environment=manual" >> $GITHUB_OUTPUT
+          else
+            echo "date=${{ env.DEFAULT_DATE }}" >> $GITHUB_OUTPUT
+            echo "time=${{ env.DEFAULT_TIME }}" >> $GITHUB_OUTPUT
+            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
+            echo "environment=scheduled" >> $GITHUB_OUTPUT
+          fi
+             
+      - name: Check if success tag already exists
+        id: tag_check
+        run: |
+          target_date="${{ steps.params.outputs.date }}"
+          tag_name="success_${target_date}"
+          
+          echo "🔍 Checking for existing tag: $tag_name"
+          
+          if git tag -l | grep -q "^${tag_name}$"; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag already exists: $tag_name"
+            exit 0
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "🏷️ Success tag does not exist: $tag_name"
+          fi
+
 
       - name: Logique conditionnelle précise
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         run: |
           # Forcer base 10 avec 10# ou retirer le 0 de tête
           current_hour=$((10#$(date -u +%H)))
@@ -84,36 +118,6 @@ jobs:
            # 0 ou positif → CONTINUE
             echo "✅ CONTINUE: $diff_minutes >= 0"
           fi    
-      - name: Set parameters
-        id: params
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "date=${{ github.event.inputs.target_date }}" >> $GITHUB_OUTPUT
-            echo "time=${{ github.event.inputs.target_time }}" >> $GITHUB_OUTPUT
-            echo "trigger_type=manual" >> $GITHUB_OUTPUT
-            echo "environment=manual" >> $GITHUB_OUTPUT
-          else
-            echo "date=${{ env.DEFAULT_DATE }}" >> $GITHUB_OUTPUT
-            echo "time=${{ env.DEFAULT_TIME }}" >> $GITHUB_OUTPUT
-            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
-            echo "environment=scheduled" >> $GITHUB_OUTPUT
-          fi
-    
-      - name: Check if success tag already exists
-        id: tag_check
-        run: |
-          target_date="${{ steps.params.outputs.date }}"
-          tag_name="success_${target_date}"
-          
-          echo "🔍 Checking for existing tag: $tag_name"
-          
-          if git tag -l | grep -q "^${tag_name}$"; then
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-            echo "🏷️ Success tag already exists: $tag_name"
-          else
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
-            echo "🏷️ Success tag does not exist: $tag_name"
-          fi
 
         
       - name: Display execution info
@@ -141,9 +145,10 @@ jobs:
           EXECUTION_ENVIRONMENT: ${{ steps.params.outputs.environment }}
           TRIGGER_TYPE: ${{ steps.params.outputs.trigger_type }}
         with:
-          runCmd: python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+          runCmd: |
+            python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+            echo "PYTHON_EXIT_CODE=$?" >> $GITHUB_ENV
           push: never
-
 
       - name: Create success tag if registration succeeded
         if: steps.tag_check.outputs.tag_exists == 'false'
