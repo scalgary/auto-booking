@@ -136,6 +136,8 @@ jobs:
 
 
       - name: Create success tag if registration succeeded
+        if: steps.tag_check.outputs.tag_exists == 'false'
+
         run: |
           target_date="${{ steps.params.outputs.date }}"
           
