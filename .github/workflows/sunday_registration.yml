@@ -1,4 +1,4 @@
-name: Registration Pickleball Saturday
+name: Registration Pickleball Sunday
 
 permissions:
   contents: write
@@ -6,28 +6,12 @@ permissions:
 
 on:
   # Multiple schedule options - you can enable/disable by commenting/uncommenting
-  schedule:
-    # Monday at 12:00 PM Calgary time (summer MDT)
-    # - cron: '0 18 * * 1'
-    # Monday at 12:00 PM Calgary time (winter MST) - uncomment when needed
-    # - cron: '0 19 * * 1'
-    
-    # Additional common times (all for Mondays, Calgary time):
-    # - cron: '0 17 * * 1'  # 11:00 AM Calgary (summer)
-    # - cron: '0 19 * * 1'  # 1:00 PM Calgary (summer)
-    # - cron: '0 20 * * 1'  # 2:00 PM Calgary (summer)
-    # - cron: '30 19 * * 1'  # 1:30 PM Calgary (summer) Monday
-    
-     - cron: '0 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-     - cron: '15 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-     - cron: '30 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-     - cron: '45 5 * * 6'  # 00:05 AM Calgary (summer) Saturday
-
-    # - cron: '5 6 * * 0'  # 00:05 AM Calgary (summer) Dimanche
-    # - cron: '5 7 * * 0'   # Sunday 00:05 Calgary (winter)
-     - cron: '0 6 * * 6'  # 00:05 AM Calgary (summer) Saturday
-
-
+  schedule:    
+     - cron: '0 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+     - cron: '15 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+     - cron: '30 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+     - cron: '45 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+     - cron: '0 6 * * 0'  # 00:05 AM Calgary (summer) Sunday
 
     
   # Manual trigger with customizable parameters
@@ -46,8 +30,8 @@ on:
 
 # Default values for automatic executions
 env:
-  DEFAULT_DATE: "20-Sep-25"
-  DEFAULT_TIME: "8:30"
+  DEFAULT_DATE: "21-Sep-25"
+  DEFAULT_TIME: "9:00"
 
 jobs:
   test:
@@ -73,7 +57,7 @@ jobs:
           git tag -l
 
 
-      - name: Logique conditionnelle précise (corrigée)
+      - name: Logique conditionnelle précise
         run: |
           # Forcer base 10 avec 10# ou retirer le 0 de tête
           current_hour=$((10#$(date -u +%H)))
@@ -136,7 +120,7 @@ jobs:
         if: steps.tag_check.outputs.tag_exists == 'false'
 
         run: |
-          echo "🎾 Monday Pickleball Registration"
+          echo "🎾 Sunday Pickleball Registration"
           echo "📅 Date: ${{ steps.params.outputs.date }}"
           echo "🕐 Time: ${{ steps.params.outputs.time }}"
           echo "🔄 Trigger: ${{ steps.params.outputs.trigger_type }}"
