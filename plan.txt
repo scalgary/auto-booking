@@ -1,5 +1,10 @@
-bugs possible
+bugs fixed
 plus de place -> done
-verifie sys.code 0 si bien enregistre
-deja inscrite
+verifie sys.code 0 si bien enregistre --> ok
 simple workflow --> commit with tag functionne
+simple workflow --> detecte si tag existe
+
+
+bug possible
+deja inscrite
+
