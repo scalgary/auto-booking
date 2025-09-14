@@ -64,6 +64,14 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Fetch all tags
+        run: |
+          echo "🏷️ Fetching all tags from remote..."
+          git fetch --tags
+          echo "📋 Available tags:"
+          git tag -l
+
 
         
       - name: Set parameters
@@ -87,6 +95,8 @@ jobs:
           target_date="${{ steps.params.outputs.date }}"
           tag_name="success_${target_date}"
           
+          echo "🔍 Checking for existing tag: $tag_name"
+          
           if git tag -l | grep -q "^${tag_name}$"; then
             echo "tag_exists=true" >> $GITHUB_OUTPUT
             echo "🏷️ Success tag already exists: $tag_name"
@@ -94,6 +104,7 @@ jobs:
             echo "tag_exists=false" >> $GITHUB_OUTPUT
             echo "🏷️ Success tag does not exist: $tag_name"
           fi
+
         
       - name: Display execution info
         if: steps.tag_check.outputs.tag_exists == 'false'
