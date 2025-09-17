@@ -7,7 +7,7 @@ permissions:
 on:
   # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:    
-    # - cron: '0 5 * * 3'  # 00:05 AM Calgary (summer) Wednesday
+     - cron: '0 5 * * 3'  # 00:05 AM Calgary (summer) Wednesday
      - cron: '15 5 * * 3'  # 00:05 AM Calgary (summer) Wednesday˙
      - cron: '30 5 * * 3'  # 00:05 AM Calgary (summer) Wednesday
      - cron: '45 5 * * 3'  # 00:05 AM Calgary (summer) Wednesday
@@ -30,8 +30,8 @@ on:
 
 # Default values for automatic executions
 env:
-  DEFAULT_DATE: "28-Sep-25"
-  DEFAULT_TIME: "8:30"
+  DEFAULT_DATE: "08-Oct-25"
+  DEFAULT_TIME: "4:30"
 
 jobs:
   test:
