@@ -168,9 +168,9 @@ jobs:
               fi
             done
       
-          echo "PYTHON_EXIT_CODE=$FINAL_EXIT_CODE" >> $GITHUB_ENV
-          echo "Final exit code: $FINAL_EXIT_CODE"
-          exit $FINAL_EXIT_CODE
+            echo "PYTHON_EXIT_CODE=$FINAL_EXIT_CODE" >> $GITHUB_ENV
+            echo "Final exit code: $FINAL_EXIT_CODE"
+            exit $FINAL_EXIT_CODE
     push: never
 
 
