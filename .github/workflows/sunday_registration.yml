@@ -171,7 +171,7 @@ jobs:
             echo "PYTHON_EXIT_CODE=$FINAL_EXIT_CODE" >> $GITHUB_ENV
             echo "Final exit code: $FINAL_EXIT_CODE"
             exit $FINAL_EXIT_CODE
-    push: never
+          push: never
 
 
       - name: Create success tag if registration succeeded
