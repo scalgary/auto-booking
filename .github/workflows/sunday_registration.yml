@@ -8,9 +8,10 @@ on:
   # Multiple schedule options - you can enable/disable by commenting/uncommenting
   schedule:    
     # - cron: '0 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
-     - cron: '15 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+    # - cron: '15 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '30 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '45 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+     - cron: '55 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '0 6 * * 0'  # 00:05 AM Calgary (summer) Sunday
 
     
