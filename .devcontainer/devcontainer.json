@@ -12,13 +12,12 @@
     "YOUR_SECRET_LOGIN_URL": "${localEnv:YOUR_SECRET_LOGIN_URL}",
     "YOUR_SECRET_MY_NAME": "${localEnv:YOUR_SECRET_MY_NAME}"
   },
-  "postCreateCommand": "bash setup.sh",
+  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup_output.log",
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance",
-        "GitHub.copilot"
+        "ms-python.vscode-pylance"
       ],
       "settings": {
        "python.defaultInterpreterPath": "/usr/local/bin/python",
