@@ -12,7 +12,7 @@
     "YOUR_SECRET_LOGIN_URL": "${localEnv:YOUR_SECRET_LOGIN_URL}",
     "YOUR_SECRET_MY_NAME": "${localEnv:YOUR_SECRET_MY_NAME}"
   },
-  "postCreateCommand": "pip install --upgrade pip",
+  "postCreateCommand": "bash setup.sh",
   "customizations": {
     "vscode": {
       "extensions": [
