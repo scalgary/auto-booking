@@ -89,3 +89,29 @@ git_push
 git log --oneline
 ================================================
 
+=== PUSH SESSION - 2025-09-27 22:55:55 ===
+    1  find . -name "*git_history*" 2>/dev/null
+    2  nano ~/.bashrc
+    3  find . -name "*git_history*" 2>/dev/null
+    4  git gpush
+    5  nano ~/.bashrc
+    6  source ./git_history_functions.sh
+    7  git gpush
+    8  type gpush
+    9  gpush
+   10  git pull
+   11  git_push
+   12  git log oneline
+   13  git log --oneline
+   14  source ./git_history_functions.sh
+   15  git_push
+   16  git log --oneline
+   17  history
+   18  history 50 >> mes_commandes.txt
+   19  git push
+   20  git log --oneline
+   21  ls -ls .git/hooks/
+   22  cat .git/hooks/prepare-commit-msg.sample 2>/dev/null
+   23  git_push
+================================================
+
