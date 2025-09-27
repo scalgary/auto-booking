@@ -1,22 +1,22 @@
 #!/bin/bash
-
-# Fonction pour push avec historique
+# Fonction pour push avec historique ajouté au dernier commit
 git_push_with_history() {
     echo "🔄 Sauvegarde de l'historique des commandes..."
     
     # Forcer la sauvegarde de l'historique actuel
-    history -a  # Ajoute les commandes de la session courante au fichier
+    history -a # Ajoute les commandes de la session courante au fichier
     
     echo "=== PUSH SESSION - $(date '+%Y-%m-%d %H:%M:%S') ===" >> mes_commandes.txt
     history 50 >> mes_commandes.txt
     echo "================================================" >> mes_commandes.txt
     echo "" >> mes_commandes.txt
     
+    # Ajouter le fichier au dernier commit avec --amend
     git add mes_commandes.txt
-    git commit -m "📋 Update command history $(date '+%Y-%m-%d %H:%M:%S')" || true
-    git push "$@"
+    git commit --amend --no-edit || true
     
-    echo "✅ Push terminé avec sauvegarde de l'historique"
+    git push "$@"
+    echo "✅ Push terminé avec sauvegarde de l'historique ajoutée au dernier commit"
 }
 
 # Alias
