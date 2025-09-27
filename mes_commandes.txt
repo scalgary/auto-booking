@@ -32,3 +32,22 @@ git_push
    15  git_push
 ================================================
 
+=== PUSH SESSION - 2025-09-27 22:47:26 ===
+Historique Bash:
+find . -name "*git_history*" 2>/dev/null
+nano ~/.bashrc
+find . -name "*git_history*" 2>/dev/null
+git gpush
+nano ~/.bashrc
+source ./git_history_functions.sh
+git gpush
+type gpush
+gpush
+git pull
+git_push
+git log oneline
+git log --oneline
+source ./git_history_functions.sh
+git_push
+================================================
+
