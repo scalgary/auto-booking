@@ -1,19 +1,3 @@
---- Session du 2025-09-25 16:19:06 ---
-
-=== PUSH SESSION - 2025-09-25 16:21:01 ===
-Historique récent:
-================================================
-
-=== PUSH SESSION - 2025-09-25 16:21:34 ===
-Historique récent:
-================================================
-
-=== PUSH SESSION - 2025-09-25 16:23:52 ===
-================================================
-
-=== PUSH SESSION - 2025-09-25 16:24:06 ===
-================================================
-
 === PUSH SESSION - 2025-09-25 16:35:06 ===
     1  find . -name "*git_history*" 2>/dev/null
     2  nano ~/.bashrc
@@ -26,20 +10,8 @@ Historique récent:
     9  gpush
 ================================================
 
-=== PUSH SESSION - 2025-09-25 16:35:07 ===
-Historique Bash:
-find . -name "*git_history*" 2>/dev/null
-nano ~/.bashrc
-find . -name "*git_history*" 2>/dev/null
-git gpush
-nano ~/.bashrc
-source ./git_history_functions.sh
-git gpush
-type gpush
-gpush
-================================================
 
-=== PUSH SESSION - 2025-09-25 16:39:39 ===
+=== PUSH SESSION - 2025-09-27 22:41:35 ===
     1  find . -name "*git_history*" 2>/dev/null
     2  nano ~/.bashrc
     3  find . -name "*git_history*" 2>/dev/null
@@ -49,18 +21,7 @@ gpush
     7  git gpush
     8  type gpush
     9  gpush
-================================================
-
-=== PUSH SESSION - 2025-09-25 16:39:39 ===
-Historique Bash:
-find . -name "*git_history*" 2>/dev/null
-nano ~/.bashrc
-find . -name "*git_history*" 2>/dev/null
-git gpush
-nano ~/.bashrc
-source ./git_history_functions.sh
-git gpush
-type gpush
-gpush
+   10  git pull
+   11  git_push
 ================================================
 

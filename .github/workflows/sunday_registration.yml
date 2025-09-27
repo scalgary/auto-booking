@@ -11,7 +11,7 @@ on:
     # - cron: '15 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '30 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '45 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
-     - cron: '55 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
+    #- cron: '55 5 * * 0'  # 00:05 AM Calgary (summer) Sunday
      - cron: '0 6 * * 0'  # 00:05 AM Calgary (summer) Sunday
 
     
@@ -97,11 +97,19 @@ jobs:
           # Forcer base 10 avec 10# ou retirer le 0 de tête
           current_hour=$((10#$(date -u +%H)))
           current_minute=$((10#$(date -u +%M)))
+          current_second=$((10#$(date -u +%S)))
+          
           diff_minutes=$(( ((current_hour * 60) + current_minute) - 360 ))
-                 
+          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+          # 6:00 AM = 6 * 3600 = 21600 seconds since midnight
+          target_seconds=21600
+          diff_seconds_before_trigger=$(( target_seconds - current_total_seconds ))
+
+
           echo "Heure: ${current_hour}h${current_minute}m"
           echo "Différence: $diff_minutes minutes"
-                 
+          echo "Différence: $diff_seconds secondes"
+
           if [ $diff_minutes -lt -15 ]; then
           # Plus de 15 min avant → STOP
             echo "❌ STOP: $diff_minutes < -15"
@@ -110,8 +118,9 @@ jobs:
           elif [ $diff_minutes -lt 0 ]; then
           # Entre -15 et -1 (inclus) → SLEEP
             abs_diff=$((-diff_minutes))
-            sleep_seconds=$((abs_diff * 60))
-            echo "⌛ SLEEP: $abs_diff minutes"
+            #sleep_seconds=$((abs_diff * 60))
+            sleep_seconds = $diff_seconds_before_trigger -10
+            echo "⌛ SLEEP: $sleep_seconds seconds"
             sleep $sleep_seconds
             echo "✅ Continue après sleep"
                  
@@ -130,6 +139,8 @@ jobs:
           echo "🕐 Time: ${{ steps.params.outputs.time }}"
           echo "🔄 Trigger: ${{ steps.params.outputs.trigger_type }}"
           echo "🌍 Environment: ${{ steps.params.outputs.environment }}"
+          echo $(date -u +%H:%M:%S)
+
 
       - name: Run Python test in devcontainer
         if: steps.tag_check.outputs.tag_exists == 'false'
@@ -163,8 +174,8 @@ jobs:
                 echo "🚨 All 3 attempts failed"
                 FINAL_EXIT_CODE=$EXIT_CODE
                else
-                echo "⏳ Waiting 30 seconds before retry..."
-                sleep 30
+                echo "⏳ Waiting 15 seconds before retry..."
+                sleep 15
                fi
               fi
             done
