@@ -1,0 +1,6 @@
+Starting post-create setup...
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: pip in /home/vscode/.local/lib/python3.11/site-packages (25.2)
+pip upgrade completed
+git_history_functions.sh sourced
+Setup completed successfully
