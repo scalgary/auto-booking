@@ -119,7 +119,7 @@ jobs:
           # Entre -15 et -1 (inclus) → SLEEP
             abs_diff=$((-diff_minutes))
             #sleep_seconds=$((abs_diff * 60))
-            sleep_seconds = $diff_seconds_before_trigger -10
+            sleep_seconds = $((diff_seconds_before_trigger - 10))
             echo "⌛ SLEEP: $sleep_seconds seconds"
             sleep $sleep_seconds
             echo "✅ Continue après sleep"
