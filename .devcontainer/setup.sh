@@ -7,6 +7,7 @@ echo "pip upgrade completed" | tee -a $LOG_FILE
 source git_history_functions.sh 2>&1 | tee -a $LOG_FILE
 echo "git_history_functions.sh sourced" | tee -a $LOG_FILE
 echo "Setup completed successfully" | tee -a $LOG_FILE
+type git_push >> $log_file
 #!/bin/bash
 # Fonction pour push avec historique ajouté au dernier commit
 git_push_with_history() {
