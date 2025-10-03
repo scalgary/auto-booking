@@ -31,7 +31,7 @@ on:
 
 # Default values for automatic executions
 env:
-  DEFAULT_DATE: "05-Oct-25"
+  DEFAULT_DATE: "12-Oct-25"
   DEFAULT_TIME: "9:00"
 
 jobs:
@@ -91,6 +91,7 @@ jobs:
 
 
       - name: Logique conditionnelle précise
+        id: conditional_logic
         if: steps.tag_check.outputs.tag_exists == 'false'
 
         run: |
@@ -113,6 +114,8 @@ jobs:
           if [ $diff_minutes -lt -15 ]; then
           # Plus de 15 min avant → STOP
             echo "❌ STOP: $diff_minutes < -15"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+
             exit 0
                  
           elif [ $diff_minutes -lt 0 ]; then
@@ -121,17 +124,21 @@ jobs:
             #sleep_seconds=$((abs_diff * 60))
             sleep_seconds = $((diff_seconds_before_trigger - 10))
             echo "⌛ SLEEP: $sleep_seconds seconds"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+
             sleep $sleep_seconds
             echo "✅ Continue après sleep"
                  
           else
            # 0 ou positif → CONTINUE
+            echo "should_continue=true" >> $GITHUB_OUTPUT
             echo "✅ CONTINUE: $diff_minutes >= 0"
           fi    
 
         
       - name: Display execution info
-        if: steps.tag_check.outputs.tag_exists == 'false'
+        if: steps.tag_check.outputs.tag_exists == 'false' && steps.conditional_logic.outputs.should_continue == 'true'
+
 
         run: |
           echo "🎾 Sunday Pickleball Registration"
@@ -143,7 +150,7 @@ jobs:
 
 
       - name: Run Python test in devcontainer
-        if: steps.tag_check.outputs.tag_exists == 'false'
+        if: steps.tag_check.outputs.tag_exists == 'false' && steps.conditional_logic.outputs.should_continue == 'true'
 
         uses: devcontainers/ci@v0.3
         env:
@@ -187,7 +194,7 @@ jobs:
 
 
       - name: Create success tag if registration succeeded
-        if: steps.tag_check.outputs.tag_exists == 'false'
+        if: steps.tag_check.outputs.tag_exists == 'false' && steps.conditional_logic.outputs.should_continue == 'true'
 
         run: |
           target_date="${{ steps.params.outputs.date }}"
