@@ -4,7 +4,7 @@ permissions:
 on:
   schedule:
     - cron: '35 5 * * 1' # 23:35 Calgary (summer) Sunday 05:35 UTC Monday
-    - cron: '45 5 * * 1'
+    - cron: '45 5 * * 1' # Monday is 1 
     - cron: '55 5 * * 1'
 env:
   TARGET_DATE: "13-Oct-25"
