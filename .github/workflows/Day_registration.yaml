@@ -1,4 +1,4 @@
-name: Day Regirstration Pickleball
+name: Day Registration Pickleball
 
 permissions:
   contents: write
@@ -11,8 +11,8 @@ on:
   workflow_dispatch:  # Ajoutez cette ligne
 
 env:
-  TARGET_DATE: "09-Oct-25"
-  TARGET_TIME: "4:15"
+  TARGET_DATE: "12-Oct-25"
+  TARGET_TIME: "09:00"
   TARGET_DAY: "Sunday"
 
 jobs:
@@ -80,7 +80,6 @@ jobs:
           target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
 
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
-          diff_seconds=100
           echo "⏱️ Current seconds since UTC midnight: $current_total_seconds"
           echo "🎯 Target seconds (6:00 UTC): $target_total_seconds"
           echo "📊 Difference: $diff_seconds seconds"
@@ -92,13 +91,13 @@ jobs:
             echo "🛑 Stopping workflow"
             echo "exists=true" >> $GITHUB_OUTPUT
 
-          elif [ $diff_seconds -gt 30 ]; then
-            sleep_duration=$(( diff_seconds - 30 ))
-            echo "⌛ Sleeping for $sleep_duration seconds (until 30s before 6:00 UTC)"
+          elif [ $diff_seconds -gt 50 ]; then
+            sleep_duration=$(( diff_seconds - 50 ))
+            echo "⌛ Sleeping for $sleep_duration seconds (until 50s before 6:00 UTC)"
             sleep $sleep_duration
             echo "✅ Sleep complete, continuing..."
           elif [ $diff_seconds -ge 0 ]; then
-            echo "⏭️ Less than 30 seconds remaining, continuing immediately"
+            echo "⏭️ Less than 50 seconds remaining, continuing immediately"
           else
             echo "✅ Past target time by $((-diff_seconds)) seconds, continuing"
           fi
