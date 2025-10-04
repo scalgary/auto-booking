@@ -5,14 +5,14 @@ permissions:
 
 on:
   schedule:
-    - cron: '35 5 * * 1' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
-    - cron: '45 5 * * 1' # 23:45  Sunday is 0 Saturday 6
-    - cron: '55 5 * * 1' # 23:55 Calgary
+    - cron: '35 5 * * 6' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+    - cron: '45 5 * * 6' # 23:45  Sunday is 0 Saturday 6
+    - cron: '55 5 * * 6' # 23:55 Calgary
 
 env:
-  TARGET_DATE: "13-Oct-25"
-  TARGET_TIME: "10:30"
-  TARGET_DAY: "Monday"
+  TARGET_DATE: "11-Oct-25"
+  TARGET_TIME: "8:30"
+  TARGET_DAY: "Saturday"
 
 jobs:
   register:
@@ -111,6 +111,7 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
+            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             echo "Pickleball Registration: $TARGET_DAY"
             echo "📅 Target date: $TARGET_DATE"
             echo "🕐 Target time: $TARGET_TIME"
@@ -138,6 +139,7 @@ jobs:
             done
             
             echo ""
+            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_ENV
             echo "======================================"
@@ -153,7 +155,8 @@ jobs:
           echo "======================================"
           echo "🏷️ Creating success tag"
           echo "======================================"
-          
+          echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+
           tag="success_$TARGET_DATE"
           echo "📝 Tag to create: $tag"
           
