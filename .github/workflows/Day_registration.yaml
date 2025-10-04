@@ -1,18 +1,18 @@
-name: Pickleball Registration
+name: Pickleball Registration Day
 
 permissions:
   contents: write
 
 on:
   schedule:
-    - cron: '35 5 * * 6' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
-    - cron: '45 5 * * 6' # 23:45  Sunday is 0 Saturday 6
-    - cron: '55 5 * * 6' # 23:55 Calgary
+    - cron: '35 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+    - cron: '45 5 * * 0' # 23:45  Sunday is 0 Saturday 6
+    - cron: '55 5 * * 0' # 23:55 Calgary
 
 env:
-  TARGET_DATE: "11-Oct-25"
-  TARGET_TIME: "8:30"
-  TARGET_DAY: "Saturday"
+  TARGET_DATE: "12-Oct-25"
+  TARGET_TIME: "9:00"
+  TARGET_DAY: "Sunday"
 
 jobs:
   register:
@@ -72,12 +72,14 @@ jobs:
           echo "⏱️ Current seconds since UTC midnight: $current_total_seconds"
           echo "🎯 Target seconds (6:00 UTC): $target_total_seconds"
           echo "📊 Difference: $diff_seconds seconds"
-          
+          echo "exists=false" >> $GITHUB_OUTPUT
+
           # Timing logic
           if [ $diff_seconds -gt 600 ]; then
             echo "❌ Too early: $diff_seconds seconds remaining (> 10 minutes)"
             echo "🛑 Stopping workflow"
-            exit 1
+            echo "exists=true" >> $GITHUB_OUTPUT
+
           elif [ $diff_seconds -gt 30 ]; then
             sleep_duration=$(( diff_seconds - 30 ))
             echo "⌛ Sleeping for $sleep_duration seconds (until 30s before 6:00 UTC)"
@@ -89,7 +91,6 @@ jobs:
             echo "✅ Past target time by $((-diff_seconds)) seconds, continuing"
           fi
           
-          echo "exists=false" >> $GITHUB_OUTPUT
           echo "======================================"
 
       # ==========================================
@@ -100,6 +101,9 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         uses: devcontainers/ci@v0.3
         env:
+          : ${{ env.TARGET_DATE }}
+          TARGET_TIME: ${{ env.TARGET_TIME }}
+          TARGET_DAY: ${{ env.TARGET_DAY }}
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
           YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
