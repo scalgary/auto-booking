@@ -1,4 +1,4 @@
-name: Pickleball Registration Day
+name: Day Regirstration Pickleball
 
 permissions:
   contents: write
@@ -101,7 +101,7 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         uses: devcontainers/ci@v0.3
         env:
-          : ${{ env.TARGET_DATE }}
+          TARGET_DATE: ${{ env.TARGET_DATE }}
           TARGET_TIME: ${{ env.TARGET_TIME }}
           TARGET_DAY: ${{ env.TARGET_DAY }}
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
