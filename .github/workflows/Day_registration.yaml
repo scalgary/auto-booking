@@ -126,10 +126,14 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
+            # Get current UTC time
+            current_hour=$((10#$(date -u +%H)))
+            current_minute=$((10#$(date -u +%M)))
+            current_second=$((10#$(date -u +%S)))
             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             echo "Pickleball Registration: $TARGET_DAY"
-            echo "📅 Target date: $TARGET_DATE"
-            echo "🕐 Target time: $TARGET_TIME"
+            echo "📅 Date: ${{ steps.params.outputs.date }}"
+            echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
             
             FINAL_CODE=1
