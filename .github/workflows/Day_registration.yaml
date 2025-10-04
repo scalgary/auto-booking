@@ -80,7 +80,7 @@ jobs:
           target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
 
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
-          diff_seconds=700
+          diff_seconds=100
           echo "⏱️ Current seconds since UTC midnight: $current_total_seconds"
           echo "🎯 Target seconds (6:00 UTC): $target_total_seconds"
           echo "📊 Difference: $diff_seconds seconds"
