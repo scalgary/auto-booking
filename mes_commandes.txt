@@ -175,3 +175,32 @@ git_push
     9  git_push
 ================================================
 
+=== PUSH SESSION - 2025-10-06 16:31:47 ===
+    1  git pull
+    2  git branch 
+    3  git branch -r
+    4  git branch -a
+    5  git checkout workflows
+    6  git checkout -b workflows
+    7  git push
+    8  git push --set-upstream origin workflows
+    9  git status
+   10  git add .
+   11  git commit -m "work on workflows"
+   12  git push
+   13  git checkout main
+   14  vb
+   15  cp .github/workflows/Day_registration.yaml .github/workflows/Day_registration.yml
+   16  git add .
+   17  git commit -m "Clean main branch and set up 1 workflow with conteneur set up and then waiting time"
+   18  git push
+   19  git_push
+   20  git_push_with_history() {     echo "🔄 Sauvegarde de l'historique des commandes...";     last_commit_msg=$(git log -1 --pretty=%B); 
+    history -a # Ajoute les commandes de la session courante au fichier
+         echo "=== PUSH SESSION - $(date '+%Y-%m-%d %H:%M:%S') ===" >> mes_commandes.txt;     history 50 >> mes_commandes.txt;     echo "================================================" >> mes_commandes.txt;     echo "" >> mes_commandes.txt;     
+    git add mes_commandes.txt;     git commit --amend -m "$last_commit_msg" || true;          git push "$@";     echo "✅ Bonjour Push terminé avec sauvegarde de l'historique ajoutée au dernier commit"; }
+   21  # Alias
+   22  alias git_push='git_push_with_history'
+   23  git_push
+================================================
+

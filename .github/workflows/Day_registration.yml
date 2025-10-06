@@ -2,18 +2,26 @@ name: Day Registration Pickleball
 
 permissions:
   contents: write
+  actions: read
+
 
 on:
   schedule:
-    - cron: '35 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
-    - cron: '45 5 * * 0' # 23:45  Sunday is 0 Saturday 6
-    - cron: '55 5 * * 0' # 23:55 Calgary
+   # - cron: '35 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+   # - cron: '45 5 * * 0' # 23:45  Sunday is 0 Saturday 6
+   # - cron: '55 5 * * 0' # 23:55 Calgary
+   # - cron: '0 6 * * 0' # 00:00 Calgary
+    - cron: '35 5 * * 2' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+    - cron: '45 5 * * 2' # 23:45  Sunday is 0 Saturday 6
+    - cron: '55 5 * * 2' # 23:55 Calgary
+    - cron: '0 6 * * 2' # 00:00 Calgary
+
   workflow_dispatch:  # Ajoutez cette ligne
 
 env:
-  TARGET_DATE: "13-Oct-25"
-  TARGET_TIME: "8:30"
-  TARGET_DAY: "Sunday"
+  TARGET_DATE: "14-Oct-25"
+  TARGET_TIME: "12:00"
+  TARGET_DAY: "Tuesday"
 
 jobs:
   register:
@@ -64,7 +72,7 @@ jobs:
           if git tag -l | grep -q "^${tag}$"; then
             echo "🏷️ ✅ Success tag already exists: $tag"
             echo "🛑 Stopping workflow (success already registered)"
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "should_continue=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           echo "📝 Tag not found, continuing..."
@@ -80,27 +88,22 @@ jobs:
           target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
 
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
-          echo "⏱️ Current seconds since UTC midnight: $current_total_seconds"
-          echo "🎯 Target seconds (6:00 UTC): $target_total_seconds"
-          echo "📊 Difference: $diff_seconds seconds"
-          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "⏱️ Difference: $diff_seconds seconds avant 6:00 UTC"
 
           # Timing logic
           if [ $diff_seconds -gt 600 ]; then
             echo "❌ Too early: $diff_seconds seconds remaining (> 10 minutes)"
             echo "🛑 Stopping workflow"
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
 
-          elif [ $diff_seconds -gt 50 ]; then
-            sleep_duration=$(( diff_seconds - 50 ))
-            echo "⌛ Sleeping for $sleep_duration seconds (until 50s before 6:00 UTC)"
-            sleep $sleep_duration
-            echo "✅ Sleep complete, continuing..."
-          elif [ $diff_seconds -ge 0 ]; then
-            echo "⏭️ Less than 50 seconds remaining, continuing immediately"
           else
-            echo "✅ Past target time by $((-diff_seconds)) seconds, continuing"
+            echo "✅ Moins de 10 minutes avant 6:00 UTC"
+            echo "📦 Le conteneur sera démarré"
+            echo "⏰ L'attente finale se fera DANS le conteneur"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
           fi
+
           
           echo "======================================"
 
@@ -109,7 +112,7 @@ jobs:
       # ==========================================
       - name: Register
         id: registration
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.should_continue == 'true'
         uses: devcontainers/ci@v0.3
         env:
           TARGET_DATE: ${{ env.TARGET_DATE }}
@@ -126,9 +129,28 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
-            echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
+            # ⏰ ATTENTE JUSQU'À EXACTEMENT 6:00 UTC
+            current_hour=$((10#$(date -u +%H)))
+            current_minute=$((10#$(date -u +%M)))
+            current_second=$((10#$(date -u +%S)))
+            current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+            target_total_seconds=$(( 6 * 3600 ))
+            diff_seconds=$(( target_total_seconds - current_total_seconds ))
+            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+
+            
+            if [ $diff_seconds -gt 0 ]; then
+              echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
+              sleep $diff_seconds
+              echo "✅ 6:00:00 UTC atteint!"
+            else
+              echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
+            fi
+            
             echo "📅 Date: ${{ steps.params.outputs.date }}"
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
+
+            echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
 
             
             FINAL_CODE=1
@@ -153,7 +175,6 @@ jobs:
             done
             
             echo ""
-            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_ENV
             echo "======================================"
@@ -164,12 +185,11 @@ jobs:
       # STEP 4: Create success tag
       # ==========================================
       - name: Tag success
-        if: steps.check.outputs.exists == 'false' && env.PYTHON_EXIT_CODE == '0'
+        if: steps.check.outputs.should_continue == 'true' && env.PYTHON_EXIT_CODE == '0'
         run: |
           echo "======================================"
           echo "🏷️ Creating success tag"
           echo "======================================"
-          echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
           target_date="${{ steps.params.outputs.date }}"
           tag="success_${target_date}"
 
