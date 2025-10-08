@@ -1,0 +1,226 @@
+name: Registration Pickleball
+
+permissions:
+  contents: write
+  actions: read
+
+
+on:
+  schedule:
+   # - cron: '35 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+   # - cron: '45 5 * * 0' # 23:45  Sunday is 0 Saturday 6
+   # - cron: '55 5 * * 0' # 23:55 Calgary
+   # - cron: '0 6 * * 0' # 00:00 Calgary
+   # - cron: '35 5 * * 2' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+   # - cron: '45 5 * * 2' # 23:45  Sunday is 0 Saturday 6
+   # - cron: '55 5 * * 2' # 23:55 Calgary
+   # - cron: '0 6 * * 2' # 00:00 Calgary
+   # - cron: '30 5 * * *' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+    - cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '50 5 * * *' # 23:55 Calgary
+    - cron: '0 6 * * *' # 00:00 Calgary
+
+  workflow_dispatch:  # Ajoutez cette ligne
+
+env:
+  TARGET_DATE: "10-Oct-25"
+  TARGET_TIME: "4:15"
+  TARGET_DAY: "Friday"
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      # ==========================================
+      # STEP 1: Checkout code and fetch tags
+      # ==========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+      
+      - name: Set parameters
+        id: params
+        run: |
+
+          echo "date=${{ env.TARGET_DATE }}" >> $GITHUB_OUTPUT
+          echo "time=${{ env.TARGET_TIME }}" >> $GITHUB_OUTPUT
+          echo "day=${{ env.TARGET_DAY }}" >> $GITHUB_OUTPUT
+
+          
+      - name: check day
+        id: checkday
+        run: |
+          current_day=$(date -u +%A)
+          target_day="${{ env.TARGET_DAY }}"
+
+          if [ "$current_day" != "$target_day" ]; then
+            echo "❌ ERROR: Today is $current_day, but the target day is $target_day"
+            echo "day_check=false" >> $GITHUB_OUTPUT
+            exit 0
+
+          fi
+          echo "day_check=true" >> $GITHUB_OUTPUT
+
+
+
+
+      - name: Git setup and fetch tags
+        if: steps.checkday.outputs.day_check == 'true'
+        run: |
+          echo "🔧 Configuring Git..."
+          git config user.name "bot"
+          git config user.email "bot@github.com"
+          echo "🏷️ Fetching tags from remote..."
+          git fetch --tags
+          echo "✅ Tags fetched successfully"
+
+      # ==========================================
+      # STEP 2: Check tag and timing
+      # ==========================================
+      - name: Check tag & timing
+        id: check
+        if: steps.checkday.outputs.day_check == 'true'
+        run: |
+          echo "======================================"
+          echo "🕐 Checking timing and tags"
+          echo "======================================"
+          target_date="${{ steps.params.outputs.date }}"
+          tag="success_${target_date}"
+          echo "🔍 Looking for tag: $tag"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^${tag}$"; then
+            echo "🏷️ ✅ Success tag already exists: $tag"
+            echo "🛑 Stopping workflow (success already registered)"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "📝 Tag not found, continuing..."
+          
+          # Get current UTC time
+          current_hour=$((10#$(date -u +%H)))
+          current_minute=$((10#$(date -u +%M)))
+          current_second=$((10#$(date -u +%S)))
+          echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+          
+          # Calculate time in seconds
+          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+          target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
+
+          diff_seconds=$(( target_total_seconds - current_total_seconds ))
+          echo "⏱️ Difference: $diff_seconds seconds avant 6:00 UTC"
+
+          # Timing logic
+          if [ $diff_seconds -gt 600 ]; then
+            echo "❌ Too early: $diff_seconds seconds remaining (> 10 minutes)"
+            echo "🛑 Stopping workflow"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+
+          else
+            echo "✅ Moins de 10 minutes avant 6:00 UTC"
+            echo "📦 Le conteneur sera démarré"
+            echo "⏰ L'attente finale se fera DANS le conteneur"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+          fi
+
+          
+          echo "======================================"
+
+      # ==========================================
+      # STEP 3: Registration attempt
+      # ==========================================
+      - name: Register
+        id: registration
+        if: steps.checkday.outputs.day_check == 'true' && steps.check.outputs.should_continue == 'true'
+        uses: devcontainers/ci@v0.3
+        env:
+          TARGET_DATE: ${{ env.TARGET_DATE }}
+          TARGET_TIME: ${{ env.TARGET_TIME }}
+          TARGET_DAY: ${{ env.TARGET_DAY }}
+          YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
+          YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
+          YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
+          YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+          YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
+        with:
+          runCmd: |
+            echo "======================================"
+            echo "🎾 Pickleball Registration Attempt"
+            echo "======================================"
+            # ⏰ ATTENTE JUSQU'À EXACTEMENT 6:00 UTC
+            current_hour=$((10#$(date -u +%H)))
+            current_minute=$((10#$(date -u +%M)))
+            current_second=$((10#$(date -u +%S)))
+            current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+            target_total_seconds=$(( 6 * 3600 ))
+            diff_seconds=$(( target_total_seconds - current_total_seconds ))
+            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+
+            
+            if [ $diff_seconds -gt 0 ]; then
+              echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
+              sleep $diff_seconds
+              echo "✅ 6:00:00 UTC atteint!"
+            else
+              echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
+            fi
+            
+            echo "📅 Date: ${{ steps.params.outputs.date }}"
+            echo "🕐 Time: ${{ steps.params.outputs.time }}"
+
+            echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
+
+            
+            FINAL_CODE=1
+            for i in {1..3}; do
+              echo ""
+              echo "🔄 Attempt $i/3..."
+              python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+              EXIT_CODE=$?
+              echo "📊 Python exit code: $EXIT_CODE"
+              
+              if [ $EXIT_CODE -eq 0 ]; then
+                echo "✅ Registration successful!"
+                FINAL_CODE=0
+                break
+              else
+                echo "❌ Attempt $i failed"
+                if [ $i -lt 3 ]; then
+                  echo "⌛ Waiting 20 seconds before next attempt..."
+                  sleep 20
+                fi
+              fi
+            done
+            
+            echo ""
+            echo "📊 Final code: $FINAL_CODE"
+            echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_ENV
+            echo "======================================"
+            exit 0
+          push: never
+
+      # ==========================================
+      # STEP 4: Create success tag
+      # ==========================================
+      - name: Tag success
+        if: steps.checkday.outputs.day_check == 'true' && steps.check.outputs.should_continue == 'true' && env.PYTHON_EXIT_CODE == '0'
+        run: |
+          echo "======================================"
+          echo "🏷️ Creating success tag"
+          echo "======================================"
+          target_date="${{ steps.params.outputs.date }}"
+          tag="success_${target_date}"
+
+          echo "📝 Tag to create: $tag"
+          
+          git commit --allow-empty -m "✅ $tag"
+          git tag "$tag"
+          
+          echo "📤 Pushing tag to remote..."
+          git push origin HEAD "$tag"
+          echo "✅ Tag pushed successfully!"
+          echo "======================================"
