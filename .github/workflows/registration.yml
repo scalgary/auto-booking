@@ -23,7 +23,7 @@ on:
   workflow_dispatch:  # Ajoutez cette ligne
 
 env:
-  TARGET_DATE: "10-Oct-25"
+  TARGET_DATE: "17-Oct-25"
   TARGET_TIME: "4:15"
   TARGET_DAY: "Friday"
 
@@ -39,7 +39,52 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
-      
+      - name: TEST - Read JSON and check today
+        run: |
+          echo "======================================"
+          echo "🧪 TEST - Reading registrations.json"
+          echo "======================================"
+          
+          # Afficher le jour actuel
+          current_day=$(date -u +%A)
+          echo "📅 Current day (UTC): $current_day"
+          echo ""
+          
+          # Vérifier que le fichier existe
+          if [ ! -f "registrations.json" ]; then
+            echo "❌ ERROR: registrations.json not found!"
+            exit 1
+          fi
+          echo "✅ File registrations.json found"
+          echo ""
+          
+          # Afficher le contenu du fichier
+          echo "📄 Content of registrations.json:"
+          cat registrations.json
+          echo ""
+          echo "======================================"
+          
+          # Chercher la registration pour aujourd'hui
+          registration=$(jq -r --arg day "$current_day" \
+            '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)"' \
+            registrations.json | head -1)
+          
+          # Afficher le résultat
+          if [ -z "$registration" ]; then
+            echo "❌ No registration found for $current_day"
+          else
+            echo "✅ Registration found for $current_day:"
+            
+            # Split la string
+            IFS='|' read -r date time day <<< "$registration"
+            
+            echo "   📅 Date: $date"
+            echo "   🕐 Time: $time"
+            echo "   📆 Day: $day"
+          fi
+          
+          echo "======================================"
+
       - name: Set parameters
         id: params
         run: |
@@ -48,7 +93,7 @@ jobs:
           echo "time=${{ env.TARGET_TIME }}" >> $GITHUB_OUTPUT
           echo "day=${{ env.TARGET_DAY }}" >> $GITHUB_OUTPUT
 
-          
+      
       - name: check day
         id: checkday
         run: |
