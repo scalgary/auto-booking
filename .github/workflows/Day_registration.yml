@@ -80,7 +80,14 @@ jobs:
             exit 0
           fi
           echo "📝 Tag not found, continuing..."
-          
+           # Si déclenchement manuel, skip la vérification de timing
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🔧 MANUAL MODE: Skipping timing check"
+            echo "✅ Proceeding immediately"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+            echo "======================================"
+            exit 0
+          fi
           # Get current UTC time
           current_hour=$((10#$(date -u +%H)))
           current_minute=$((10#$(date -u +%M)))
