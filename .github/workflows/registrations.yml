@@ -39,77 +39,52 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
-      - name: TEST - Read JSON and check today
-        run: |
-          echo "======================================"
-          echo "🧪 TEST - Reading registrations.json"
-          echo "======================================"
-          
-          # Afficher le jour actuel
-          current_day=$(date -u +%A)
-          echo "📅 Current day (UTC): $current_day"
-          echo ""
-          
-          # Vérifier que le fichier existe
-          if [ ! -f "registrations.json" ]; then
-            echo "❌ ERROR: registrations.json not found!"
-            exit 1
-          fi
-          echo "✅ File registrations.json found"
-          echo ""
-          
-          # Afficher le contenu du fichier
-          echo "📄 Content of registrations.json:"
-          cat registrations.json
-          echo ""
-          echo "======================================"
-          
-          # Chercher la registration pour aujourd'hui
-          registration=$(jq -r --arg day "$current_day" \
-            '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)"' \
-            registrations.json | head -1)
-          
-          # Afficher le résultat
-          if [ -z "$registration" ]; then
-            echo "❌ No registration found for $current_day"
-          else
-            echo "✅ Registration found for $current_day:"
-            
-            # Split la string
-            IFS='|' read -r date time day <<< "$registration"
-            
-            echo "   📅 Date: $date"
-            echo "   🕐 Time: $time"
-            echo "   📆 Day: $day"
-          fi
-          
-          echo "======================================"
 
-      - name: Set parameters
+      - name: Load registration from JSON
         id: params
         run: |
-
-          echo "date=${{ env.TARGET_DATE }}" >> $GITHUB_OUTPUT
-          echo "time=${{ env.TARGET_TIME }}" >> $GITHUB_OUTPUT
-          echo "day=${{ env.TARGET_DAY }}" >> $GITHUB_OUTPUT
-
-      
-      - name: check day
-        id: checkday
-        run: |
-          current_day=$(date -u +%A)
-          target_day="${{ env.TARGET_DAY }}"
-
-          if [ "$current_day" != "$target_day" ]; then
-            echo "❌ ERROR: Today is $current_day, but the target day is $target_day"
-            echo "day_check=false" >> $GITHUB_OUTPUT
-            exit 0
-
-          fi
-          echo "day_check=true" >> $GITHUB_OUTPUT
+         echo "======================================"
+         echo "📖 Loading registration from JSON"
+         echo "======================================"
+    
+         # Récupérer le jour actuel
+         current_day=$(date -u +%A)
+         echo "📅 Current day (UTC): $current_day"
+    
+         # Chercher la registration pour aujourd'hui (AJOUTE level)
+          registration=$(jq -r --arg day "$current_day" \
+          '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+          registrations.json | head -1)
 
 
+         # Vérifier si une registration existe
+         if [ -z "$registration" ]; then
+          echo "❌ No registration found for $current_day"
+          echo "should_continue=false" >> $GITHUB_OUTPUT
+          exit 0
+         fi
 
+    
+         # Split et afficher
+         IFS='|' read -r date time day <<< "$registration"
+         echo "✅ Registration found:"
+         echo "   📅 Date: $date"
+         echo "   🕐 Time: $time"
+         echo "   📆 Day: $day"
+         echo "   🎾 Level: $level"
+
+    
+         # Exporter vers GITHUB_OUTPUT
+         echo "date=$date" >> $GITHUB_OUTPUT
+         echo "time=$time" >> $GITHUB_OUTPUT
+         echo "day=$day" >> $GITHUB_OUTPUT
+         echo "level=$level" >> $GITHUB_OUTPUT
+
+         echo "should_continue=true" >> $GITHUB_OUTPUT
+    
+         echo "======================================"
+
+    
 
       - name: Git setup and fetch tags
         if: steps.checkday.outputs.day_check == 'true'
@@ -179,12 +154,13 @@ jobs:
       # ==========================================
       - name: Register
         id: registration
-        if: steps.checkday.outputs.day_check == 'true' && steps.check.outputs.should_continue == 'true'
+        if: steps.check.outputs.should_continue == 'true'
         uses: devcontainers/ci@v0.3
         env:
-          TARGET_DATE: ${{ env.TARGET_DATE }}
-          TARGET_TIME: ${{ env.TARGET_TIME }}
-          TARGET_DAY: ${{ env.TARGET_DAY }}
+          TARGET_DATE: ${{ steps.params.outputs.date }}
+          TARGET_TIME: ${{ steps.params.outputs.time }}
+          TARGET_DAY: ${{ steps.params.outputs.day }}
+
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
           YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
@@ -224,7 +200,7 @@ jobs:
             for i in {1..3}; do
               echo ""
               echo "🔄 Attempt $i/3..."
-              python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}"
+              python3 execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}"
               EXIT_CODE=$?
               echo "📊 Python exit code: $EXIT_CODE"
               
@@ -252,7 +228,7 @@ jobs:
       # STEP 4: Create success tag
       # ==========================================
       - name: Tag success
-        if: steps.checkday.outputs.day_check == 'true' && steps.check.outputs.should_continue == 'true' && env.PYTHON_EXIT_CODE == '0'
+        if: steps.check.outputs.should_continue == 'true' && env.PYTHON_EXIT_CODE == '0'
         run: |
           echo "======================================"
           echo "🏷️ Creating success tag"

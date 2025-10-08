@@ -14,24 +14,24 @@ import os
 import sys
 
 # Get arguments from command line or environment variables
-if len(sys.argv) != 3:
-    print("Usage: python mon_script.py <variable1> <variable2> ")
-    sys.exit(1)
+if len(sys.argv) != 4:
+    print("Usage: python mon_script.py <variable1> <variable2> <variable3>")
+    #sys.exit(1)
+import sys
 
-TARGET_DATE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else os.getenv("DEFAULT_DATE", "19-Aug-25")
-COURSE_TYPE = "Indoor Pickleball Intermediate"
-COURSE_LEVEL = "Intermediate"
-TARGET_TIME = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else os.getenv("DEFAULT_TIME", "4:30")
+# Valeurs par défaut
+DEFAULT_DATE = "19-Aug-25"
+DEFAULT_TIME = "4:30"
+DEFAULT_LEVEL = "Intermediate"
 
-print(f"Variable 1: {TARGET_DATE}")
-#print(f"Variable 2: {COURSE_TYPE}")
-print(f"Variable 2: {TARGET_TIME}")
+# Récupérer arguments ou utiliser défauts
+TARGET_DATE = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DATE
+TARGET_TIME = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_TIME
+COURSE_LEVEL = sys.argv[3] if len(sys.argv) > 3 else DEFAULT_LEVEL
 
-# Modifiez juste ces valeurs :
-#TARGET_DATE = "19-Aug-25"  # ← VOTRE DATE ICI
-#COURSE_TYPE = "Indoor Pickleball Intermediate"
-#TARGET_TIME = "4:30"
-
+print(f"📅 Date: {TARGET_DATE}")
+print(f"🕐 Time: {TARGET_TIME}")
+print(f"🎾 Level: {COURSE_LEVEL}")
 
 
 #load_dotenv()  # Charge le fichier .env when running in codespace
