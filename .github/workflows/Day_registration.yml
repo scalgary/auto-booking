@@ -23,9 +23,9 @@ on:
   workflow_dispatch:  # Ajoutez cette ligne
 
 env:
-  TARGET_DATE: "15-Oct-25"
-  TARGET_TIME: "4:30"
-  TARGET_DAY: "Wednesday"
+  TARGET_DATE: "09-Oct-25"
+  TARGET_TIME: "12:30"
+  TARGET_DAY: "Thursday"
 
 jobs:
   register:
