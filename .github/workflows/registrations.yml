@@ -75,7 +75,7 @@ jobs:
     
 
       - name: Git setup and fetch tags
-        if: steps.checkday.outputs.day_check == 'true'
+        if: steps.check.outputs.should_continue == 'true'
         run: |
           echo "🔧 Configuring Git..."
           git config user.name "bot"
@@ -89,7 +89,7 @@ jobs:
       # ==========================================
       - name: Check tag & timing
         id: check
-        if: steps.checkday.outputs.day_check == 'true'
+        if: steps.check.outputs.should_continue == 'true'
         run: |
           echo "======================================"
           echo "🕐 Checking timing and tags"
