@@ -94,6 +94,13 @@ jobs:
           echo "======================================"
           echo "🕐 Checking timing and tags"
           echo "======================================"
+          # POUR TEST MANUEL SEULEMENT
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🧪 Manual run detected - skipping timing check"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           target_date="${{ steps.params.outputs.date }}"
           tag="success_${target_date}"
           echo "🔍 Looking for tag: $tag"
@@ -161,23 +168,27 @@ jobs:
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
             # ⏰ ATTENTE JUSQU'À EXACTEMENT 6:00 UTC
-            current_hour=$((10#$(date -u +%H)))
-            current_minute=$((10#$(date -u +%M)))
-            current_second=$((10#$(date -u +%S)))
-            current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-            target_total_seconds=$(( 6 * 3600 ))
-            diff_seconds=$(( target_total_seconds - current_total_seconds ))
-            echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+            if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+
+             current_hour=$((10#$(date -u +%H)))
+             current_minute=$((10#$(date -u +%M)))
+             current_second=$((10#$(date -u +%S)))
+             current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+             target_total_seconds=$(( 6 * 3600 ))
+             diff_seconds=$(( target_total_seconds - current_total_seconds ))
+             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
 
             
-            if [ $diff_seconds -gt 0 ]; then
-              echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
-              sleep $diff_seconds
-              echo "✅ 6:00:00 UTC atteint!"
+             if [ $diff_seconds -gt 0 ]; then
+               echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
+               sleep $diff_seconds
+               echo "✅ 6:00:00 UTC atteint!"
+             else
+               echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
+             fi
             else
-              echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
+             echo "Manual : pas attente"
             fi
-            
             echo "📅 Date: ${{ steps.params.outputs.date }}"
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
