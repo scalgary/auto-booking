@@ -15,10 +15,10 @@ on:
    # - cron: '45 5 * * 2' # 23:45  Sunday is 0 Saturday 6
    # - cron: '55 5 * * 2' # 23:55 Calgary
    # - cron: '0 6 * * 2' # 00:00 Calgary
-    - cron: '30 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
-    - cron: '40 5 * * 0' # 23:45  Sunday is 0 Saturday 6
-    - cron: '50 5 * * 0' # 23:55 Calgary
-    - cron: '0 6 * * 0' # 00:00 Calgary
+   # - cron: '30 5 * * 0' # 23:35 Calgary (Sunday night) = 05:35 UTC Monday
+   # - cron: '40 5 * * 0' # 23:45  Sunday is 0 Saturday 6
+   # - cron: '50 5 * * 0' # 23:55 Calgary
+   # - cron: '0 6 * * 0' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
 
