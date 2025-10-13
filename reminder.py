@@ -234,6 +234,78 @@ print(f"✓ {len(appointments)} appointments saved!")
 #print(json.dumps(appointments, indent=2))
 
 driver.quit()
+import json
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def load_appointments(filename='appointments.json'):
+    """Load appointments from JSON file"""
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            appointments = json.load(f)
+            print(f"✓ Loaded {len(appointments)} appointments")
+            return appointments
+    except FileNotFoundError:
+        print(f"❌ File {filename} not found")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid JSON: {e}")
+        return []
+
+
+def send_all_appointments_email(appointments):
+    """Send email with ALL appointments"""
+    email_from = os.environ.get('EMAIL_FROM')
+    email_to = os.environ.get('EMAIL_TO')
+    email_password = os.environ.get('EMAIL_PASSWORD')
+    smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+    
+    if not all([email_from, email_to, email_password]):
+        print("❌ Email configuration missing")
+        return False
+    
+    # Email subject
+    subject = f"🎾 Your Pickleball Appointments - {len(appointments)} total"
+    
+    # Email body
+    body = "Hello!\n\n"
+    body += f"Here are all your scheduled pickleball appointments ({len(appointments)} total):\n\n"
+    
+    for idx, apt in enumerate(appointments, 1):
+        date_clean = apt['date'].replace('\n', ' ')
+        time_clean = apt['time'].replace('\n', ' ')
+        body += f"{idx}. {date_clean} at {time_clean}\n"
+    
+    body += "\n📍 Location: Calgary JCC\n"
+    body += "\nSee you on the court! 🏓\n"
+    
+    # Create message
+    msg = MIMEMultipart()
+    msg['From'] = email_from
+    msg['To'] = email_to
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+    
+    # Send email
+    try:
+        print(f"📧 Connecting to {smtp_server}:{smtp_port}...")
+        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+        server.starttls()
+        print(f"🔐 Logging in...")
+        server.login(email_from, email_password)
+        print(f"📤 Sending email...")
+        server.send_message(msg)
+        server.quit()
+        print(f"✅ Email sent to {email_to}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+        return False
+
+
 
 def main():
 
@@ -241,13 +313,27 @@ def main():
         print("ℹ️ No appointments found")
         return
     
-    tomorrow_appointments = get_tomorrow_appointments(appointments,1)
+    #tomorrow_appointments = get_tomorrow_appointments(appointments,1)
     
-    if tomorrow_appointments:
-        print(f"🎯 Found {len(tomorrow_appointments)} appointment(s) for tomorrow")
-        send_email(tomorrow_appointments)
+    #if tomorrow_appointments:
+        #print(f"🎯 Found {len(tomorrow_appointments)} appointment(s) for tomorrow")
+        #send_email(tomorrow_appointments)
+    #else:
+        #print("ℹ️ No appointments for tomorrow")
+    print(f"\n📅 Appointments to send:")
+    for idx, apt in enumerate(appointments, 1):
+        date = apt['date'].replace('\n', ' ')
+        time = apt['time'].replace('\n', ' ')
+        print(f"  {idx}. {date} - {time}")
+    
+    # Send email
+    print()
+    if send_all_appointments_email(appointments):
+        print("\n✅ Email sent successfully!")
     else:
-        print("ℹ️ No appointments for tomorrow")
+        print("\n❌ Failed to send email")
+
+
 
 main()
 

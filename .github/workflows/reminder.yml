@@ -7,7 +7,7 @@ permissions:
 
 on:
   schedule:
-    - cron: '0 6 * * *' # 00:00 Calgary
+    - cron: '0 6 * * 0' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
 
