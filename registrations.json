@@ -17,5 +17,13 @@
     "day": "Saturday",
     "level": "Intermediate"
 
+  },
+    {
+    "date": "26-Oct-25",
+    "time": "9:00",
+    "day": "Sunday",
+    "level": "Intermediate"
+
   }
+  
 ]
