@@ -14,7 +14,7 @@ on:
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
       date:
-        description: 'Date (YYYY-MM-DD)'
+        description: 'Date (DD-Mth-YY)'
         required: true
       time:
         description: 'Time (HH:MM)'
