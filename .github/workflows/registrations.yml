@@ -182,6 +182,11 @@ jobs:
           YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
           YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
           YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
+          YOUR_SECRET_APPOINTMENT: ${{ secrets.YOUR_SECRET_APPOINTMENT }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+
         with:
           runCmd: |
             echo "======================================"
