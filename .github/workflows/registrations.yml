@@ -220,6 +220,13 @@ jobs:
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_ENV
             echo "======================================"
+            if [ $FINAL_CODE -eq 0 ]; then
+              echo "🚀 Running script2.py..."
+              python3 reminder.py
+            else
+              echo "⏭️ Skipping reminder.py (execution.py failed)"
+            fi
+
             exit 0
           push: never
 
