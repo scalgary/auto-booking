@@ -243,7 +243,7 @@ jobs:
             
             echo ""
             echo "📊 Final code: $FINAL_CODE"
-            echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_ENV
+            echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
             if [ $FINAL_CODE -eq 0 ]; then
               echo "🚀 Running script2.py..."
@@ -259,7 +259,7 @@ jobs:
       # STEP 4: Create success tag
       # ==========================================
       - name: Tag success
-        if: steps.check.outputs.should_continue == 'true' && env.PYTHON_EXIT_CODE == '0'
+        if: steps.check.outputs.should_continue == 'true' && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
         run: |
           echo "======================================"
           echo "🏷️ Creating success tag"
