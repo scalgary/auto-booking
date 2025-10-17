@@ -12,6 +12,17 @@ on:
     - cron: '0 6 * * *' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
+    inputs:
+      date:
+        description: 'Date (YYYY-MM-DD)'
+        required: true
+      time:
+        description: 'Time (HH:MM)'
+        required: true
+      level:
+        description: 'Level'
+        required: true
+
 
 #limitation expect registration to begin a 6 UTC"
 
@@ -34,32 +45,41 @@ jobs:
          echo "======================================"
          echo "📖 Loading registration from JSON"
          echo "======================================"
+         # Si manuel, utiliser les inputs
+         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+           echo "🔧 Manual trigger - using inputs"
+           date="${{ inputs.date }}"
+           time="${{ inputs.time }}"
+           level="${{ inputs.level }}"
+           day=$(date -d "$date" +%A)
+         else
+
+           # Récupérer le jour actuel
+           current_day=$(date -u +%A)
+           echo "📅 Current day (UTC): $current_day"
     
-         # Récupérer le jour actuel
-         current_day=$(date -u +%A)
-         echo "📅 Current day (UTC): $current_day"
-    
-         # Chercher la registration pour aujourd'hui (AJOUTE level)
-          registration=$(jq -r --arg day "$current_day" \
-          '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
-          registrations.json | head -1)
+           # Chercher la registration pour aujourd'hui (AJOUTE level)
+           registration=$(jq -r --arg day "$current_day" \
+           '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+           registrations.json | head -1)
 
 
-         # Vérifier si une registration existe
-         if [ -z "$registration" ]; then
-          echo "❌ No registration found for $current_day"
-          echo "should_continue=false" >> $GITHUB_OUTPUT
-          exit 0
+           # Vérifier si une registration existe
+           if [ -z "$registration" ]; then
+            echo "❌ No registration found for $current_day"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+           fi
+
+    
+           # Split et afficher
+           IFS='|' read -r date time day level<<< "$registration"
+           echo "✅ Registration found:"
+           echo "   📅 Date: $date"
+           echo "   🕐 Time: $time"
+           echo "   📆 Day: $day"
+           echo "   🎾 Level: $level"
          fi
-
-    
-         # Split et afficher
-         IFS='|' read -r date time day level<<< "$registration"
-         echo "✅ Registration found:"
-         echo "   📅 Date: $date"
-         echo "   🕐 Time: $time"
-         echo "   📆 Day: $day"
-         echo "   🎾 Level: $level"
 
     
          # Exporter vers GITHUB_OUTPUT
