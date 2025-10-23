@@ -6,10 +6,7 @@ permissions:
 
 
 on:
-  schedule:
-    - cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '50 5 * * *' # 23:55 Calgary
-    - cron: '0 6 * * *' # 00:00 Calgary
+
 
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
