@@ -177,7 +177,6 @@ jobs:
           TARGET_DATE: ${{ steps.params.outputs.date }}
           TARGET_TIME: ${{ steps.params.outputs.time }}
           TARGET_DAY: ${{ steps.params.outputs.day }}
-
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
           YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
@@ -189,7 +188,7 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
-          run: |
+        run: |
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
