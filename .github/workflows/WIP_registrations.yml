@@ -27,7 +27,9 @@ jobs:
   register:
     runs-on: ubuntu-latest
     # Utilise ton image Docker personnalisée
-
+    container:
+      image: scalgary/selenium-env:latest
+      options: --wor
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
@@ -99,7 +101,7 @@ jobs:
         if: steps.params.outputs.should_continue == 'true'
         run: |
           echo "🔧 Configuring Git..."
-          cd /github/workspace
+          git config --global --add safe.directory /github/workspace
           git config user.name "bot"
           git config user.email "bot@github.com"
           echo "🏷️ Fetching tags from remote..."
