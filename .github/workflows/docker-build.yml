@@ -38,6 +38,6 @@ jobs:
         with:
           context: .devcontainer
           push: true
-          tags: your-dockerhub-username/your-image-name:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/selenium-env:latest
           cache-from: type=gha       # <-- optionnel, active le cache GitHub Actions
           cache-to: type=gha,mode=max
