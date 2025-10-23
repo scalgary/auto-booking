@@ -100,8 +100,10 @@ jobs:
       - name: Git setup and fetch tags
         if: steps.params.outputs.should_continue == 'true'
         run: |
+          pwd
+          ls -la
           echo "🔧 Configuring Git..."
-          git config --global --add safe.directory /github/workspace
+          git config --global --add safe.directory $GITHUB_WORKSPACE
           git config user.name "bot"
           git config user.email "bot@github.com"
           echo "🏷️ Fetching tags from remote..."
