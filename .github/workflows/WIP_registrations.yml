@@ -115,6 +115,7 @@ jobs:
       # ==========================================
       - name: Check tag & timing
         id: check
+        shell: bash
         if: steps.params.outputs.should_continue == 'true'
         run: |
           echo "======================================"
