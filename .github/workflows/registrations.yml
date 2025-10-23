@@ -253,7 +253,6 @@ jobs:
             fi
 
             exit 0
-          push: never
 
       # ==========================================
       # STEP 4: Create success tag
