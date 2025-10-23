@@ -4,21 +4,23 @@ permissions:
   contents: write
   actions: read
 
-
 on:
   schedule:
-    - cron: '0 6 * * 0' # 00:00 Calgary
-
-  workflow_dispatch:  # Ajoutez cette ligne
-
-#limitation expect registration to begin a 6 UTC"
+    - cron: '0 6 * * 0' # 00:00 Calgary (6h UTC le dimanche)
+  workflow_dispatch: # Lancer manuellement
 
 jobs:
-  register:
+  add-events-to-calendar:
+    name: Add events to calendar
     runs-on: ubuntu-latest
+
+    # Utilise ton image Docker personnalisée
+    container:
+      image: scalgary/selenium-env:latest
+
     steps:
       # ==========================================
-      # STEP 1: Checkout code and fetch tags
+      # STEP 1: Checkout code
       # ==========================================
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,23 +28,23 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
-      # STEP 3: Registration attempt
       # ==========================================
-      - name: Reminder
-        id: reminder
-        uses: devcontainers/ci@v0.3
-        env:
+      # STEP 2: Install dependencies (si besoin)
+      # ==========================================
+      #- name: Install dependencies
+      #  run: |
+      #    python -m pip install --upgrade pip
+      #    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # ==========================================
+      # STEP 3: Run your reminder script
+      # ==========================================
+      - name: Run reminder script
+        env:
           CALDAV_USER: ${{ secrets.CALDAV_USER }}
           CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
-
-
-        with:
-          runCmd: |
-            echo "======================================"
-            echo "🎾 Pickleball Reminder"
-            echo "======================================"
-
-            python3 add_booking_in_calendar.py
-          push: never
-
+        run: |
+          echo "======================================"
+          echo "🎾 Pickleball Reminder"
+          echo "======================================"
+          python3 add_booking_in_calendar.py
