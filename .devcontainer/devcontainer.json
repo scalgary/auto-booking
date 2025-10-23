@@ -12,7 +12,11 @@
     "YOUR_SECRET_APPOINTMENT": "${localEnv:YOUR_SECRET_APPOINTMENT}",
     "EMAIL_TO": "${localEnv:EMAIL_TO}",
     "EMAIL_FROM": "${localEnv:EMAIL_FROM}",
-    "EMAIL_PASSWORD": "${localEnv:EMAIL_PASSWORD}"
+    "EMAIL_PASSWORD": "${localEnv:EMAIL_PASSWORD}",
+    "CALDAV_USER": "${localEnv:CALDAV_USER}",
+    "CALDAV_PASSWORD": "${localEnv:CALDAV_PASSWORD}"
+
+
 
 
 
