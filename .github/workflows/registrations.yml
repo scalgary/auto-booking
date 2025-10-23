@@ -29,9 +29,6 @@ on:
 jobs:
   register:
     runs-on: ubuntu-latest
-    # Utilise ton image Docker personnalisée
-    container:
-      image: scalgary/selenium-env:latest
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
@@ -44,8 +41,6 @@ jobs:
 
       - name: Load registration from JSON
         id: params
-        shell: bash
-
         run: |
          echo "======================================"
          echo "📖 Loading registration from JSON"
@@ -175,10 +170,12 @@ jobs:
       - name: Register
         id: registration
         if: steps.check.outputs.should_continue == 'true'
+        uses: devcontainers/ci@v0.3
         env:
           TARGET_DATE: ${{ steps.params.outputs.date }}
           TARGET_TIME: ${{ steps.params.outputs.time }}
           TARGET_DAY: ${{ steps.params.outputs.day }}
+
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
           YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
@@ -190,7 +187,8 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
-        run: |
+        with:
+          runCmd: |
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
@@ -255,6 +253,7 @@ jobs:
             fi
 
             exit 0
+          push: never
 
       # ==========================================
       # STEP 4: Create success tag
