@@ -99,6 +99,7 @@ jobs:
         if: steps.params.outputs.should_continue == 'true'
         run: |
           echo "🔧 Configuring Git..."
+          cd /github/workspace
           git config user.name "bot"
           git config user.email "bot@github.com"
           echo "🏷️ Fetching tags from remote..."
