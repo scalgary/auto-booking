@@ -1,0 +1,48 @@
+name: Calendar
+
+permissions:
+  contents: write
+  actions: read
+
+
+on:
+  schedule:
+    - cron: '0 6 * * 0' # 00:00 Calgary
+
+  workflow_dispatch:  # Ajoutez cette ligne
+
+#limitation expect registration to begin a 6 UTC"
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      # ==========================================
+      # STEP 1: Checkout code and fetch tags
+      # ==========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      # STEP 3: Registration attempt
+      # ==========================================
+      - name: Reminder
+        id: reminder
+        uses: devcontainers/ci@v0.3
+        env:
+
+          CALDAV_USER: ${{ secrets.CALDAV_USER }}
+          CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
+
+
+        with:
+          runCmd: |
+            echo "======================================"
+            echo "🎾 Pickleball Reminder"
+            echo "======================================"
+
+            python3 add_booking_in_calendar.py
+          push: never
+
