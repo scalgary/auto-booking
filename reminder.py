@@ -268,7 +268,8 @@ def send_all_appointments_email(appointments):
         return False
     
     # Email subject
-    subject = f"🎾 Your Pickleball Appointments - {len(appointments)} total"
+
+    subject = f"🏓 Your Pickleball Appointments - {len(appointments)} total"
     
     # Email body
     body = "Hello!\n\n"
