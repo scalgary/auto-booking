@@ -44,6 +44,8 @@ jobs:
 
       - name: Load registration from JSON
         id: params
+        shell: bash
+
         run: |
          echo "======================================"
          echo "📖 Loading registration from JSON"
