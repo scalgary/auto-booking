@@ -47,4 +47,5 @@ jobs:
           echo "======================================"
           echo "🎾 Pickleball Reminder"
           echo "======================================"
+          python3 reminder.py
           python3 add_booking_in_calendar.py
