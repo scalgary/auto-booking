@@ -29,6 +29,9 @@ on:
 jobs:
   register:
     runs-on: ubuntu-latest
+    # Utilise ton image Docker personnalisée
+    container:
+      image: scalgary/selenium-env:latest
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
@@ -170,7 +173,7 @@ jobs:
       - name: Register
         id: registration
         if: steps.check.outputs.should_continue == 'true'
-        uses: devcontainers/ci@v0.3
+        #uses: devcontainers/ci@v0.3
         env:
           TARGET_DATE: ${{ steps.params.outputs.date }}
           TARGET_TIME: ${{ steps.params.outputs.time }}
@@ -187,8 +190,7 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
-        with:
-          runCmd: |
+          run: |
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
