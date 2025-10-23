@@ -11,8 +11,14 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists/*
 
     # copier fichier requirement
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt 
+# ✅ Copier requirements.txt depuis la racine SI on build depuis .devcontainer
+# Sinon, utiliser celui de la racine (pour VS Code Dev Container)
+COPY ../requirements.txt /tmp/requirements.txt 2>/dev/null || COPY requirements.txt /tmp/requirements.txt
+
+# Installer les dépendances Python
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+
 # Installer les packages Python nécessaires
 #RUN pip install --no-cache-dir selenium webdriver-manager python-dotenv pillow
 
