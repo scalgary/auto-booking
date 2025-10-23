@@ -18,12 +18,14 @@
 
 
   },
-  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup_output.log",
+  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup_output.log | pip install --no-cache-dir jupyterlab ipywidgets notebook black pylint",
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.vscode-pylance",
+         "ms-toolsai.jupyter"
+
       ],
       "settings": {
        "python.defaultInterpreterPath": "/usr/local/bin/python",
