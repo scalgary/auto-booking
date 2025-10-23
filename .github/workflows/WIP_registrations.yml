@@ -27,8 +27,7 @@ jobs:
   register:
     runs-on: ubuntu-latest
     # Utilise ton image Docker personnalisée
-    container:
-      image: scalgary/selenium-env:latest
+
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
@@ -37,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Load registration from JSON
         id: params

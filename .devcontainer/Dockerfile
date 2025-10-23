@@ -14,6 +14,12 @@ RUN apt-get update -qq && \
     # copier fichier requirement
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt 
+# Créer un utilisateur compatible avec GitHub Actions
+RUN useradd -ms /bin/bash ghauser
+USER ghauser
+
+# Définir le répertoire de travail pour GitHub Actions
+WORKDIR /github/workspace
 # Installer les packages Python nécessaires
 #RUN pip install --no-cache-dir selenium webdriver-manager python-dotenv pillow
 
