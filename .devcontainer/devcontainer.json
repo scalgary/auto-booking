@@ -18,7 +18,7 @@
 
 
   },
-  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup_output.log | pip install --no-cache-dir jupyterlab ipywidgets notebook black pylint",
+  "postCreateCommand": "bash .devcontainer/setup.sh 2>&1 | tee /tmp/setup_output.log ",
   "customizations": {
     "vscode": {
       "extensions": [
