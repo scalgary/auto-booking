@@ -43,6 +43,16 @@ jobs:
         env:
           CALDAV_USER: ${{ secrets.CALDAV_USER }}
           CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
+          YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
+          YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
+          YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
+          YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+          YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
+          YOUR_SECRET_APPOINTMENT: ${{ secrets.YOUR_SECRET_APPOINTMENT }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
           echo "======================================"
           echo "🎾 Pickleball Reminder"
