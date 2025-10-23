@@ -29,7 +29,7 @@ jobs:
     # Utilise ton image Docker personnalisée
     container:
       image: scalgary/selenium-env:latest
-      options: --wor
+      options: --workdir ${{ github.workspace }}
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
