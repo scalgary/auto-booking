@@ -36,7 +36,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: .devcontainer
           push: true
           tags: your-dockerhub-username/your-image-name:latest
           cache-from: type=gha       # <-- optionnel, active le cache GitHub Actions
