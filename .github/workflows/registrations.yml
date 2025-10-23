@@ -269,8 +269,8 @@ jobs:
 
           echo "📝 Tag to create: $tag"
           git add appointments.json
-          #git commit --allow-empty -m "✅ $tag"
-          git commit -m "✅ $tag"
+          git commit --allow-empty -m "✅ $tag"
+          #git commit -m "✅ $tag"
           git tag "$tag"
           
           echo "📤 Pushing tag to remote..."
