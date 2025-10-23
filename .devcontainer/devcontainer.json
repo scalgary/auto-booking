@@ -1,9 +1,7 @@
 {
   "name": "Mon container Codespace",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
+  "image" : "scalgary/selenium-env:latest",
+
   "containerEnv": {
     "YOUR_SECRET_EMAIL": "${localEnv:YOUR_SECRET_EMAIL}",
     "YOUR_SECRET_PASSWORD": "${localEnv:YOUR_SECRET_PASSWORD}",
