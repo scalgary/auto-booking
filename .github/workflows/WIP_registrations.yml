@@ -2,7 +2,7 @@ name: WIP Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 6
-  ADVANCE_SECONDS : 0
+  ADVANCE_SECONDS : 2
 permissions:
   contents: write
   actions: read
@@ -12,7 +12,7 @@ permissions:
 on:
   schedule:
     - cron: '42 5 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '2 5 * * *' # 23:55 Calgary
+    - cron: '52 5 * * *' # 23:55 Calgary
     - cron: '0 6 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
