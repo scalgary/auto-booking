@@ -2,7 +2,7 @@ name: WIP Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 6
-  ADVANCE_SECONDS : 2
+  ADVANCE_SECONDS : 0
 permissions:
   contents: write
   actions: read
