@@ -225,7 +225,7 @@ jobs:
              if [ $diff_seconds -gt 0 ]; then
                echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
                sleep $diff_seconds
-               echo "✅ 6:00:00 UTC atteint!"
+               echo "✅ ${TARGET_HOUR}:00:00 UTC atteint!"
              else
                echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
              fi
@@ -263,12 +263,6 @@ jobs:
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
-            if [ $FINAL_CODE -eq 0 ]; then
-              echo "🚀 Running script2.py..."
-              python3 reminder.py
-            else
-              echo "⏭️ Skipping reminder.py (execution.py failed)"
-            fi
 
             exit 0
 
