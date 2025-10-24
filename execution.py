@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
 
-
+time_sleep=3
 import sys
 
 # Get arguments from command line or environment variables
@@ -223,7 +223,7 @@ def click_for_me(driver, target_date, my_name):
             moi_button.click()
                         
             print("✅ Réservation Moi cliquée!")
-            time.sleep(3)
+            time.sleep(time_sleep)
                         
                         # Screenshot final
             driver.save_screenshot(f"7_before_basket_{target_date.replace('-', '_')}.png")
@@ -302,7 +302,7 @@ def click_confirm_basket(driver):
     basket = driver.find_elements(By.XPATH, "//*[contains(text(), 'Checkout')]")
     if basket:
         basket[0].click()
-        time.sleep(3)
+        time.sleep(time_sleep)
         driver.save_screenshot(f"8_after_basket_{TARGET_DATE.replace('-', '_')}.png")
         return True
     return False
@@ -314,8 +314,8 @@ def click_on_slot(driver, slot_available):
     if book_buttons:
         print(f"✅ Bouton 'Book Now' trouvé dans le même conteneur")
         book_buttons[0].click()
-        time.sleep(3)
-        driver.save_screenshot("6_click_on_slot.png")
+        time.sleep(time_sleep)
+        #driver.save_screenshot("6_click_on_slot.png")
         return True
     return False
 
@@ -331,7 +331,7 @@ if possible_to_book:
         if next_week_booking:
             next_week_btn = driver.find_element(By.XPATH, "//input[@value='Next Week']")
             next_week_btn.click()
-        time.sleep(3)  # Attendre le chargement
+        time.sleep(time_sleep)  # Attendre le chargement
         # Screenshot
         #driver.save_screenshot("5_planning_page.png")
         print("📸 Screenshot: planning_page.png")
