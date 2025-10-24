@@ -2,7 +2,7 @@ name: WIP Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 6
-
+  ADVANCE_SECONDS : 2
 permissions:
   contents: write
   actions: read
@@ -11,8 +11,8 @@ permissions:
 
 on:
   schedule:
-    - cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '50 5 * * *' # 23:55 Calgary
+    - cron: '42 5 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '2 5 * * *' # 23:55 Calgary
     - cron: '0 6 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
@@ -155,13 +155,14 @@ jobs:
           current_hour=$((10#$(date -u +%H)))
           current_minute=$((10#$(date -u +%M)))
           current_second=$((10#$(date -u +%S)))
+          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+
           echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
           
-          # Calculate time in seconds
-          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-          target_total_seconds=$(( TARGET_HOUR * 3600 ))  # Utilise la variable
-
+          # Calcul avec l'avance
+          target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
+
           echo "⏱️ Difference: $diff_seconds seconds avant ${TARGET_HOUR}:00 UTC"
 
           # Timing logic
@@ -208,6 +209,8 @@ jobs:
             echo "======================================"
             # Récupérer l'heure cible
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+            ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+
             echo "🎯 Target time: ${TARGET_HOUR}:00 UTC"
 
 

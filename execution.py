@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
 
-time_sleep=2
+time_sleep=1
 import sys
 
 # Get arguments from command line or environment variables
