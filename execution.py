@@ -144,7 +144,7 @@ def access_login(website_url, email_login, secret_password):
     time.sleep(3)
     print(f"📄 Titre: {driver.title}")
     # Screenshot avant
-    driver.save_screenshot("1_avant_saisie.png")
+    #driver.save_screenshot("1_avant_saisie.png")
     print("📸 Screenshot 1: 1_avant_saisie.png")
     email_field = driver.find_element(By.XPATH, "//input[@type='email']")
     ("✅ Champ email trouvé par type='email'")
@@ -157,7 +157,7 @@ def access_login(website_url, email_login, secret_password):
             time.sleep(1)
 
     # Screenshot après email
-    driver.save_screenshot("2_apres_email.png")
+    #driver.save_screenshot("2_apres_email.png")
     print("📸 Screenshot 2: 2_apres_email.png")
     # Étape 3: Trouver et remplir le champ password
     print("🔑 Recherche du champ Password...")
@@ -176,7 +176,7 @@ def access_login(website_url, email_login, secret_password):
         time.sleep(1)
 
         # Screenshot après password
-    driver.save_screenshot("3_apres_password.png")
+    #driver.save_screenshot("3_apres_password.png")
     print("📸 Screenshot 3: 3_apres_password.png")
 
     login_button = None
@@ -190,7 +190,7 @@ def access_login(website_url, email_login, secret_password):
     time.sleep(5)
 
     # Screenshot après connexion
-    driver.save_screenshot("4_apres_clic.png")
+    #driver.save_screenshot("4_apres_clic.png")
     print("📸 Screenshot 4: 4_apres_clic.png")
     #print(driver.current_url)
     return driver
@@ -333,7 +333,7 @@ if possible_to_book:
             next_week_btn.click()
         time.sleep(3)  # Attendre le chargement
         # Screenshot
-        driver.save_screenshot("5_planning_page.png")
+        #driver.save_screenshot("5_planning_page.png")
         print("📸 Screenshot: planning_page.png")
         slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
         if slot_available:
