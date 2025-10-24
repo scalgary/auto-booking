@@ -1,15 +1,15 @@
 [
   {
-    "date": "27-Oct-25",
-    "time": "2:30",
-    "day": "Monday",
+    "date": "04-Nov-25",
+    "time": "12:30",
+    "day": "Tuesday",
     "level": "Intermediate"
   },
   {
-    "date": "30-Oct-25",
-    "time": "4:15",
-    "day": "Thursday",
-    "level": "Intermediate"
+    "date": "05-Nov-25",
+    "time": "2:30",
+    "day": "Wednesday",
+    "level": "Advanced"
   },
   {
     "date": "01-Nov-25",
@@ -26,7 +26,7 @@
 
   },
   {
-    "date": "31-Oct-25",
+    "date": "07-Nov-25",
     "time": "2:45",
     "day": "Friday",
     "level": "Advanced"
