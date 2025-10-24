@@ -1,12 +1,22 @@
 name: WIP Registration Pickleball with json
 
+env:
+  TARGET_UTC_HOUR : 6
+
 permissions:
   contents: write
   actions: read
 
 
-on:
 
+on:
+  schedule:
+    - cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '50 5 * * *' # 23:55 Calgary
+    - cron: '0 6 * * *' # 00:00 Calgary
+  #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
+  #  - cron: '50 13 * * *' # 23:55 Calgary
+  #  - cron: '0 14 * * *' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
@@ -149,10 +159,10 @@ jobs:
           
           # Calculate time in seconds
           current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-          target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
+          target_total_seconds=$(( TARGET_HOUR * 3600 ))  # Utilise la variable
 
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
-          echo "⏱️ Difference: $diff_seconds seconds avant 6:00 UTC"
+          echo "⏱️ Difference: $diff_seconds seconds avant ${TARGET_HOUR}:00 UTC"
 
           # Timing logic
           if [ $diff_seconds -gt 600 ]; then
@@ -162,7 +172,7 @@ jobs:
             exit 0
 
           else
-            echo "✅ Moins de 10 minutes avant 6:00 UTC"
+            echo "✅ Moins de 10 minutes avant ${TARGET_HOUR}:00 UTC"
             echo "📦 Le conteneur sera démarré"
             echo "⏰ L'attente finale se fera DANS le conteneur"
             echo "should_continue=true" >> $GITHUB_OUTPUT
@@ -196,7 +206,11 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
-            # ⏰ ATTENTE JUSQU'À EXACTEMENT 6:00 UTC
+            # Récupérer l'heure cible
+            TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+            echo "🎯 Target time: ${TARGET_HOUR}:00 UTC"
+
+
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
 
              current_hour=$((10#$(date -u +%H)))
