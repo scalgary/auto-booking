@@ -2,7 +2,7 @@ name: WIP Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 6
-  ADVANCE_SECONDS : 2
+  ADVANCE_SECONDS : 1
 permissions:
   contents: write
   actions: read
@@ -131,6 +131,12 @@ jobs:
           echo "======================================"
           echo "🕐 Checking timing and tags"
           echo "======================================"
+          # Récupérer les paramètres
+          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+          ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
+          echo "⏰ Will start ${ADVANCE_SEC} seconds early"
+
           # POUR TEST MANUEL SEULEMENT
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "🧪 Manual run detected - skipping timing check"
@@ -213,28 +219,35 @@ jobs:
 
             echo "🎯 Target time: ${TARGET_HOUR}:00 UTC"
 
-
+            # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-
-             current_hour=$((10#$(date -u +%H)))
-             current_minute=$((10#$(date -u +%M)))
-             current_second=$((10#$(date -u +%S)))
-             current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-             target_total_seconds=$(( 6 * 3600 ))
-             diff_seconds=$(( target_total_seconds - current_total_seconds ))
-             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
-
-            
-             if [ $diff_seconds -gt 0 ]; then
-               echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
-               sleep $diff_seconds
-               echo "✅ ${TARGET_HOUR}:00:00 UTC atteint!"
-             else
-               echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
-             fi
+              current_hour=$((10#$(date -u +%H)))
+              current_minute=$((10#$(date -u +%M)))
+              current_second=$((10#$(date -u +%S)))
+              current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+              
+              # Calcul avec l'avance
+              target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
+              diff_seconds=$(( target_total_seconds - current_total_seconds ))
+              
+              echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+              
+              if [ $diff_seconds -gt 0 ]; then
+                echo "⏰ Attente de $diff_seconds secondes..."
+                echo "   Réveil prévu à: ${TARGET_HOUR}:00:00 UTC moins ${ADVANCE_SEC} secondes"
+                sleep $diff_seconds
+                
+                # Afficher l'heure exacte du réveil
+                wake_time=$(date -u +"%H:%M:%S")
+                echo "✅ Réveil à: $wake_time UTC"
+                echo "   (${ADVANCE_SEC} secondes avant ${TARGET_HOUR}:00:00)"
+              else
+                echo "⚠️ Déjà après l'heure cible (par $((-diff_seconds)) secondes)"
+              fi
             else
-             echo "Manual : pas attente"
+              echo "Manual : pas attente"
             fi
+
             echo "📅 Date: ${{ steps.params.outputs.date }}"
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
