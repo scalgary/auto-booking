@@ -197,6 +197,7 @@ jobs:
       - name: Register
         id: registration
         if: steps.check.outputs.should_continue == 'true'
+        shell: bash
         env:
           TARGET_DATE: ${{ steps.params.outputs.date }}
           TARGET_TIME: ${{ steps.params.outputs.time }}
