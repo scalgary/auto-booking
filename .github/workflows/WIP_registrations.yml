@@ -296,7 +296,7 @@ jobs:
                         if [ $FINAL_CODE -eq 0 ]; then
               echo "🚀 Running script2.py..."
               python3 reminder.py
-              python3 add_booking_in_calenedar.py
+              python3 add_booking_in_calendar.py
 
             else
               echo "⏭️ Skipping reminder.py (execution.py failed)"
