@@ -43,6 +43,8 @@ print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
 print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
 print(f"website_appointment: {'✅ DÉFINI' if website_appointment else '❌ MISSING'}")
 print(f"logon_url: {'✅ DÉFINI' if logon_url else '❌ MISSING'}")
+print(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING'}")
+print(email_password)
 
 print()
 
