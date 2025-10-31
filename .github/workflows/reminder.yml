@@ -25,7 +25,19 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
-
+      # ==========================================
+      # STEP 2: Debug Secret (ENLEVER APRÈS TEST)
+      # ==========================================
+      - name: Debug EMAIL_TO (REMOVE AFTER TEST)
+        run: |
+          echo "======================================"
+          echo "🔍 Checking EMAIL_TO secret"
+          echo "======================================"
+          echo "EMAIL_TO exists: ${{ secrets.EMAIL_TO != '' && 'Yes' || 'No' }}"
+          echo "EMAIL_TO length: ${#EMAIL_TO}"
+          echo "EMAIL_TO value: $EMAIL_TO"
+        env:
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
       # STEP 3: Registration attempt
       # ==========================================
       - name: Reminder
@@ -49,8 +61,8 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Reminder"
             echo "======================================"
-            echo "Full value (UNSAFE): $EMAIL_PASSWORD"
 
             python3 reminder.py
           push: never
+        
 
