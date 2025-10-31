@@ -49,6 +49,7 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Reminder"
             echo "======================================"
+            echo "Full value (UNSAFE): $EMAIL_PASSWORD"
 
             python3 reminder.py
           push: never
