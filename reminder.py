@@ -44,18 +44,7 @@ print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
 print(f"website_appointment: {'✅ DÉFINI' if website_appointment else '❌ MISSING'}")
 print(f"logon_url: {'✅ DÉFINI' if logon_url else '❌ MISSING'}")
 print(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING'}")
-print(email_to)
-print(f"EMAIL_TO: {' '.join(email_password)}")
-print("EMAIL_TO:", end=" ")
-for char in email_password:
-    print(char, end="|")
-print()  # Nouvelle ligne
-for char in email_from:
-    print(char, end="|")
-print()  # Nouvelle ligne
-for char in email_to:
-    print(char, end="|")
-print()  # Nouvelle ligne
+
 print()
 
 
