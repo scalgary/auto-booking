@@ -9,7 +9,7 @@ on:
   schedule:
     #- cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
     #- cron: '50 5 * * *' # 23:55 Calgary
-    - cron: '0 6 * * *' # 00:00 Calgary
+    - cron: '0 7 * * *' # 00:00 Calgary MST
 
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
@@ -142,7 +142,7 @@ jobs:
           
           # Calculate time in seconds
           current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-          target_total_seconds=$(( 6 * 3600 )) # 6:00:00 UTC = midnight Calgary
+          target_total_seconds=$(( 7 * 3600 )) # 7:00:00 UTC = midnight Calgary
 
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
           echo "⏱️ Difference: $diff_seconds seconds avant 6:00 UTC"
@@ -155,7 +155,7 @@ jobs:
             exit 0
 
           else
-            echo "✅ Moins de 10 minutes avant 6:00 UTC"
+            echo "✅ Moins de 10 minutes avant 7:00 UTC"
             echo "📦 Le conteneur sera démarré"
             echo "⏰ L'attente finale se fera DANS le conteneur"
             echo "should_continue=true" >> $GITHUB_OUTPUT
@@ -192,14 +192,14 @@ jobs:
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
-            # ⏰ ATTENTE JUSQU'À EXACTEMENT 6:00 UTC
+            # ⏰ ATTENTE JUSQU'À EXACTEMENT 7:00 UTC
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
 
              current_hour=$((10#$(date -u +%H)))
              current_minute=$((10#$(date -u +%M)))
              current_second=$((10#$(date -u +%S)))
              current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-             target_total_seconds=$(( 6 * 3600 ))
+             target_total_seconds=$(( 7 * 3600 ))
              diff_seconds=$(( target_total_seconds - current_total_seconds ))
              echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
 
@@ -207,9 +207,9 @@ jobs:
              if [ $diff_seconds -gt 0 ]; then
                echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
                sleep $diff_seconds
-               echo "✅ 6:00:00 UTC atteint!"
+               echo "✅ 7:00:00 UTC atteint!"
              else
-               echo "⚠️ Déjà après 6:00 UTC (par $((-diff_seconds)) secondes)"
+               echo "⚠️ Déjà après 7:00 UTC (par $((-diff_seconds)) secondes)"
              fi
             else
              echo "Manual : pas attente"
