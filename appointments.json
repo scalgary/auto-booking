@@ -1,9 +1,5 @@
 [
   {
-    "date": "Thu\n30\nOct",
-    "time": "4:15 PM -\n6:15 PM"
-  },
-  {
     "date": "Fri\n31\nOct",
     "time": "2:45 PM -\n4:15 PM"
   },
@@ -22,5 +18,9 @@
   {
     "date": "Wed\n05\nNov",
     "time": "2:30 PM -\n4:30 PM"
+  },
+  {
+    "date": "Fri\n07\nNov",
+    "time": "2:45 PM -\n4:15 PM"
   }
 ]

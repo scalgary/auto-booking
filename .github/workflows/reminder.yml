@@ -25,6 +25,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
+      # ==========================================
 
       # STEP 3: Registration attempt
       # ==========================================
@@ -52,4 +53,5 @@ jobs:
 
             python3 reminder.py
           push: never
+        
 

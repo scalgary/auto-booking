@@ -42,6 +42,13 @@ smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
 smtp_port = int(os.environ.get('SMTP_PORT', '587'))
 
 
+print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
+print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
+print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
+print(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
+print(f"website_appointment: {'✅ DÉFINI' if website_appointment else '❌ MISSING'}")
+print(f"logon_url: {'✅ DÉFINI' if logon_url else '❌ MISSING'}")
+print(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING'}")
 
 # Configure logger
 def setup_logger(debug_mode=False):
