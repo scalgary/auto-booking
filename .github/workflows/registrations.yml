@@ -1,15 +1,23 @@
-name: Registration Pickleball with json
+name: WIP Registration Pickleball with json
 
+env:
+  TARGET_UTC_HOUR : 7
+  ADVANCE_SECONDS : 0
+  MAX_WAIT_SECONDS: 600     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
   actions: read
 
 
+
 on:
   schedule:
-    #- cron: '40 5 * * *' # 23:45  Sunday is 0 Saturday 6
-    #- cron: '50 5 * * *' # 23:55 Calgary
-    - cron: '0 7 * * *' # 00:00 Calgary MST
+    - cron: '42 6 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '52 6 * * *' # 23:55 Calgary
+    - cron: '0 7 * * *' # 00:00 Calgary
+  #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
+  #  - cron: '50 13 * * *' # 23:55 Calgary
+  #  - cron: '0 14 * * *' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
@@ -29,6 +37,10 @@ on:
 jobs:
   register:
     runs-on: ubuntu-latest
+    # Utilise ton image Docker personnalisée
+    container:
+      image: scalgary/selenium-env:latest
+      options: --workdir ${{ github.workspace }}
     steps:
       # ==========================================
       # STEP 1: Checkout code and fetch tags
@@ -37,10 +49,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Load registration from JSON
         id: params
+        shell: bash
+
         run: |
          echo "======================================"
          echo "📖 Loading registration from JSON"
@@ -97,7 +111,10 @@ jobs:
       - name: Git setup and fetch tags
         if: steps.params.outputs.should_continue == 'true'
         run: |
+          pwd
+          ls -la
           echo "🔧 Configuring Git..."
+          git config --global --add safe.directory $GITHUB_WORKSPACE
           git config user.name "bot"
           git config user.email "bot@github.com"
           echo "🏷️ Fetching tags from remote..."
@@ -109,11 +126,20 @@ jobs:
       # ==========================================
       - name: Check tag & timing
         id: check
+        shell: bash
         if: steps.params.outputs.should_continue == 'true'
         run: |
           echo "======================================"
           echo "🕐 Checking timing and tags"
           echo "======================================"
+          # Récupérer les paramètres
+          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+          ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+          MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
+
+          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
+          echo "⏰ Will start ${ADVANCE_SEC} seconds early"
+
           # POUR TEST MANUEL SEULEMENT
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "🧪 Manual run detected - skipping timing check"
@@ -138,24 +164,25 @@ jobs:
           current_hour=$((10#$(date -u +%H)))
           current_minute=$((10#$(date -u +%M)))
           current_second=$((10#$(date -u +%S)))
+          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+
           echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
           
-          # Calculate time in seconds
-          current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-          target_total_seconds=$(( 7 * 3600 )) # 7:00:00 UTC = midnight Calgary
-
+          # Calcul avec l'avance
+          target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
-          echo "⏱️ Difference: $diff_seconds seconds avant 6:00 UTC"
+          diff_minutes=$(( diff_seconds / 60 ))
+          echo "⏱️ Difference: $diff_seconds seconds ($diff_minutes minutes) avant l'heure cible"
 
           # Timing logic
-          if [ $diff_seconds -gt 600 ]; then
+          if [ $diff_seconds -gt $MAX_WAIT ]; then
             echo "❌ Too early: $diff_seconds seconds remaining (> 10 minutes)"
             echo "🛑 Stopping workflow"
             echo "should_continue=false" >> $GITHUB_OUTPUT
             exit 0
 
           else
-            echo "✅ Moins de 10 minutes avant 7:00 UTC"
+            echo "✅ Within acceptable wait time (< $MAX_WAIT seconds)"
             echo "📦 Le conteneur sera démarré"
             echo "⏰ L'attente finale se fera DANS le conteneur"
             echo "should_continue=true" >> $GITHUB_OUTPUT
@@ -170,12 +197,11 @@ jobs:
       - name: Register
         id: registration
         if: steps.check.outputs.should_continue == 'true'
-        uses: devcontainers/ci@v0.3
+        shell: bash
         env:
           TARGET_DATE: ${{ steps.params.outputs.date }}
           TARGET_TIME: ${{ steps.params.outputs.time }}
           TARGET_DAY: ${{ steps.params.outputs.day }}
-
           YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
           YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
           YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
@@ -187,33 +213,55 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
-        with:
-          runCmd: |
+        run: |
             echo "======================================"
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
-            # ⏰ ATTENTE JUSQU'À EXACTEMENT 7:00 UTC
+            # Récupérer l'heure cible
+            TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+            ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+            MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
+
+
+            echo "📋 Configuration:"
+            echo "   🎯 Target: ${TARGET_HOUR}:00:00 UTC"
+            echo "   ⏰ Advance: ${ADVANCE_SEC} seconds"
+            echo "   ⏳ Max wait: ${MAX_WAIT} seconds"
+
+            # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-
-             current_hour=$((10#$(date -u +%H)))
-             current_minute=$((10#$(date -u +%M)))
-             current_second=$((10#$(date -u +%S)))
-             current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-             target_total_seconds=$(( 7 * 3600 ))
-             diff_seconds=$(( target_total_seconds - current_total_seconds ))
-             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
-
-            
-             if [ $diff_seconds -gt 0 ]; then
-               echo "⏰ Attente de $diff_seconds secondes jusqu'à 6:00:00 UTC exactement..."
-               sleep $diff_seconds
-               echo "✅ 7:00:00 UTC atteint!"
-             else
-               echo "⚠️ Déjà après 7:00 UTC (par $((-diff_seconds)) secondes)"
-             fi
+              current_hour=$((10#$(date -u +%H)))
+              current_minute=$((10#$(date -u +%M)))
+              current_second=$((10#$(date -u +%S)))
+              current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
+              
+              # Calcul avec l'avance
+              target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
+              diff_seconds=$(( target_total_seconds - current_total_seconds ))
+              
+              echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
+              if [ $diff_seconds -gt 0 ]; then
+                echo "⏰ Waiting $diff_seconds seconds..."
+                
+                # Calcul de l'heure de réveil prévue
+                wake_hour=$(( (target_total_seconds / 3600) % 24 ))
+                wake_minute=$(( (target_total_seconds % 3600) / 60 ))
+                wake_second=$(( target_total_seconds % 60 ))
+                printf "   Wake up scheduled at: %02d:%02d:%02d UTC\n" $wake_hour $wake_minute $wake_second
+                
+                sleep $diff_seconds
+                
+                # Afficher l'heure exacte du réveil
+                actual_time=$(date -u +"%H:%M:%S")
+                echo "✅ Woke up at: $actual_time UTC"
+                echo "   (${ADVANCE_SEC} seconds before ${TARGET_HOUR}:00:00)"
+              else
+                echo "⚠️ Already past target time (by $((-diff_seconds)) seconds)"
+              fi
             else
-             echo "Manual : pas attente"
+              echo "🧪 Manual run: skipping wait"
             fi
+
             echo "📅 Date: ${{ steps.params.outputs.date }}"
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
@@ -245,7 +293,7 @@ jobs:
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
-            if [ $FINAL_CODE -eq 0 ]; then
+                        if [ $FINAL_CODE -eq 0 ]; then
               echo "🚀 Running script2.py..."
               python3 reminder.py
 
@@ -254,7 +302,6 @@ jobs:
             fi
 
             exit 0
-          push: never
 
       # ==========================================
       # STEP 4: Create success tag
