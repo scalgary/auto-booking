@@ -21,4 +21,11 @@ docker logs jupyter-selenium
 #docker rm jupyter-selenium
 
 
-#http://localhost:8888
+# http://localhost:8888
+# docker-compose down && docker-compose up -d
+# # Sur ton Mac (pas dans le container)
+
+# Dans le container
+# docker exec jupyter-selenium jupyter kernelspec list
+# # Réinstalle UN SEUL kernel propre
+# docker exec auto-booking-selenium-jupyter-1 python -m ipykernel install --name=selenium --display-name="Selenium Python"
