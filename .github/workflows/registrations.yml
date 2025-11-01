@@ -1,4 +1,4 @@
-name: WIP Registration Pickleball with json
+name: Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 7
