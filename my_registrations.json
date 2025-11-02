@@ -31,6 +31,13 @@
     "day": "Friday",
     "level": "Advanced"
 
+  },
+    {
+    "date": "10-Nov-25",
+    "time": "4:30",
+    "day": "Monday",
+    "level": "Intermediate"
+
   }
   
 ]

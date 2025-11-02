@@ -78,7 +78,7 @@ jobs:
            # Chercher la registration pour aujourd'hui (AJOUTE level)
            registration=$(jq -r --arg day "$current_day" \
            '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
-           registrations.json | head -1)
+           his_registrations.json | head -1)
 
 
            # Vérifier si une registration existe
@@ -320,7 +320,7 @@ jobs:
           tag="bot_success_${target_date}"
 
           echo "📝 Tag to create: $tag"
-          git add appointments.json
+          git add all_appointments.json
           git commit --allow-empty -m "✅ $tag"
           #git commit -m "✅ $tag"
           git tag "$tag"

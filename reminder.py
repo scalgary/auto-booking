@@ -233,7 +233,7 @@ class SecureWebLogin:
                     "name": cells[4].text,
                 })
 
-        with open('appointments.json', 'w', encoding='utf-8') as f:
+        with open('all_appointments.json', 'w', encoding='utf-8') as f:
             json.dump(appointments, f, indent=2)
 
         logger.info(f"✓ {len(appointments)} appointments saved!")
@@ -262,7 +262,7 @@ secure_login.login()  # ✅ D'abord se connecter
 secure_login.save_appointments_json()
 secure_login.quit()
 
-def load_appointments(filename='appointments.json'):
+def load_appointments(filename='all_appointments.json'):
     """Load appointments from JSON file"""
     try:
         with open(filename, 'r', encoding='utf-8') as f:
