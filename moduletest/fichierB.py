@@ -1,6 +1,6 @@
 # module/fichierB.py
 
-from module.fichierA import Animal
+from moduletest.fichierA import Animal
 
 class Dog(Animal):
     def parler(self):

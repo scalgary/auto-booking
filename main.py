@@ -1,7 +1,7 @@
 # main.py
 
-from module.fichierA import Animal
-from module.fichierB import Dog
+from moduletest.fichierA import Animal
+from moduletest.fichierB import Dog
 
 def main():
     # Exemple avec Animal
