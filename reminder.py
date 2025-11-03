@@ -133,6 +133,7 @@ else:
     logger.debug("Poursuite de l'exécution...")
 
 
+
 class SecureWebLogin:
     """Classe pour gérer le login sécurisé avec driver comme objet"""
     
@@ -275,7 +276,77 @@ class SecureWebLogin:
 
         logger.info(f"✓ {len(appointments)} appointments saved!")
 
+    def delete_appointment(self, date_cancellation=None, time_cancellation=None, name_cancellation=None, type_cancellation=None):
+        """Delete a specific appointment by matching criteria"""
+        self.go_appointment()
+        wait = WebDriverWait(self.driver, time_sleep)
+    
+        try:
+            # Wait for table rows to be visible
+            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "tbody tr.align-middle")))
+            rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody tr.align-middle")
+            
+            match = False
+            matching_row = None
+        
+            # Find matching row
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if len(cells) >= 5:
+                    row_date = cells[0].text
+                    row_time = cells[1].text
+                    row_name = cells[4].text
+                    row_type = self.transform_text(cells[3].text)
+                
+                    # Check if this row matches the criteria
+                    match = True
+                    if date_cancellation and date_cancellation != row_date:
+                        match = False
+                    if time_cancellation and time_cancellation != row_time:
+                        match = False
+                    if name_cancellation and name_cancellation not in row_name:
+                        match = False
+                    if type_cancellation and type_cancellation != row_type:
+                        match = False
+                    
+                    if match:
+                        matching_row = row
+                        break
+        
+            # Process cancellation if match found
+            if match and matching_row:
+                logger.info(f"🎯 Found matching appointment: {row_date}")
+                
+                # Click cancel link
+                cancel_link = matching_row.find_element(By.CSS_SELECTOR, "a.btn-danger[title='Cancel']")
+                cancel_link.click()
+                logger.info("📋 Cancel confirmation page opened")
+            
+                # Click process cancellation
+                process_button = wait.until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@type='submit' and contains(text(), 'Process Cancellation')]")
+                ))
+                process_button.click()
+                logger.info(f"✅ Appointment deleted: {row_date} {row_time} - {row_name}")
+                return True
+            else:
+                logger.warning("❌ No matching appointment found")
+                return False
+            
+        except TimeoutException:
+            logger.error("❌ Timeout during deletion process")
+            return False
+        except Exception as e:
+            logger.error(f"❌ Error during deletion: {e}")
+            return False
 
+    def delete_appointment_exact(self, date_exact, time_exact, name_exact):
+        """Delete appointment with exact text matching (including newlines)"""
+        return self.delete_appointment(
+            date_cancellation=date_exact,
+            time_cancellation=time_exact, 
+            name_cancellation=name_exact
+        )
     def get_driver(self):
         """Retourne le driver pour utilisation externe"""
         return self.driver
@@ -287,6 +358,7 @@ class SecureWebLogin:
             logger.info("🔒 Driver fermé")
     
     
+  
 
 # Usage:
 # secure_login = SecureWebLogin("https://site.com", "email@test.com", "password123")
