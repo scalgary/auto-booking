@@ -1,7 +1,7 @@
 name: Bot Pickleball with json
 
 env:
-  TARGET_UTC_HOUR : 7
+  TARGET_UTC_HOUR : 15
   ADVANCE_SECONDS : 0
   MAX_WAIT_SECONDS: 600     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
@@ -12,9 +12,9 @@ permissions:
 
 on:
   schedule:
-    - cron: '42 6 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '52 6 * * *' # 23:55 Calgary
-    - cron: '0 7 * * *' # 00:00 Calgary
+    - cron: '42 14 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '52 14 * * *' # 23:55 Calgary
+    - cron: '0 15 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
   #  - cron: '0 14 * * *' # 00:00 Calgary
@@ -216,6 +216,10 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          CALDAV_PASSWORD: = ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_USER: = ${{ secrets.CALDAV_USER }}
+
+
 
         run: |
             echo "======================================"

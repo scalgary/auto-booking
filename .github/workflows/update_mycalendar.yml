@@ -1,0 +1,83 @@
+name: Update my calendar with Pickleball booking
+
+
+permissions:
+  contents: write
+  actions: read
+
+
+
+on:
+  workflow_dispatch:  # Ajoutez cette ligne
+
+
+
+#limitation expect registration to begin a 6 UTC"
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    # Utilise ton image Docker personnalisée
+    container:
+      image: scalgary/selenium-env:latest
+      options: --workdir ${{ github.workspace }}
+    steps:
+      # ==========================================
+      # STEP 1: Checkout code and fetch tags
+      # ==========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+
+      # ==========================================
+      # STEP 3: Registration attempt
+      # ==========================================
+      - name: Register
+        id: registration
+        shell: bash
+        env:
+          YOUR_SECRET_EMAIL: ${{ secrets.YOUR_SECRET_EMAIL }}
+          YOUR_SECRET_PASSWORD: ${{ secrets.YOUR_SECRET_PASSWORD }}
+          YOUR_SECRET_LOGON_URL: ${{ secrets.YOUR_SECRET_LOGON_URL }}
+          YOUR_SECRET_PLANNING_URL: ${{ secrets.YOUR_SECRET_PLANNING_URL }}
+          YOUR_SECRET_LOGIN_URL: ${{ secrets.YOUR_SECRET_LOGIN_URL }}
+          YOUR_SECRET_MY_NAME: ${{ secrets.YOUR_SECRET_MY_NAME }}
+          YOUR_SECRET_HIS_NAME: ${{ secrets.YOUR_SECRET_HIS_NAME }}
+          YOUR_SECRET_APPOINTMENT: ${{ secrets.YOUR_SECRET_APPOINTMENT }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          CALDAV_PASSWORD: = ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_USER: = ${{ secrets.CALDAV_USER }}
+
+
+
+        run: |
+            echo "======================================"
+            echo "🎾 Pickleball Registration Attempt"
+            echo "======================================"
+            python3 reminder.py
+
+
+
+        if: steps.check.outputs.should_continue == 'true' && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
+        run: |
+          echo "======================================"
+          echo "🏷️ Creating success tag"
+          echo "======================================"
+          target_date="${{ steps.params.outputs.date }}"
+          tag="bot_success_${target_date}"
+
+          echo "📝 Tag to create: $tag"
+          git add all_appointments.json
+          git commit --allow-empty -m "✅ $tag"
+          #git commit -m "✅ $tag"
+          git tag "$tag"
+          
+          echo "📤 Pushing tag to remote..."
+          git push origin HEAD "$tag"
+          echo "✅ Tag pushed successfully!"
+          echo "======================================"
