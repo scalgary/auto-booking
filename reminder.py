@@ -13,13 +13,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta
 import json
 import logging
 import os
@@ -102,6 +101,7 @@ logger.info(f"email_to: {'✅ DÉFINI' if email_to else '❌ MISSING'}")
 logger.info(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING'}")
 logger.info(f"CALDAV_USER: {'✅ DÉFINI' if CALDAV_USER else '❌ MISSING'}")
 logger.info(f"CALDAV_PASSWORD: {'✅ DÉFINI' if CALDAV_PASSWORD else '❌ MISSING'}")
+
 
 
 # Vérification complète
@@ -232,9 +232,24 @@ class SecureWebLogin:
 
         return self.driver
     
+    @staticmethod
+    def transform_text(s):
+        import re
+        # Si "Pickleball" est présent
+        if "Pickleball" in s:
+            match = re.search(r"(Pickleball)\s+(\w+)", s)
+            if match:
+                return " ".join(match.groups())
+            else:
+                return "Pickleball"
+        else:
+        # Retirer tout texte entre parenthèses
+            return re.sub(r"\s*\([^)]*\)", "", s).strip()
+
     def save_appointments_json(self):
         self.go_appointment()
         wait = WebDriverWait(self.driver, time_sleep)
+
 
         try:
             # 🕐 Attendre que le tableau soit visible
@@ -252,6 +267,7 @@ class SecureWebLogin:
                     "date": cells[0].text,
                     "time": cells[1].text,
                     "name": cells[4].text,
+                    "type": SecureWebLogin.transform_text(cells[3].text)
                 })
 
         with open('all_appointments.json', 'w', encoding='utf-8') as f:
@@ -278,10 +294,9 @@ class SecureWebLogin:
 # 
 # Utiliser le driver dans d'autres fonctions:
 # driver = secure_login.driver
-secure_login = SecureWebLogin(logon_url, email, password)
-secure_login.login()  # ✅ D'abord se connecter
-secure_login.save_appointments_json()
-secure_login.quit()
+
+
+
 
 def load_appointments(filename='all_appointments.json'):
     """Load appointments from JSON file"""
@@ -359,6 +374,7 @@ def send_all_appointments_email(appointments):
         logger.error(f"❌ Failed to send email: {e}")
         return False
 
+
 class PickleballCalendarManager:
     def __init__(self, calendar_name=CALENDAR_NAME):
         if not CALDAV_USER or not CALDAV_PASSWORD:
@@ -375,7 +391,7 @@ class PickleballCalendarManager:
         )
         return client.principal().calendar(name=self.calendar_name)
     
-    def find_events(self, start_date=None, days_ahead=7, search_terms=SEARCH_TERMS):
+    def find_events(self, start_date=None, days_ahead=8, search_terms=SEARCH_TERMS):
         """Trouve les événements avec les emojis recherchés"""
         if start_date is None:
             start_date = datetime.now() + timedelta(days=1)
@@ -440,7 +456,7 @@ class PickleballCalendarManager:
         
         logger.info(f"➕ Créé {created}/{len(events)} événements")
     
-    def parse_appointments_json(self, filepath="appointments.json"):
+    def parse_appointments_json(self, filepath="all_appointments.json"):
         # Mapping des mois
         MONTH_MAP = {
         'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
@@ -469,6 +485,7 @@ class PickleballCalendarManager:
                 day = int(date_parts[1])
                 month = MONTH_MAP[date_parts[2]]
                 name = apt['name']
+                type_app =apt['type']
                 
                 # Année: actuelle si mois >= actuel, sinon suivante
                 year = current_year if month >= current_month else current_year + 1
@@ -489,7 +506,7 @@ class PickleballCalendarManager:
                     events.append({
                         'start': start,
                         'end': end,
-                        'summary': f'🏓 Registration {name}'
+                        'summary': f"{'🏓 ' if 'Pickleball' in type_app else '🎾 '}{type_app} {name}"
                     })
                     
             except Exception as e:
@@ -536,10 +553,14 @@ def update_calendar():
         logger.error(f"❌ Erreur: {e}")
         raise
 
+
 secure_login = SecureWebLogin(logon_url, email, password)
 secure_login.login()  # ✅ D'abord se connecter
 secure_login.save_appointments_json()
 secure_login.quit()
+
+
 send_all_appointments_email(load_appointments())
+
+
 update_calendar()
-send_all_appointments_email(load_appointments())

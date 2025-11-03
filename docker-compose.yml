@@ -1,0 +1,14 @@
+services:
+  selenium-jupyter:
+    container_name: my-selenium-jupyter  # Add this line
+    image: scalgary/selenium-env:latest
+    platform: linux/amd64
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    ports:
+      - "8888:8888"
+    env_file: .env
+    command: >
+      bash -c "pip install --root-user-action=ignore jupyter ipykernel &&
+      jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''"

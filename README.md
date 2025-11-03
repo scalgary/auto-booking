@@ -27,6 +27,7 @@ Python Learning:
       lighter image 
 -- Development
       use image plus other packages in a container either on codespace or on local
+      use docker-compose
 
 -- Workflows:
    docker-build.yml manual for building image for production

@@ -1,2 +1,4 @@
-needs to use classes
+#module test -> know how to use module
+# objectif 1
+# set up class
 
