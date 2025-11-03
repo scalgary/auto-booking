@@ -62,22 +62,3 @@ jobs:
             python3 reminder.py
 
 
-
-        if: steps.check.outputs.should_continue == 'true' && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
-        run: |
-          echo "======================================"
-          echo "🏷️ Creating success tag"
-          echo "======================================"
-          target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
-
-          echo "📝 Tag to create: $tag"
-          git add all_appointments.json
-          git commit --allow-empty -m "✅ $tag"
-          #git commit -m "✅ $tag"
-          git tag "$tag"
-          
-          echo "📤 Pushing tag to remote..."
-          git push origin HEAD "$tag"
-          echo "✅ Tag pushed successfully!"
-          echo "======================================"
