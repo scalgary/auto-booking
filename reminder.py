@@ -101,7 +101,6 @@ logger.info(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING
 logger.info(f"CALDAV_USER: {'✅ DÉFINI' if CALDAV_USER else '❌ MISSING'}")
 logger.info(f"CALDAV_PASSWORD: {'✅ DÉFINI' if CALDAV_PASSWORD else '❌ MISSING'}")
 
-CALDAV_PASSWORD="zvtj-atek-ghnc-eyyj"
 
 # Vérification complète
 secrets_dict = {
