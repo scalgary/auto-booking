@@ -30,12 +30,14 @@ import sys
 
 import sys
 
+
+
 # Configuration simple
 CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
 CALDAV_URL = 'https://caldav.icloud.com'
 CALENDAR_NAME = "Family"
-SEARCH_TERMS = ['🏓', '🏋️']
+SEARCH_TERMS = ['🏓', '🏋️', '🔥']
 
 
 
@@ -461,7 +463,7 @@ class PickleballCalendarManager:
         )
         return client.principal().calendar(name=self.calendar_name)
     
-    def find_events(self, start_date=None, days_ahead=8, search_terms=SEARCH_TERMS):
+    def find_events(self, start_date=None, days_ahead=16, search_terms=SEARCH_TERMS):
         """Trouve les événements avec les emojis recherchés"""
         if start_date is None:
             start_date = datetime.now() + timedelta(days=1)
@@ -576,7 +578,7 @@ class PickleballCalendarManager:
                     events.append({
                         'start': start,
                         'end': end,
-                        'summary': f"{'🏓 ' if 'Pickleball' in type_app else '🏋️ '}{type_app} {name}"
+                        'summary': f"{'🏓 ' if 'Pickleball' in type_app else '🔥 '} {type_app} {name}"
                     })
                     
             except Exception as e:
@@ -623,14 +625,13 @@ def update_calendar():
         logger.error(f"❌ Erreur: {e}")
         raise
 
+if len(sys.argv) > 1 and sys.argv[1].lower() == 'local':
+    update_calendar()
 
-secure_login = SecureWebLogin(logon_url, email, password)
-secure_login.login()  # ✅ D'abord se connecter
-secure_login.save_appointments_json()
-secure_login.quit()
+else:
+    secure_login = SecureWebLogin(logon_url, email, password)
+    secure_login.login()  # ✅ D'abord se connecter
+    secure_login.save_appointments_json()
+    secure_login.quit()
+    send_all_appointments_email(load_appointments())
 
-
-send_all_appointments_email(load_appointments())
-
-
-update_calendar()
