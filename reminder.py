@@ -30,6 +30,9 @@ import sys
 
 import sys
 
+LOCAL_RUN_DEFAULT = False
+LOCAL_RUN = sys.argv[1] if len(sys.argv) > 1 else LOCAL_RUN_DEFAULT
+
 # Configuration simple
 CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
@@ -629,8 +632,7 @@ secure_login.login()  # ✅ D'abord se connecter
 secure_login.save_appointments_json()
 secure_login.quit()
 
+#send_all_appointments_email(load_appointments())
 
-send_all_appointments_email(load_appointments())
-
-
-update_calendar()
+if LOCAL_RUN:
+    update_calendar()
