@@ -1,0 +1,104 @@
+name: Cancellation Pickleball with json
+
+env:
+  TARGET_UTC_HOUR : 5
+permissions:
+  contents: write
+  actions: read
+
+
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # 00:00 Calgary
+
+
+  workflow_dispatch:  # Ajoutez cette ligne
+    inputs:
+      date:
+        description: "Sun\n09\nNov"
+        required: true
+      time:
+        description: "9:00 AM -\n11:00 AM"
+        required: true
+      day:
+        description: 'Day'
+        required: true
+      name:
+        description: 'Sonia Lior'
+        required: true
+
+
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    # Utilise ton image Docker personnalisée
+    container:
+      image: scalgary/selenium-env:latest
+      options: --workdir ${{ github.workspace }}
+    steps:
+      # ==========================================
+      # STEP 1: Checkout code and fetch tags
+      # ==========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Load cancellation from JSON
+        id: params
+        shell: bash
+
+        run: |
+         echo "======================================"
+         echo "📖 Loading cancellation from JSON"
+         echo "======================================"
+         # Si manuel, utiliser les inputs
+         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+           echo "🔧 Manual trigger - using inputs"
+           date="${{ inputs.date }}"
+           time="${{ inputs.time }}"
+           name="${{ inputs.name }}"
+           day=$(date -d "$date" +%A)
+         else
+
+           # Récupérer le jour actuel
+           current_day=$(date -u +%A)
+           echo "📅 Current day (UTC): $current_day"
+    
+           # Chercher la cancellation pour aujourd'hui (AJOUTE level)
+           cancellation=$(jq -r --arg day "$current_day" \
+           '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.name)"' \
+           cancellation.json | head -1)
+
+
+           # Vérifier si une registration existe
+           if [ -z "$cancellation" ]; then
+            echo "❌ No cancellation found for $current_day"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+           fi
+
+    
+           # Split et afficher
+           IFS='|' read -r date time day name<<< "$cancellation"
+           echo "✅ Registration found:"
+           echo "   📅 Date: $date"
+           echo "   🕐 Time: $time"
+           echo "   📆 Day: $day"
+         fi
+
+    
+         # Exporter vers GITHUB_OUTPUT
+         echo "date=$date" >> $GITHUB_OUTPUT
+         echo "time=$time" >> $GITHUB_OUTPUT
+         echo "day=$day" >> $GITHUB_OUTPUT
+         echo "name=$name" >> $GITHUB_OUTPUT
+
+         echo "should_continue=true" >> $GITHUB_OUTPUT
+    
+         echo "======================================"
+
+    
