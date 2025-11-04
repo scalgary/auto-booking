@@ -35,7 +35,7 @@ CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
 CALDAV_URL = 'https://caldav.icloud.com'
 CALENDAR_NAME = "Family"
-SEARCH_TERMS = ['🏓', '🎾']
+SEARCH_TERMS = ['🏓', '🏋️']
 
 
 
@@ -409,7 +409,7 @@ def send_all_appointments_email(appointments):
         logger.info("no appointments")
     # Email subject
 
-    subject = f"🏓 Your Pickleball Appointments - {len(appointments)} total"
+    subject = f"Your Appointments - {len(appointments)} total"
     
     # Email body
     body = "Hello!\n\n"
@@ -578,7 +578,7 @@ class PickleballCalendarManager:
                     events.append({
                         'start': start,
                         'end': end,
-                        'summary': f"{'🏓 ' if 'Pickleball' in type_app else '🎾 '}{type_app} {name}"
+                        'summary': f"{'🏓 ' if 'Pickleball' in type_app else '🏋️ '}{type_app} {name}"
                     })
                     
             except Exception as e:
