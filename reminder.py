@@ -31,7 +31,6 @@ import sys
 import sys
 
 
-
 # Configuration simple
 CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
@@ -634,4 +633,5 @@ else:
     secure_login.save_appointments_json()
     secure_login.quit()
     send_all_appointments_email(load_appointments())
+
 
