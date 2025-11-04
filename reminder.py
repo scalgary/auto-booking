@@ -58,7 +58,6 @@ CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
 CALDAV_URL = 'https://caldav.icloud.com'
 CALENDAR_NAME = "Family"
-SEARCH_TERMS = ['🏓', '🎾']
 print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
 print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
 print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
@@ -102,7 +101,7 @@ logger.info(f"email_password: {'✅ DÉFINI' if email_password else '❌ MISSING
 logger.info(f"CALDAV_USER: {'✅ DÉFINI' if CALDAV_USER else '❌ MISSING'}")
 logger.info(f"CALDAV_PASSWORD: {'✅ DÉFINI' if CALDAV_PASSWORD else '❌ MISSING'}")
 
-
+CALDAV_PASSWORD="zvtj-atek-ghnc-eyyj"
 
 # Vérification complète
 secrets_dict = {
