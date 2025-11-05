@@ -397,8 +397,8 @@ class TennisBookingBot:
             return False
         
         if not slot['available']:
-            logger.error("❌ Créneau complet")
-            return False
+            logger.info("❌ Créneau complet")
+            return True
         
         # 5. Réserver le créneau
         if not self._click_book_slot(slot):
