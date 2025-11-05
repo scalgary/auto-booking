@@ -1,39 +1,39 @@
 [
   {
-    "date": "11-Nov-25",
-    "time": "8:30",
+    "date": "18-Nov-25",
+    "time": "4:15",
     "day": "Tuesday",
-    "level": "Intermediate"
+    "level": "Advanced"
   },
   {
-    "date": "12-Nov-25",
+    "date": "19-Nov-25",
     "time": "4:30",
     "day": "Wednesday",
-    "level": "Intermediate"
+    "level": "Advanced"
   },
   {
-    "date": "08-Nov-25",
-    "time": "8:30",
+    "date": "15-Nov-25",
+    "time": "12:45",
     "day": "Saturday",
-    "level": "Intermediate"
+    "level": "Advanced"
 
   },
     {
-    "date": "09-Nov-25",
-    "time": "9:00",
+    "date": "16-Nov-25",
+    "time": "1:00",
     "day": "Sunday",
-    "level": "Intermediate"
+    "level": "Advanced"
 
   },
   {
-    "date": "07-Nov-25",
-    "time": "2:45",
+    "date": "14-Nov-25",
+    "time": "4:15",
     "day": "Friday",
     "level": "Advanced"
 
   },
   {
-    "date": "10-Nov-25",
+    "date": "17-Nov-25",
     "time": "4:30",
     "day": "Monday",
     "level": "Advanced"
