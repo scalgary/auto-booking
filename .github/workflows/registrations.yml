@@ -2,7 +2,7 @@ name: Registration Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 15
-  ADVANCE_SECONDS : 0
+  ADVANCE_SECONDS : 1
   MAX_WAIT_SECONDS: 600     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
