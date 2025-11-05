@@ -5,6 +5,7 @@ services:
     platform: linux/amd64
     volumes:
       - .:/workspace
+      - ./.gitconfig:/root/.gitconfig:ro
     working_dir: /workspace
     ports:
       - "8888:8888"

@@ -1,0 +1,2 @@
+[alias]
+  cj = !git add -u "*.json" && commit -m "update json files"
