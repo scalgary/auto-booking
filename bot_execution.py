@@ -13,26 +13,51 @@ from datetime import datetime, timedelta
 import sys
 
 
-# Configure logger
+
+
+# Configuration du logger
 def setup_logger(debug_mode=False):
-    level = logging.DEBUG if debug_mode else logging.INFO
+    """Configure le logger avec console + fichier"""
     
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(sys.stdout)  # Print to console
-        ]
+    # Nom du fichier log avec timestamp
+    log_filename = f"booking_bot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    
+    # Configuration
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    
+    # Supprimer les handlers existants
+    logger.handlers.clear()
+    
+    # Format des messages
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%H:%M:%S'
     )
-    return logging.getLogger(__name__)
+    
+    # Handler 1: Console
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # Handler 2: Fichier
+    file_handler = logging.FileHandler(log_filename, encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)  # Tout dans le fichier
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    logger.info(f"📝 Logs sauvegardés dans: {log_filename}")
+    
+    return logger
 
 
 # Initialize logger
-DEBUG = False  # Set to False in production
+DEBUG = True  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
 time_sleep=1
 
-
+##########
 
 email = os.getenv('YOUR_SECRET_EMAIL')
 password = os.getenv('YOUR_SECRET_PASSWORD')
@@ -82,7 +107,7 @@ else:
 class TennisBookingBot:
     """Bot de réservation de tennis/sport complet avec screenshots debug"""
     
-    def __init__(self, target_date, target_time, course_level, player_name, time_sleep=1, debug_mode=False):
+    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, debug_mode=False):
         # Paramètres de réservation
         self.target_date = target_date
         self.target_time = target_time
@@ -205,6 +230,9 @@ class TennisBookingBot:
     
     def _check_date_validity(self):
         """Vérifier si la date est valide pour réservation"""
+        if self.debug_mode:
+            logger.warning("🐛 DEBUG MODE: Skip date validation")
+            return True, True
         try:
             target_datetime = datetime.strptime(self.target_date, "%d-%b-%y")
             today = datetime.now()
@@ -306,7 +334,101 @@ class TennisBookingBot:
         logger.warning("❌ Aucun créneau trouvé")
         self._debug_screenshot("no_slot_found")
         return None
-    
+
+
+                
+
+   
+    def _find_and_wait_for_bookable_slot(self, max_refresh=8, timeout=3):
+        """Trouver le slot correspondant et attendre qu'il soit bookable"""
+        logger.info("🔍 Recherche du slot correspondant...")
+        
+        for refresh_count in range(max_refresh):
+            self._debug_screenshot(f"search_attempt_{refresh_count + 1}")
+            
+            # Chercher tous les boutons de cours
+            course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
+            logger.info(f"📋 {len(course_buttons)} slots trouvés (tentative {refresh_count + 1}/{max_refresh})")
+            
+            for i, button in enumerate(course_buttons):
+                # Extraire les données
+                class_name = button.get_attribute('data-class-name') or ''
+                class_date = button.get_attribute('data-class-date') or ''
+                class_time = button.get_attribute('data-class-time') or ''
+                class_spaces = button.get_attribute('data-class-spaces') or '0'
+                
+                # Vérifier correspondance
+                date_match = self.target_date in class_date
+                level_match = self.course_level in class_name
+                time_match = self.target_time in class_time.split("-")[0] or self.target_time.strip() in class_time.split("-")[0]
+                
+                if date_match and time_match and level_match:
+                    logger.info(f"✅ SLOT CORRESPONDANT TROUVÉ!")
+                    logger.info(f"  📛 {class_name}")
+                    logger.info(f"  📅 {class_date}")
+                    logger.info(f"  🕐 {class_time}")
+                    logger.info(f"  👥 Spaces: {class_spaces}")
+                    
+                    # Vérifier si le slot est bookable (Book Now présent)
+                    parent = button.find_element(By.XPATH, "./..")
+                    
+                    # Chercher le bouton Book/Book Now
+                    book_buttons = parent.find_elements(
+                        By.XPATH, 
+                        ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
+                    )
+                    
+                    # Chercher le bouton Unavailable
+                    unavailable_buttons = parent.find_elements(
+                        By.XPATH,
+                        ".//*[contains(text(), 'Unavailable')]"
+                    )
+
+                    # Si Book Now présent → PRÊT!
+                    if book_buttons and not unavailable_buttons[0].get_attribute('class').__contains__('disabled') if unavailable_buttons else True:
+                        spaces_available = int(class_spaces)
+                        logger.info(f"🎉 SLOT BOOKABLE! ({spaces_available} places)")
+                        self._debug_screenshot("slot_bookable_ready")
+                        return {
+                            'button': button,
+                            'available': spaces_available > 0,
+                            'spaces': spaces_available
+                        }
+                    
+                    # Si Unavailable → REFRESH et retry
+                    logger.warning(f"⚠️ Slot trouvé mais UNAVAILABLE - Refresh {refresh_count + 1}/{max_refresh}")
+                    self._debug_screenshot(f"slot_unavailable_{refresh_count + 1}")
+                    
+                    # Attendre avec WebDriverWait que Book Now apparaisse
+                    wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=0.2)
+                    try:
+                        # Refresh et attendre
+                        self.driver.refresh()
+                        time.sleep(self.time_sleep)
+                        
+                        # Attendre que Book Now apparaisse quelque part sur la page
+                        wait.until(EC.presence_of_element_located(
+                            (By.XPATH, "//*[contains(text(), 'Book Now') or contains(text(), 'Book')]")
+                        ))
+                        logger.info("✅ Book Now détecté après refresh!")
+                        
+                    except TimeoutException:
+                        logger.warning(f"⏱️ Timeout après refresh {refresh_count + 1}")
+                    
+                    # Reboucler pour re-chercher le slot
+                    break
+            
+            # Si on n'a pas trouvé le slot du tout
+            else:
+                logger.warning("❌ Slot non trouvé dans cette tentative")
+                if refresh_count < max_refresh - 1:
+                    logger.info("🔄 Refresh et nouvelle tentative...")
+                    self.driver.refresh()
+                    time.sleep(self.time_sleep)
+        
+        logger.error(f"❌ Impossible de trouver un slot bookable après {max_refresh} tentatives")
+        self._debug_screenshot("no_bookable_slot_found")
+        return None
     def _click_book_slot(self, slot):
         """Cliquer pour réserver le créneau"""
         logger.info("📝 Réservation du créneau...")
@@ -391,7 +513,7 @@ class TennisBookingBot:
         self._navigate_to_planning(next_week)
         
         # 4. Chercher créneau
-        slot = self._find_available_slot()
+        slot = self._find_and_wait_for_bookable_slot()
         if not slot:
             logger.error("❌ Aucun créneau disponible")
             return False
@@ -425,10 +547,11 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "02-Nov-25"
-DEFAULT_TIME = "9:00"
-DEFAULT_LEVEL = "Novice"
+DEFAULT_DATE = "15-Nov-25"
+DEFAULT_TIME = "8:30"
+DEFAULT_LEVEL = "Intermediate"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_MY_NAME', 'Player')
+
 
 # Arguments ou défauts
 target_date = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DATE
@@ -443,9 +566,9 @@ bot = TennisBookingBot(
         target_time=target_time, 
         course_level=course_level,
         player_name=player_name,
-        debug_mode=False
+        time_sleep=time_sleep,
+        debug_mode=DEBUG
     )
-
 
 
 try:
