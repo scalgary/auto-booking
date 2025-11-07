@@ -31,3 +31,4 @@ docker logs jupyter-selenium
 # # docker exec my-selenium-jupyter python -m ipykernel install --name=selenium --display-name="Selenium Python"
 # docker exec auto-booking-selenium-jupyter-1 python -m ipykernel install --name=selenium --display-name="Selenium Python"
 # docker exec my-selenium-jupyter  python  main.py
+# git config --local --list | grep alias
