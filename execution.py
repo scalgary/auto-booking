@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from datetime import datetime, timedelta
-time_sleep=2
+time_sleep=1
 import sys
 
 # Get arguments from command line or environment variables
