@@ -505,9 +505,9 @@ class TennisBookingBot:
             return False
         
         # 2. Vérifier panier vide
-        if not self._check_basket_empty():
-            logger.error("❌ Panier non vide")
-            return False
+        #if not self._check_basket_empty():
+        #    logger.error("❌ Panier non vide")
+        #    return False
         
         # 3. Aller au planning
         self._navigate_to_planning(next_week)
