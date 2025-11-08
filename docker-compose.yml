@@ -1,6 +1,6 @@
 services:
   selenium-jupyter:
-    container_name: my-selenium-jupyter  # Add this line
+    container_name: my-selenium  # Add this line
     image: scalgary/selenium-env:latest
     platform: linux/amd64
     volumes:
