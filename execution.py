@@ -9,8 +9,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
+import logging
 
-time_sleep=1
+time_sleep=2
 import sys
 
 # Get arguments from command line or environment variables
@@ -18,6 +19,47 @@ if len(sys.argv) != 4:
     print("Usage: python mon_script.py <variable1> <variable2> <variable3>")
     #sys.exit(1)
 import sys
+
+# Configuration du logger
+def setup_logger(debug_mode=False):
+    """Configure le logger avec console + fichier"""
+    
+    # Nom du fichier log avec timestamp
+    log_filename = f"booking_bot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    
+    # Configuration
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    
+    # Supprimer les handlers existants
+    logger.handlers.clear()
+    
+    # Format des messages
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%H:%M:%S'
+    )
+    
+    # Handler 1: Console
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # Handler 2: Fichier
+    file_handler = logging.FileHandler(log_filename, encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)  # Tout dans le fichier
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    logger.info(f"📝 Logs sauvegardés dans: {log_filename}")
+    
+    return logger
+
+
+# Initialize logger
+DEBUG = False  # Set to False in production
+logger = setup_logger(debug_mode=DEBUG)
 
 # Valeurs par défaut
 DEFAULT_DATE = "19-Aug-25"
@@ -70,7 +112,7 @@ def take_full_page_screenshot(driver, filename):
     driver.set_window_size(window_size['width'], total_height)
     
     # Attendre que la page se charge complètement
-    time.sleep(2)
+    time.sleep(time_sleep)
     
     # Prendre la capture d'écran
     driver.save_screenshot(filename)
@@ -101,10 +143,10 @@ def check_date(target_date):
     possible = is_after_today & less_7_days
 
 
-    print(f"Your date: {your_date.strftime('%Y-%m-%d')}")
-    print(f"Today: {today.strftime('%Y-%m-%d')}")
-    print(f"Is after today: {is_after_today}")
-    print(f"Days difference: {days_difference}")
+    logger.info(f"Your date: {your_date.strftime('%Y-%m-%d')}")
+    logger.info(f"Today: {today.strftime('%Y-%m-%d')}")
+    logger.info(f"Is after today: {is_after_today}")
+    logger.info(f"Days difference: {days_difference}")
     return possible, next_week
 
 
@@ -112,7 +154,7 @@ def check_date(target_date):
 def access_login(website_url, email_login, secret_password):
     """Script simple : saisir email + password et prendre screenshots"""
 
-    print("🚀 Script simple - Email + Password + Screenshots")
+    logger.info("🚀 Script simple - Email + Password + Screenshots")
     print("=" * 50)
     #print(f"🌐 Site: {website_url}")
     #print(f"📧 Email: {email}")
@@ -139,9 +181,9 @@ def access_login(website_url, email_login, secret_password):
     driver.refresh()
 
     # Étape 1: Aller sur le site
-    print("🌐 Connexion au site...")
+    logger.info("🌐 Connexion au site...")
     driver.get(website_url)
-    time.sleep(3)
+    time.sleep(time_sleep)
     print(f"📄 Titre: {driver.title}")
     # Screenshot avant
     #driver.save_screenshot("1_avant_saisie.png")
@@ -154,44 +196,44 @@ def access_login(website_url, email_login, secret_password):
             email_field.clear()
             email_field.send_keys(email_login)
             #(f"✅ Email saisi: {email_login}")
-            time.sleep(1)
+            time.sleep(time_sleep)
 
     # Screenshot après email
     #driver.save_screenshot("2_apres_email.png")
-    print("📸 Screenshot 2: 2_apres_email.png")
+    #print("📸 Screenshot 2: 2_apres_email.png")
     # Étape 3: Trouver et remplir le champ password
-    print("🔑 Recherche du champ Password...")
+    logger.info("🔑 Recherche du champ Password...")
 
     password_field = None
 
     password_field = driver.find_element(By.XPATH, "//input[@type='password']")
-    print("✅ Champ password trouvé par type='password'")
+    logger.info("✅ Champ password trouvé par type='password'")
 
 
     if password_field:
-        print("📝 Saisie du password...")
+        logger.info("📝 Saisie du password...")
         password_field.clear()
         password_field.send_keys(secret_password)
-        print("✅ Password saisi")
-        time.sleep(1)
+        logger.info("✅ Password saisi")
+        time.sleep(time_sleep)
 
         # Screenshot après password
     #driver.save_screenshot("3_apres_password.png")
-    print("📸 Screenshot 3: 3_apres_password.png")
+    #print("📸 Screenshot 3: 3_apres_password.png")
 
     login_button = None
     login_button = driver.find_element(By.XPATH, "//input[@value='Login']")
 
     login_button.click()
-    print("✅ Bouton cliqué!")
+    logger.info("✅ Bouton cliqué!")
 
     # Étape 6: Attendre la redirection et vérifier
     print("⏳ Attente de la redirection...")
-    time.sleep(5)
+    time.sleep(time_sleep)
 
     # Screenshot après connexion
     #driver.save_screenshot("4_apres_clic.png")
-    print("📸 Screenshot 4: 4_apres_clic.png")
+    #print("📸 Screenshot 4: 4_apres_clic.png")
     #print(driver.current_url)
     return driver
 
@@ -231,12 +273,12 @@ def click_for_me(driver, target_date, my_name):
             return True
     return False
 def look_for_slots(driver, target_date, target_level, target_time):
-    print("🔍 Recherche de boutons avec données de cours...")
+    logger.info("🔍 Recherche de boutons avec données de cours...")
 
     # Chercher tous les boutons avec data-class-time (structure de votre site)
     course_buttons = driver.find_elements(By.XPATH, "//button[@data-class-time]")
 
-    print(f"📋 {len(course_buttons)} bouton(s) de cours trouvé(s)")
+    logger.info(f"📋 {len(course_buttons)} bouton(s) de cours trouvé(s)")
 
     found_slots = None
 
@@ -270,7 +312,7 @@ def look_for_slots(driver, target_date, target_level, target_time):
                 #print(f"    Places: {class_spaces}")
             
             if date_match and time_match and level_match:
-                print(f"    ✅ CORRESPONDANCE TROUVÉE!")
+                logger.info(f" ✅ CORRESPONDANCE TROUVÉE!")
                 spaces_available = int(class_spaces)
                 print(spaces_available)
                 #driver.save_screenshot("7_find_date_planning.png")
@@ -288,13 +330,13 @@ def look_for_slots(driver, target_date, target_level, target_time):
                 found_slots = slot_info
                         
                 if spaces_available > 0:
-                    print(f"    ✅ DISPONIBLE - {spaces_available} place(s)")
+                    logger.info(f"   ✅ DISPONIBLE - {spaces_available} place(s)")
                     
                 else:
-                    print(f"    ❌ COMPLET - 0 place")
+                    logger.info(f"    ❌ COMPLET - 0 place")
                 break
     if found_slots == None:
-        print(f"    ❌ NO CORRESPONDANCE TROUVÉE!")
+        logger.info(f"    ❌ NO CORRESPONDANCE TROUVÉE!")
     return found_slots
             
 
@@ -312,7 +354,7 @@ def click_on_slot(driver, slot_available):
     parent = info_button.find_element(By.XPATH, "./..")
     book_buttons = parent.find_elements(By.XPATH, ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]")
     if book_buttons:
-        print(f"✅ Bouton 'Book Now' trouvé dans le même conteneur")
+        logger.info(f"✅ Bouton 'Book Now' trouvé dans le même conteneur")
         book_buttons[0].click()
         time.sleep(time_sleep)
         #driver.save_screenshot("6_click_on_slot.png")
@@ -334,7 +376,7 @@ if possible_to_book:
     time.sleep(time_sleep)  # Attendre le chargement
     # Screenshot
     #driver.save_screenshot("5_planning_page.png")
-    print("📸 Screenshot: planning_page.png")
+    #print("📸 Screenshot: planning_page.png")
     slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
     if slot_available:
         if click_on_slot(driver, slot_available):
