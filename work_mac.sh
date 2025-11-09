@@ -26,9 +26,4 @@ docker logs jupyter-selenium
 # # Sur ton Mac (pas dans le container)
 
 # Dans le container
-# docker exec jupyter-selenium jupyter kernelspec list
-# # Réinstalle UN SEUL kernel propre
-# # docker exec my-selenium-jupyter python -m ipykernel install --name=selenium --display-name="Selenium Python"
-# docker exec auto-booking-selenium-jupyter-1 python -m ipykernel install --name=selenium --display-name="Selenium Python"
-# docker exec my-selenium-jupyter  python  main.py
-# git config --local --list | grep alias
+

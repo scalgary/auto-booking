@@ -1,0 +1,28 @@
+---
+title: "Untitled"
+format: html
+---
+
+# Commandes classiques
+## alias git
+1 - pour voir mes alias dans mon repo
+git config --local --get-regexp alias
+2 - pour configurer des alias
+git config --local alias.wk '!git add -u ".github/workflows/" && git commit -m "improve workflows"'
+
+## docker
+1 - lance le container
+docker-compose down && docker-compose up -d
+2 - jupyter
+docker exec my-selenium python -m ipykernel install --name=selenium --display-name="Selenium Python"
+3 - lance code
+docker exec my-selenium  python  main.py
+4 - get list kernels
+docker exec my-selenium jupyter kernelspec list
+http://localhost:8888
+
+
+
+
+
+
