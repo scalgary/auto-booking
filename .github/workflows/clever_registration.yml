@@ -2,8 +2,8 @@ name: Bot Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 15
-  ADVANCE_SECONDS : 1
-  MAX_WAIT_SECONDS: 600     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
+  ADVANCE_SECONDS : 2
+  MAX_WAIT_SECONDS: 500     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
   actions: read
@@ -14,6 +14,8 @@ on:
   schedule:
     - cron: '42 14 * * *' # 23:45  Sunday is 0 Saturday 6
     - cron: '52 14 * * *' # 23:55 Calgary
+    - cron: '56 14 * * *' # 23:55 Calgary
+
     - cron: '0 15 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
@@ -291,8 +293,8 @@ jobs:
               else
                 echo "❌ Attempt $i failed"
                 if [ $i -lt 3 ]; then
-                  echo "⌛ Waiting 20 seconds before next attempt..."
-                  sleep 20
+                  echo "⌛ Waiting 10 seconds before next attempt..."
+                  sleep 10
                 fi
               fi
             done
@@ -301,13 +303,13 @@ jobs:
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
-                        if [ $FINAL_CODE -eq 0 ]; then
-              echo "🚀 Running script2.py..."
-              python3 reminder.py
+            #            if [ $FINAL_CODE -eq 0 ]; then
+            #  echo "🚀 Running script2.py..."
+            #  python3 reminder.py
 
-            else
-              echo "⏭️ Skipping reminder.py (execution.py failed)"
-            fi
+            # else
+            #  echo "⏭️ Skipping reminder.py (execution.py failed)"
+            # fi
 
             exit 0
 
@@ -325,7 +327,7 @@ jobs:
 
           echo "📝 Tag to create: $tag"
           git pull
-          git add all_appointments.json
+          # git add all_appointments.json
           git commit --allow-empty -m "✅ $tag"
           #git commit -m "✅ $tag"
           git tag "$tag"
