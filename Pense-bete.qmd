@@ -20,6 +20,12 @@ docker exec my-selenium  python  main.py
 4 - get list kernels
 docker exec my-selenium jupyter kernelspec list
 http://localhost:8888
+5 voir les images
+docker image ls 
+6 - supprimer les containers arretes
+docker container prune
+
+
 
 
 
