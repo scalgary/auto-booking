@@ -624,14 +624,16 @@ def update_calendar():
         logger.error(f"❌ Erreur: {e}")
         raise
 
+
+secure_login = SecureWebLogin(logon_url, email, password)
+secure_login.login()  # ✅ D'abord se connecter
+secure_login.save_appointments_json()
+secure_login.quit()
+send_all_appointments_email(load_appointments())
 if len(sys.argv) > 1 and sys.argv[1].lower() == 'local':
     update_calendar()
 
-else:
-    secure_login = SecureWebLogin(logon_url, email, password)
-    secure_login.login()  # ✅ D'abord se connecter
-    secure_login.save_appointments_json()
-    secure_login.quit()
-    send_all_appointments_email(load_appointments())
+
+
 
 
