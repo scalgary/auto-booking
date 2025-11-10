@@ -1,11 +1,5 @@
 [
   {
-    "date": "Sun\n09\nNov",
-    "time": "9:00 AM -\n11:00 AM",
-    "name": "Sandrine Lebon",
-    "type": "Pickleball Intermediate"
-  },
-  {
     "date": "Tue\n11\nNov",
     "time": "10:30 AM -\n12:30 PM",
     "name": "Sandrine Lebon",
@@ -48,13 +42,19 @@
     "type": "Pickleball Advanced"
   },
   {
-    "date": "Tue\n18\nNov",
-    "time": "6:15 PM -\n7:15 PM",
-    "name": "Sandrine Lebon",
-    "type": "Women & Weights Class"
+    "date": "Mon\n17\nNov",
+    "time": "4:30 PM -\n6:30 PM",
+    "name": "Serge Lebon",
+    "type": "Pickleball Advanced"
   },
   {
-    "date": "Tue\n25\nNov",
+    "date": "Mon\n17\nNov",
+    "time": "4:30 PM -\n6:30 PM",
+    "name": "Sandrine Lebon",
+    "type": "Pickleball Intermediate"
+  },
+  {
+    "date": "Tue\n18\nNov",
     "time": "6:15 PM -\n7:15 PM",
     "name": "Sandrine Lebon",
     "type": "Women & Weights Class"
