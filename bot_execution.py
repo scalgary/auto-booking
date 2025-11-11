@@ -55,7 +55,7 @@ def setup_logger(debug_mode=False):
 # Initialize logger
 DEBUG = False  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
-time_sleep=1
+time_sleep=2
 
 ##########
 
@@ -177,10 +177,11 @@ class TennisBookingBot:
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
-        
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=options)
         self.driver.set_window_size(1400, 900)
+        self.driver.set_page_load_timeout(300)  # 5 minutes au lieu du défaut
+
         logger.info("✅ Driver configuré")
         self._debug_screenshot("driver_setup")
     
@@ -194,7 +195,7 @@ class TennisBookingBot:
         logger.info(f"📄 Titre: {self.driver.title}")
         self._debug_screenshot("login_page_loaded")
         
-        wait = WebDriverWait(self.driver, 10)
+        wait = WebDriverWait(self.driver, 15)
         try:
             # Email
             email_field = wait.until(EC.visibility_of_element_located((By.XPATH, "//input[@type='email']")))
