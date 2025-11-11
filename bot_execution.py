@@ -14,7 +14,7 @@ import sys
 
 
 
-
+start = time.perf_counter()
 # Configuration du logger
 def setup_logger(debug_mode=False):
     """Configure le logger avec console + fichier"""
@@ -56,7 +56,7 @@ def setup_logger(debug_mode=False):
 DEBUG = False  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
 time_sleep=2
-
+web_wait_time=25
 ##########
 
 email = os.getenv('YOUR_SECRET_EMAIL')
@@ -65,7 +65,7 @@ logon_url = os.getenv("YOUR_SECRET_LOGON_URL")
 planning_url = os.getenv('YOUR_SECRET_PLANNING_URL')
 login_url = os.getenv('YOUR_SECRET_LOGIN_URL')
 my_name = os.getenv('YOUR_SECRET_MY_NAME')
-
+his_name = os.getenv('YOUR_SECRET_HIS_NAME')
 
 
 
@@ -85,7 +85,8 @@ secrets_dict = {
     "MY_NAME": my_name,
     "LOGON_URL": logon_url,
     "PLANNING_URL": planning_url,
-    "LOGIN_URL": login_url
+    "LOGIN_URL": login_url,
+    "HIS_NAME" : his_name
 }
 
 missing_secrets = [name for name, value in secrets_dict.items() if not value]
@@ -107,13 +108,14 @@ else:
 class TennisBookingBot:
     """Bot de réservation de tennis/sport complet avec screenshots debug"""
     
-    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, debug_mode=False):
+    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, debug_mode=False):
         # Paramètres de réservation
         self.target_date = target_date
         self.target_time = target_time
         self.course_level = course_level
         self.player_name = player_name
         self.time_sleep = time_sleep
+        self.web_wait_time = web_wait_time
         self.debug_mode = debug_mode
         self.screenshot_counter = 0
         
@@ -180,7 +182,8 @@ class TennisBookingBot:
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=options)
         self.driver.set_window_size(1400, 900)
-        self.driver.set_page_load_timeout(300)  # 5 minutes au lieu du défaut
+        self.driver.set_page_load_timeout(100)  # 5 minutes au lieu du défaut
+        self.driver.implicitly_wait(3)  # Add this for element searches
 
         logger.info("✅ Driver configuré")
         self._debug_screenshot("driver_setup")
@@ -192,10 +195,14 @@ class TennisBookingBot:
         
         logger.info("🔐 Connexion en cours...")
         self.driver.get(self.logon_url)
+
+        # Option 3: Wait for specific element (BEST - also ensures page is loaded)
+        WebDriverWait(self.driver, web_wait_time).until(EC.presence_of_element_located((By.ID, "Logon")))  # or any unique element)
+        logger.info("✅ Page de connexion chargée")
         logger.info(f"📄 Titre: {self.driver.title}")
         self._debug_screenshot("login_page_loaded")
         
-        wait = WebDriverWait(self.driver, 15)
+        wait = WebDriverWait(self.driver, web_wait_time)
         try:
             # Email
             email_field = wait.until(EC.visibility_of_element_located((By.XPATH, "//input[@type='email']")))
@@ -548,10 +555,10 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "15-Nov-25"
-DEFAULT_TIME = "8:30"
+DEFAULT_DATE = "12-Nov-25"
+DEFAULT_TIME = "8:00"
 DEFAULT_LEVEL = "Intermediate"
-DEFAULT_NAME = os.getenv('YOUR_SECRET_MY_NAME', 'Player')
+DEFAULT_NAME = os.getenv('YOUR_SECRET_HIS_NAME', 'Player')
 
 
 # Arguments ou défauts
@@ -568,6 +575,7 @@ bot = TennisBookingBot(
         course_level=course_level,
         player_name=player_name,
         time_sleep=time_sleep,
+        web_wait_time=web_wait_time,
         debug_mode=DEBUG
     )
 
@@ -581,4 +589,6 @@ try:
 finally:
     bot.quit()
 
+elapsed = time.perf_counter() - start
+print(f" Runtime: {elapsed:.6f} seconds")
 sys.exit(exit_code)
