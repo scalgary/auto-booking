@@ -2,7 +2,7 @@ name: Bot Pickleball with json
 
 env:
   TARGET_UTC_HOUR : 15
-  ADVANCE_SECONDS : 2
+  ADVANCE_SECONDS : 1
   MAX_WAIT_SECONDS: 500     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
@@ -12,10 +12,9 @@ permissions:
 
 on:
   schedule:
-    - cron: '42 14 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '45 14 * * *' # 23:45  Sunday is 0 Saturday 6
     - cron: '52 14 * * *' # 23:55 Calgary
-    - cron: '56 14 * * *' # 23:55 Calgary
-
+    - cron: '59 14 * * *' # 23:55 Calgary
     - cron: '0 15 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
