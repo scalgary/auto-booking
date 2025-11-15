@@ -74,6 +74,7 @@ logger.info("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
 logger.info(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
 logger.info(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
 logger.info(f"MY_NAME: {'✅ DÉFINI' if my_name else '❌ MISSING'}")
+logger.info(f"his_name: {'✅ DÉFINI' if his_name else '❌ MISSING'}")
 logger.info(f"LOGON_URL: {'✅ DÉFINI' if logon_url else '❌ MISSING'}")
 logger.info(f"PLANNING_URL: {'✅ DÉFINI' if planning_url else '❌ MISSING'}")
 logger.info(f"LOGIN_URL: {'✅ DÉFINI' if login_url else '❌ MISSING'}")
@@ -86,7 +87,8 @@ secrets_dict = {
     "LOGON_URL": logon_url,
     "PLANNING_URL": planning_url,
     "LOGIN_URL": login_url,
-    "HIS_NAME" : his_name
+    "HIS_NAME" : his_name,
+    "MY_NAME": my_name
 }
 
 missing_secrets = [name for name, value in secrets_dict.items() if not value]
