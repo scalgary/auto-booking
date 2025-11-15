@@ -9,7 +9,8 @@ format: html
 git config --local --get-regexp alias
 2 - pour configurer des alias
 git config --local alias.wk '!git add -u ".github/workflows/" && git commit -m "improve workflows"'
-
+3 - git stash - ne pas oublier les fichiers untrackers
+git stash push -u -m "WIP: convertisseur"
 ## docker
 1 - lance le container
 docker-compose down && docker-compose up -d
