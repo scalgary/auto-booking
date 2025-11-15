@@ -1,9 +1,13 @@
-name: Bot Pickleball for HIS
+name: Bot Pickleball For ME
 
 env:
   TARGET_UTC_HOUR : 15
-  ADVANCE_SECONDS : 2
+  ADVANCE_SECONDS : 1
   MAX_WAIT_SECONDS: 500     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
+  REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
+  TAG_PREFIX: 'my'  # ← Change 'my' ou 'his'
+  TARGET_NAME_SECRET: 'YOUR_SECRET_MY_NAME'  # ← 'YOUR_SECRET_MY_NAME' ou 'YOUR_SECRET_HIS_NAME'
+
 permissions:
   contents: write
   actions: read
@@ -15,7 +19,6 @@ on:
     - cron: '45 14 * * *' # 23:45  Sunday is 0 Saturday 6
     - cron: '52 14 * * *' # 23:55 Calgary
     - cron: '56 14 * * *' # 23:55 Calgary
-
     - cron: '59 14 * * *' # 23:55 Calgary
     - cron: '0 15 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
@@ -79,9 +82,12 @@ jobs:
            echo "📅 Current day (UTC): $current_day"
     
            # Chercher la registration pour aujourd'hui (AJOUTE level)
-           registration=$(jq -r --arg day "$current_day" \
-           '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
-           his_registrations.json | head -1)
+           json_file="${{ env.REGISTRATION_JSON_FILE }}"
+          echo "📄 Using: $json_file"
+
+          registration=$(jq -r --arg day "$current_day" \
+          '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+          "$json_file" | head -1)
 
 
            # Vérifier si une registration existe
@@ -154,7 +160,9 @@ jobs:
           fi
 
           target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
+          prefix="${{ env.TAG_PREFIX }}"
+          tag="${prefix}_bot_success_${target_date}"
+          echo "🏷️ Tag prefix: $prefix"
           echo "🔍 Looking for tag: $tag"
           
           # Check if tag already exists
@@ -219,8 +227,8 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          CALDAV_PASSWORD: = ${{ secrets.CALDAV_PASSWORD }}
-          CALDAV_USER: = ${{ secrets.CALDAV_USER }}
+          CALDAV_PASSWORD:  ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_USER: ${{ secrets.CALDAV_USER }}
 
 
 
@@ -232,6 +240,14 @@ jobs:
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
             ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
+            # Déterminer quel nom utiliser
+            if [ "${{ env.TARGET_NAME_SECRET }}" = "YOUR_SECRET_MY_NAME" ]; then
+            TARGET_NAME="${{ secrets.YOUR_SECRET_MY_NAME }}"
+            else
+            TARGET_NAME="${{ secrets.YOUR_SECRET_HIS_NAME }}"
+            fi
+
+            echo "👤 Using name from: ${{ env.TARGET_NAME_SECRET }}"
 
 
             echo "📋 Configuration:"
@@ -277,40 +293,20 @@ jobs:
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
             echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
+            python3 bot_execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$TARGET_NAME"
+            FINAL_CODE=$?
 
-            
-            FINAL_CODE=1
-            for i in {1..3}; do
-              echo ""
-              echo "🔄 Attempt $i/3..."
-              python3 bot_execution.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME"
-              EXIT_CODE=$?
-              echo "📊 Python exit code: $EXIT_CODE"
-              
-              if [ $EXIT_CODE -eq 0 ]; then
+            if [ $FINAL_CODE -eq 0 ]; then
                 echo "✅ Registration successful!"
-                FINAL_CODE=0
-                break
-              else
-                echo "❌ Attempt $i failed"
-                if [ $i -lt 3 ]; then
-                  echo "⌛ Waiting 10 seconds before next attempt..."
-                  sleep 10
-                fi
-              fi
-            done
-            
+            else
+                echo "❌ Registration failed"
+            fi
+
             echo ""
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
-            #            if [ $FINAL_CODE -eq 0 ]; then
-            #  echo "🚀 Running script2.py..."
-            #  python3 reminder.py
 
-            # else
-            #  echo "⏭️ Skipping reminder.py (execution.py failed)"
-            # fi
 
             exit 0
 
@@ -324,7 +320,9 @@ jobs:
           echo "🏷️ Creating success tag"
           echo "======================================"
           target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
+          prefix="${{ env.TAG_PREFIX }}"
+          tag="${prefix}_bot_success_${target_date}"
+
 
           echo "📝 Tag to create: $tag"
           git pull
