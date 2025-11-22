@@ -26,7 +26,7 @@ docker image ls
 6 - supprimer les containers arretes
 docker container prune
 
-
+docker exec my-selenium python reminder.py local
 
 
 
