@@ -2,7 +2,6 @@ name: Bot Pickleball for HIS
 
 env:
   TARGET_UTC_HOUR : 15
-  ADVANCE_SECONDS : 2
   MAX_WAIT_SECONDS: 500     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
@@ -57,64 +56,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Load registration from JSON
-        id: params
-        shell: bash
-
-        run: |
-         echo "======================================"
-         echo "📖 Loading registration from JSON"
-         echo "======================================"
-         # Si manuel, utiliser les inputs
-         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-           echo "🔧 Manual trigger - using inputs"
-           date="${{ inputs.date }}"
-           time="${{ inputs.time }}"
-           level="${{ inputs.level }}"
-           day=$(date -d "$date" +%A)
-         else
-
-           # Récupérer le jour actuel
-           current_day=$(date -u +%A)
-           echo "📅 Current day (UTC): $current_day"
-    
-           # Chercher la registration pour aujourd'hui (AJOUTE level)
-           registration=$(jq -r --arg day "$current_day" \
-           '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
-           his_registrations.json | head -1)
-
-
-           # Vérifier si une registration existe
-           if [ -z "$registration" ]; then
-            echo "❌ No registration found for $current_day"
-            echo "should_continue=false" >> $GITHUB_OUTPUT
-            exit 0
-           fi
-
-    
-           # Split et afficher
-           IFS='|' read -r date time day level<<< "$registration"
-           echo "✅ Registration found:"
-           echo "   📅 Date: $date"
-           echo "   🕐 Time: $time"
-           echo "   📆 Day: $day"
-           echo "   🎾 Level: $level"
-         fi
-
-    
-         # Exporter vers GITHUB_OUTPUT
-         echo "date=$date" >> $GITHUB_OUTPUT
-         echo "time=$time" >> $GITHUB_OUTPUT
-         echo "day=$day" >> $GITHUB_OUTPUT
-         echo "level=$level" >> $GITHUB_OUTPUT
-
-         echo "should_continue=true" >> $GITHUB_OUTPUT
-    
-         echo "======================================"
-
+      - name: Load registration his parameters
+        id: params                                           # ← ID du step
+        uses: ./.github/actions/load-his-params
+        with:
+          event_name: ${{ github.event_name }}
     
 
       - name: Git setup and fetch tags
+        id: look_tag
+      
         if: steps.params.outputs.should_continue == 'true'
         run: |
           pwd
@@ -126,33 +77,6 @@ jobs:
           echo "🏷️ Fetching tags from remote..."
           git fetch --tags
           echo "✅ Tags fetched successfully"
-
-      # ==========================================
-      # STEP 2: Check tag and timing
-      # ==========================================
-      - name: Check tag & timing
-        id: check
-        shell: bash
-        if: steps.params.outputs.should_continue == 'true'
-        run: |
-          echo "======================================"
-          echo "🕐 Checking timing and tags"
-          echo "======================================"
-          # Récupérer les paramètres
-          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-          ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
-          MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
-
-          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
-          echo "⏰ Will start ${ADVANCE_SEC} seconds early"
-
-          # POUR TEST MANUEL SEULEMENT
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "🧪 Manual run detected - skipping timing check"
-            echo "should_continue=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
           target_date="${{ steps.params.outputs.date }}"
           tag="bot_success_${target_date}"
           echo "🔍 Looking for tag: $tag"
@@ -165,6 +89,66 @@ jobs:
             exit 0
           fi
           echo "📝 Tag not found, continuing..."
+          echo "should_continue=true" >> $GITHUB_OUTPUT
+
+          # Compter les tentatives existantes
+          attempt_count=$(git tag -l "bot_run_${target_date}_*" | wc -l)
+          echo "📊 Existing attempts: $attempt_count"
+          echo "🎯 This will be attempt #$attempt_count"
+          
+          # Calculer l'avance : attempt 0 = -2, puis +2, +4, +6...
+          if [ $attempt_count -eq 0 ]; then
+            ADVANCE_SEC=-2
+            echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
+          else
+            ADVANCE_SEC=$(( attempt_count * 2 ))
+            echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
+          fi
+          
+          # Créer le tag
+          tag="bot_run_${target_date}_${attempt_count}"
+          echo "🏷️ Creating tag: $tag"
+          git commit --allow-empty -m "✅ $tag"
+          git tag "$tag"
+          
+          echo "📤 Pushing tag to remote..."
+          git push origin HEAD "$tag"
+          echo "✅ Tag pushed successfully!"
+          echo "======================================"
+
+          # Exporter les valeurs
+          echo "ADVANCE_SEC=$ADVANCE_SEC" >> $GITHUB_OUTPUT
+          echo "attempt_number=$attempt_count" >> $GITHUB_OUTPUT
+          echo "======================================"
+
+
+
+      # ==========================================
+      # STEP 2: Check tag and timing
+      # ==========================================
+      - name: timing
+        id: check
+        shell: bash
+        if: steps.look_tag.outputs.should_continue == 'true'
+        run: |
+          echo "======================================"
+          echo "🕐 Checking timing and tags"
+          echo "======================================"
+          # Récupérer les paramètres
+          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+          MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
+
+
+          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
+
+          # POUR TEST MANUEL SEULEMENT
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🧪 Manual run detected - skipping timing check"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+
           
           # Get current UTC time
           current_hour=$((10#$(date -u +%H)))
@@ -174,11 +158,15 @@ jobs:
 
           echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
           
-          # Calcul avec l'avance
-          target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
+          
+          # ADVANCE_SEC négatif = avant, positif = après
+          target_total_seconds=$(( (TARGET_HOUR * 3600) ))
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
           diff_minutes=$(( diff_seconds / 60 ))
           echo "⏱️ Difference: $diff_seconds seconds ($diff_minutes minutes) avant l'heure cible"
+          echo "⏱️ Seconds to wait: $diff_seconds"
+
+
 
           # Timing logic
           if [ $diff_seconds -gt $MAX_WAIT ]; then
@@ -196,6 +184,10 @@ jobs:
 
 
           echo "======================================"
+
+ 
+
+
 
       # ==========================================
       # STEP 3: Registration attempt
@@ -219,8 +211,8 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          CALDAV_PASSWORD: = ${{ secrets.CALDAV_PASSWORD }}
-          CALDAV_USER: = ${{ secrets.CALDAV_USER }}
+          CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_USER: ${{ secrets.CALDAV_USER }}
 
 
 
@@ -230,14 +222,14 @@ jobs:
             echo "======================================"
             # Récupérer l'heure cible
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-            ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+            ADVANCE_SEC=${{ steps.look_tag.outputs.ADVANCE_SEC }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
 
 
             echo "📋 Configuration:"
             echo "   🎯 Target: ${TARGET_HOUR}:00:00 UTC"
             echo "   ⏰ Advance: ${ADVANCE_SEC} seconds"
-            echo "   ⏳ Max wait: ${MAX_WAIT} seconds"
+            echo "   🔢 Attempt: #${{ steps.look_tag.outputs.attempt_number }}"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
@@ -246,7 +238,7 @@ jobs:
               current_second=$((10#$(date -u +%S)))
               current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
               
-              # Calcul avec l'avance
+              # ADVANCE_SEC négatif = avant, positif = après
               target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
               diff_seconds=$(( target_total_seconds - current_total_seconds ))
               
@@ -314,11 +306,12 @@ jobs:
 
             exit 0
 
+
       # ==========================================
       # STEP 4: Create success tag
       # ==========================================
       - name: Tag success
-        if: steps.check.outputs.should_continue == 'true' && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
+        if: steps.check.outputs.should_continue == 'true'  && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
         run: |
           echo "======================================"
           echo "🏷️ Creating success tag"

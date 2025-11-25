@@ -1,0 +1,89 @@
+name: 'Load Registration Parameters'
+description: 'Load registration from JSON or manual inputs from his'
+
+inputs:
+  event_name:
+    description: 'GitHub event name'
+    required: true
+  input_date:
+    description: 'Manual input date'
+    required: false
+    default: ''
+  input_time:
+    description: 'Manual input time'
+    required: false
+    default: ''
+  input_level:
+    description: 'Manual input level'
+    required: false
+    default: ''
+
+outputs:
+  date:
+    description: 'Registration date'
+    value: ${{ steps.load.outputs.date }}
+  time:
+    description: 'Registration time'
+    value: ${{ steps.load.outputs.time }}
+  level:
+    description: 'Registration level'
+    value: ${{ steps.load.outputs.level }}
+  day:
+    description: 'Registration day'
+    value: ${{ steps.load.outputs.day }}
+  should_continue:
+    description: 'Should workflow continue'
+    value: ${{ steps.load.outputs.should_continue }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Load registration
+      id: load
+      shell: bash
+      run: |
+        echo "======================================"
+        echo "📖 Loading registration from JSON"
+        echo "======================================"
+        
+        # Si manuel, utiliser les inputs
+        if [ "${{ inputs.event_name }}" = "workflow_dispatch" ]; then
+          echo "🔧 Manual trigger - using inputs"
+          date="${{ inputs.input_date }}"
+          time="${{ inputs.input_time }}"
+          level="${{ inputs.input_level }}"
+          day=$(date -d "$date" +%A)
+        else
+          # Récupérer le jour actuel
+          current_day=$(date -u +%A)
+          echo "📅 Current day (UTC): $current_day"
+          
+          # Chercher la registration pour aujourd'hui
+          registration=$(jq -r --arg day "$current_day" \
+            '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+            his_registrations.json | head -1)
+          
+          # Vérifier si une registration existe
+          if [ -z "$registration" ]; then
+            echo "❌ No registration found for $current_day"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Split et afficher
+          IFS='|' read -r date time day level <<< "$registration"
+          echo "✅ Registration found:"
+          echo "   📅 Date: $date"
+          echo "   🕐 Time: $time"
+          echo "   📆 Day: $day"
+          echo "   🎾 Level: $level"
+        fi
+        
+        # Exporter vers GITHUB_OUTPUT
+        echo "date=$date" >> $GITHUB_OUTPUT
+        echo "time=$time" >> $GITHUB_OUTPUT
+        echo "day=$day" >> $GITHUB_OUTPUT
+        echo "level=$level" >> $GITHUB_OUTPUT
+        echo "should_continue=true" >> $GITHUB_OUTPUT
+        
+        echo "======================================"
