@@ -1,0 +1,56 @@
+name: Test Manage Attempt Tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'Date to test (DD-Mth-YY)'
+        required: true
+        default: '27-Nov-25'
+
+permissions:
+  contents: write
+
+jobs:
+  test-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Test manage-attempt-tags action
+        id: test
+        uses: ./.github/actions/manage-attempt-tags
+        with:
+          target_date: ${{ github.event.inputs.target_date }}
+          workspace_path: ${{ github.workspace }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display results
+        run: |
+          echo "======================================"
+          echo "📊 Test Results"
+          echo "======================================"
+          echo "Should continue: ${{ steps.test.outputs.should_continue }}"
+          echo "Advance seconds: ${{ steps.test.outputs.ADVANCE_SEC }}"
+          echo "Attempt number: ${{ steps.test.outputs.attempt_number }}"
+          echo "======================================"
+          
+      - name: Verify tags were created
+        if: steps.test.outputs.should_continue == 'true'
+        run: |
+          echo "🔍 Checking if tags were created..."
+          git fetch --tags
+          target_date="${{ github.event.inputs.target_date }}"
+          attempt_num="${{ steps.test.outputs.attempt_number }}"
+          expected_tag="bot_run_${target_date}_${attempt_num}"
+          
+          if git tag -l | grep -q "^${expected_tag}$"; then
+            echo "✅ Tag found: $expected_tag"
+          else
+            echo "❌ Tag NOT found: $expected_tag"
+            exit 1
+          fi
