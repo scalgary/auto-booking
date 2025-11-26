@@ -98,10 +98,10 @@ jobs:
           
           # Calculer l'avance : attempt 0 = -2, puis +2, +4, +6...
           if [ $attempt_count -eq 0 ]; then
-            ADVANCE_SEC=-2
+            ADVANCE_SEC=-4
             echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
           else
-            ADVANCE_SEC=$(( attempt_count * 2 ))
+            ADVANCE_SEC=$(( -4 + attempt_count * 2 ))
             echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
           fi
           
@@ -239,8 +239,8 @@ jobs:
               current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
               
               # ADVANCE_SEC négatif = avant, positif = après
-              target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
-              diff_seconds=$(( target_total_seconds - current_total_seconds ))
+              target_total_seconds=$(( (TARGET_HOUR * 3600) ))
+              diff_seconds=$(( target_total_seconds - current_total_seconds  + ADVANCE_SEC))
               
               echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
               if [ $diff_seconds -gt 0 ]; then
