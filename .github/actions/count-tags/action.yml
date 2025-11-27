@@ -1,0 +1,10 @@
+name: "Count Tags"
+description: "Compte les tags du repo"
+runs:
+  using: "composite"
+  steps:
+    - id: count
+      shell: bash
+      run: |
+        TAG_COUNT=$(git tag | wc -l)
+        echo "tag_count=$TAG_COUNT" >> $GITHUB_OUTPUT
