@@ -1,0 +1,78 @@
+name: 'Create Success Tag'
+description: 'Crée et push un tag de succès avec préfixe configurable'
+
+inputs:
+  target_date:
+    description: 'Date cible (DD-Mth-YY)'
+    required: true
+  workspace_path:
+    description: 'Chemin du workspace Git'
+    required: true
+  github_token:
+    description: 'GitHub token pour push'
+    required: true
+  github_repository:
+    description: 'GitHub repository (owner/repo)'
+    required: true
+  tag_prefix:
+    description: 'Préfixe pour les tags (ex: "my", "his")'
+    required: false
+    default: 'bot'
+
+outputs:
+  tag_created:
+    description: 'true si le tag a été créé, false sinon'
+    value: ${{ steps.create.outputs.tag_created }}
+  tag_name:
+    description: 'Nom du tag créé'
+    value: ${{ steps.create.outputs.tag_name }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Create and push success tag
+      id: create
+      shell: bash
+      run: |
+        echo "======================================"
+        echo "🏷️  Creating success tag"
+        echo "======================================"
+        
+        # Configuration Git
+        echo "🔧 Configuring Git..."
+        git config --global --add safe.directory ${{ inputs.workspace_path }}
+        git config user.name "bot"
+        git config user.email "bot@github.com"
+        
+        # Configurer l'authentification avec le token
+        echo "🔐 Setting up authentication..."
+        git remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ inputs.github_repository }}.git
+        
+        # Préparer le tag
+        target_date="${{ inputs.target_date }}"
+        prefix="${{ inputs.tag_prefix }}"
+        tag="${prefix}_bot_success_${target_date}"
+        
+        echo "🏷️  Tag prefix: $prefix"
+        echo "📝 Tag to create: $tag"
+        
+        # Pull les derniers changements
+        echo "🔄 Pulling latest changes..."
+        git pull
+        
+        # Créer le commit et le tag
+        echo "✨ Creating tag..."
+        git commit --allow-empty -m "✅ $tag"
+        git tag "$tag"
+        
+        # Push vers remote
+        echo "📤 Pushing tag to remote..."
+        git push origin HEAD "$tag"
+        
+        echo "✅ Tag pushed successfully!"
+        
+        # Exporter les outputs
+        echo "tag_created=true" >> $GITHUB_OUTPUT
+        echo "tag_name=$tag" >> $GITHUB_OUTPUT
+        
+        echo "======================================"

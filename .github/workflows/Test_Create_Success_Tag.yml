@@ -1,0 +1,74 @@
+name: Test Create Success Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'Date to test (DD-Mth-YY)'
+        required: true
+        default: '27-Nov-24'
+      tag_prefix:
+        description: 'Tag prefix (my, his, test)'
+        required: true
+        default: 'test'
+
+permissions:
+  contents: write
+
+jobs:
+  test-create-success-tag:
+    runs-on: ubuntu-latest
+    steps:
+      # ==========================================
+      # STEP 1: Checkout code
+      # ==========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # ==========================================
+      # STEP 2: Test create-success-tag action
+      # ==========================================
+      - name: Test create-success-tag action
+        id: test
+        uses: ./.github/actions/create-success-tag
+        with:
+          target_date: ${{ github.event.inputs.target_date }}
+          workspace_path: ${{ github.workspace }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_repository: ${{ github.repository }}
+          tag_prefix: ${{ github.event.inputs.tag_prefix }}
+
+      # ==========================================
+      # STEP 3: Display results
+      # ==========================================
+      - name: Display results
+        run: |
+          echo "======================================"
+          echo "📊 Test Results"
+          echo "======================================"
+          echo "Tag created: ${{ steps.test.outputs.tag_created }}"
+          echo "Tag name: ${{ steps.test.outputs.tag_name }}"
+          echo "======================================"
+          
+      # ==========================================
+      # STEP 4: Verify tag exists on remote
+      # ==========================================
+      - name: Verify tag exists
+        run: |
+          echo "🔍 Verifying tag on remote..."
+          git fetch --tags
+          expected_tag="${{ steps.test.outputs.tag_name }}"
+          
+          if git tag -l | grep -q "^${expected_tag}$"; then
+            echo "✅ Success tag found: $expected_tag"
+          else
+            echo "❌ Success tag NOT found: $expected_tag"
+            exit 1
+          fi
+          
+          echo ""
+          echo "📋 All tags with prefix '${{ github.event.inputs.tag_prefix }}':"
+          git tag -l "${{ github.event.inputs.tag_prefix }}_*"
