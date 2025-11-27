@@ -1,0 +1,39 @@
+name: Test Git Docker
+
+permissions:
+  contents: write
+  actions: read
+
+
+
+on:
+
+
+  workflow_dispatch:  # Ajoutez cette ligne
+jobs:
+  register:
+    runs-on: ubuntu-latest
+
+    container:
+      image: scalgary/selenium-env:latest
+      options: --workdir /github/workspace
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Si ton image n'a pas git, active cette étape
+      - name: Ensure git is installed
+        run: |
+          if ! command -v git; then
+            apt-get update && apt-get install -y git
+          fi
+
+      - name: Count tags
+        id: counttags
+        uses: ./.github/actions/count-tags
+
+      - name: Output
+        run: echo "Le repo contient ${{ steps.counttags.outputs.tag_count }} tags"
