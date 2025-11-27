@@ -27,6 +27,9 @@ jobs:
       - name: Fix git safe directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
       - name: Count tags
         id: counttags
         uses: ./.github/actions/count-tags
