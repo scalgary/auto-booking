@@ -20,12 +20,7 @@ on:
 
     - cron: '59 14 * * *' # 23:55 Calgary
     - cron: '0 15 * * *' # 00:00 Calgary
-    - cron: '45 15 * * *' # 00:00 Calgary
-    - cron: '0 16 * * *' # 00:00 Calgary
 
-  #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
-  #  - cron: '50 13 * * *' # 23:55 Calgary
-  #  - cron: '0 14 * * *' # 00:00 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
 
@@ -125,7 +120,7 @@ jobs:
       - name: timing
         id: check
         shell: bash
-        if: steps.tags.outputs.should_continue == 'true'
+        if: steps.look_tag.outputs.should_continue == 'true'
         run: |
           echo "======================================"
           echo "🕐 Checking timing and tags"
