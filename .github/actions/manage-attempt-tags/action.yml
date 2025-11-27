@@ -1,5 +1,5 @@
 name: 'Manage Attempt Tags'
-description: 'Gère les tags de tentatives et calcule l''avance temporelle'
+description: 'Gère les tags de tentatives avec préfixe configurable et calcule l''avance temporelle'
 
 inputs:
   target_date:
@@ -8,10 +8,16 @@ inputs:
   workspace_path:
     description: 'Chemin du workspace Git'
     required: true
-    default: ${{ github.workspace }}
   github_token:
     description: 'GitHub token pour push'
     required: true
+  github_repository:
+    description: 'GitHub repository (owner/repo)'
+    required: true
+  tag_prefix:
+    description: 'Préfixe pour les tags (ex: "my", "his")'
+    required: false
+    default: 'bot'
 
 outputs:
   should_continue:
@@ -35,28 +41,37 @@ runs:
         echo "🏷️  Managing attempt tags"
         echo "======================================"
         
-        # Configuration Git
+        WORKSPACE="${{ inputs.workspace_path }}"
+        
+        # Debug
+        echo "📂 Workspace: $WORKSPACE"
+        echo "📂 Current dir: $(pwd)"
+        
+        # Configuration Git avec -C pour spécifier le répertoire
         echo "🔧 Configuring Git..."
-        git config --global --add safe.directory ${{ inputs.workspace_path }}
-        git config user.name "bot"
-        git config user.email "bot@github.com"
+        git -C "$WORKSPACE" config --global --add safe.directory "$WORKSPACE"
+        git -C "$WORKSPACE" config user.name "bot"
+        git -C "$WORKSPACE" config user.email "bot@github.com"
         
         # Configurer l'authentification avec le token
-        git remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ github.repository }}.git
+        echo "🔐 Setting up authentication..."
+        git -C "$WORKSPACE" remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ inputs.github_repository }}.git
         
         # Fetch tags
         echo "🏷️  Fetching tags from remote..."
-        git fetch --tags
+        git -C "$WORKSPACE" fetch --tags
         echo "✅ Tags fetched successfully"
         
         # Variables
         target_date="${{ inputs.target_date }}"
-        success_tag="bot_success_${target_date}"
+        prefix="${{ inputs.tag_prefix }}"
+        success_tag="${prefix}_bot_success_${target_date}"
         
+        echo "🏷️  Tag prefix: $prefix"
         echo "🔍 Looking for success tag: $success_tag"
         
         # Vérifier si tag de succès existe déjà
-        if git tag -l | grep -q "^${success_tag}$"; then
+        if git -C "$WORKSPACE" tag -l | grep -q "^${success_tag}$"; then
           echo "🏷️  ✅ Success tag already exists: $success_tag"
           echo "🛑 Stopping workflow (success already registered)"
           echo "should_continue=false" >> $GITHUB_OUTPUT
@@ -66,8 +81,8 @@ runs:
         echo "📝 Success tag not found, continuing..."
         echo "should_continue=true" >> $GITHUB_OUTPUT
         
-        # Compter les tentatives existantes
-        attempt_count=$(git tag -l "bot_run_${target_date}_*" | wc -l)
+        # Compter les tentatives existantes pour cette date avec ce préfixe
+        attempt_count=$(git -C "$WORKSPACE" tag -l "${prefix}_bot_run_${target_date}_*" | wc -l)
         echo "📊 Existing attempts: $attempt_count"
         echo "🎯 This will be attempt #$attempt_count"
         
@@ -85,13 +100,13 @@ runs:
         fi
         
         # Créer le tag de tentative
-        run_tag="bot_run_${target_date}_${attempt_count}"
+        run_tag="${prefix}_bot_run_${target_date}_${attempt_count}"
         echo "🏷️  Creating tag: $run_tag"
-        git commit --allow-empty -m "✅ $run_tag"
-        git tag "$run_tag"
+        git -C "$WORKSPACE" commit --allow-empty -m "✅ $run_tag"
+        git -C "$WORKSPACE" tag "$run_tag"
         
         echo "📤 Pushing tag to remote..."
-        git push origin HEAD "$run_tag"
+        git -C "$WORKSPACE" push origin HEAD "$run_tag"
         echo "✅ Tag pushed successfully!"
         
         # Exporter les outputs

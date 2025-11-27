@@ -17,7 +17,7 @@ inputs:
   tag_prefix:
     description: 'Préfixe pour les tags (ex: "my", "his")'
     required: false
-    default: 'bot'
+    default: 'his'
 
 outputs:
   tag_created:
