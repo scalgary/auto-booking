@@ -47,21 +47,30 @@ runs:
         echo "📂 Workspace: $WORKSPACE"
         echo "📂 Current dir: $(pwd)"
         
-        # Configuration Git - ORDRE IMPORTANT!
+        # Configuration Git - Écrire directement dans le fichier de config global
         echo "🔧 Configuring Git..."
-        # 1. D'abord ajouter le safe.directory SANS -C
-        git config --global --add safe.directory "$WORKSPACE"
-        # 2. Ensuite configurer user avec -C
-        git -C "$WORKSPACE" config user.name "bot"
-        git -C "$WORKSPACE" config user.email "bot@github.com"
+        mkdir -p ~/.gitconfig.d
+        echo "[safe]" > ~/.gitconfig.d/safe-directory
+        echo "    directory = $WORKSPACE" >> ~/.gitconfig.d/safe-directory
+        
+        # Inclure le fichier dans la config globale
+        git config --global --add include.path ~/.gitconfig.d/safe-directory
+        
+        # Configurer user
+        git config --global user.name "bot"
+        git config --global user.email "bot@github.com"
+        
+        # Vérifier qu'on peut accéder au repo
+        echo "🔍 Verifying Git access..."
+        cd "$WORKSPACE" || exit 1
         
         # Configurer l'authentification avec le token
         echo "🔐 Setting up authentication..."
-        git -C "$WORKSPACE" remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ inputs.github_repository }}.git
+        git remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ inputs.github_repository }}.git
         
         # Fetch tags
         echo "🏷️  Fetching tags from remote..."
-        git -C "$WORKSPACE" fetch --tags
+        git fetch --tags
         echo "✅ Tags fetched successfully"
         
         # Variables
@@ -73,7 +82,7 @@ runs:
         echo "🔍 Looking for success tag: $success_tag"
         
         # Vérifier si tag de succès existe déjà
-        if git -C "$WORKSPACE" tag -l | grep -q "^${success_tag}$"; then
+        if git tag -l | grep -q "^${success_tag}$"; then
           echo "🏷️  ✅ Success tag already exists: $success_tag"
           echo "🛑 Stopping workflow (success already registered)"
           echo "should_continue=false" >> $GITHUB_OUTPUT
@@ -84,7 +93,7 @@ runs:
         echo "should_continue=true" >> $GITHUB_OUTPUT
         
         # Compter les tentatives existantes pour cette date avec ce préfixe
-        attempt_count=$(git -C "$WORKSPACE" tag -l "${prefix}_bot_run_${target_date}_*" | wc -l)
+        attempt_count=$(git tag -l "${prefix}_bot_run_${target_date}_*" | wc -l)
         echo "📊 Existing attempts: $attempt_count"
         echo "🎯 This will be attempt #$attempt_count"
         
@@ -104,11 +113,11 @@ runs:
         # Créer le tag de tentative
         run_tag="${prefix}_bot_run_${target_date}_${attempt_count}"
         echo "🏷️  Creating tag: $run_tag"
-        git -C "$WORKSPACE" commit --allow-empty -m "✅ $run_tag"
-        git -C "$WORKSPACE" tag "$run_tag"
+        git commit --allow-empty -m "✅ $run_tag"
+        git tag "$run_tag"
         
         echo "📤 Pushing tag to remote..."
-        git -C "$WORKSPACE" push origin HEAD "$run_tag"
+        git push origin HEAD "$run_tag"
         echo "✅ Tag pushed successfully!"
         
         # Exporter les outputs
