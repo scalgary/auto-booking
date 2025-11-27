@@ -1,110 +1,96 @@
-name: 'Manage Attempt Tags'
-description: 'Gère les tags de tentatives avec préfixe configurable et calcule l''avance temporelle'
+name: 'Load Registration Parameters'
+description: 'Load registration from JSON or manual inputs'
 
 inputs:
-  target_date:
-    description: 'Date cible (DD-Mth-YY)'
+  event_name:
+    description: 'GitHub event name'
     required: true
-  workspace_path:
-    description: 'Chemin du workspace Git'
-    required: true
-  github_token:
-    description: 'GitHub token pour push'
-    required: true
-  github_repository:
-    description: 'GitHub repository (owner/repo)'
-    required: true
-  tag_prefix:
-    description: 'Préfixe pour les tags (ex: "my", "his")'
+  json_file:
+    description: 'Path to JSON registration file'
     required: false
-    default: 'bot'
+    default: 'his_registrations.json'
+  input_date:
+    description: 'Manual input date'
+    required: false
+    default: ''
+  input_time:
+    description: 'Manual input time'
+    required: false
+    default: ''
+  input_level:
+    description: 'Manual input level'
+    required: false
+    default: ''
 
 outputs:
+  date:
+    description: 'Registration date'
+    value: ${{ steps.load.outputs.date }}
+  time:
+    description: 'Registration time'
+    value: ${{ steps.load.outputs.time }}
+  level:
+    description: 'Registration level'
+    value: ${{ steps.load.outputs.level }}
+  day:
+    description: 'Registration day'
+    value: ${{ steps.load.outputs.day }}
   should_continue:
-    description: 'true si le workflow doit continuer, false sinon'
-    value: ${{ steps.manage.outputs.should_continue }}
-  ADVANCE_SEC:
-    description: 'Nombre de secondes d''avance/retard (-4, -2, 0, +2, +4...)'
-    value: ${{ steps.manage.outputs.ADVANCE_SEC }}
-  attempt_number:
-    description: 'Numéro de tentative (0, 1, 2...)'
-    value: ${{ steps.manage.outputs.attempt_number }}
+    description: 'Should workflow continue'
+    value: ${{ steps.load.outputs.should_continue }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Git setup and manage tags
-      id: manage
+    - name: Load registration
+      id: load
       shell: bash
       run: |
         echo "======================================"
-        echo "🏷️  Managing attempt tags"
+        echo "📖 Loading registration parameters"
         echo "======================================"
         
-        # Configuration Git
-        echo "🔧 Configuring Git..."
-        git config --global --add safe.directory ${{ inputs.workspace_path }}
-        git config user.name "bot"
-        git config user.email "bot@github.com"
+        JSON_FILE="${{ inputs.json_file }}"
+        echo "📄 Using JSON file: $JSON_FILE"
         
-        # Configurer l'authentification avec le token
-        echo "🔐 Setting up authentication..."
-        git remote set-url origin https://x-access-token:${{ inputs.github_token }}@github.com/${{ inputs.github_repository }}.git
-        
-        # Fetch tags
-        echo "🏷️  Fetching tags from remote..."
-        git fetch --tags
-        echo "✅ Tags fetched successfully"
-        
-        # Variables
-        target_date="${{ inputs.target_date }}"
-        prefix="${{ inputs.tag_prefix }}"
-        success_tag="${prefix}_bot_success_${target_date}"
-        
-        echo "🏷️  Tag prefix: $prefix"
-        echo "🔍 Looking for success tag: $success_tag"
-        
-        # Vérifier si tag de succès existe déjà
-        if git tag -l | grep -q "^${success_tag}$"; then
-          echo "🏷️  ✅ Success tag already exists: $success_tag"
-          echo "🛑 Stopping workflow (success already registered)"
+
+          # Vérifier que le fichier existe
+        if [ ! -f "$JSON_FILE" ]; then
+          echo "❌ JSON file not found: $JSON_FILE"
           echo "should_continue=false" >> $GITHUB_OUTPUT
           exit 0
         fi
+          
+        # Récupérer le jour actuel
+        current_day=$(date -u +%A)
+        echo "📅 Current day (UTC): $current_day"
         
-        echo "📝 Success tag not found, continuing..."
-        echo "should_continue=true" >> $GITHUB_OUTPUT
-        
-        # Compter les tentatives existantes pour cette date avec ce préfixe
-        attempt_count=$(git tag -l "${prefix}_bot_run_${target_date}_*" | wc -l)
-        echo "📊 Existing attempts: $attempt_count"
-        echo "🎯 This will be attempt #$attempt_count"
-        
-        # Calculer l'avance : attempt 0 = -4, puis -2, 0, +2, +4...
-        if [ $attempt_count -eq 0 ]; then
-          ADVANCE_SEC=-4
-          echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
-        else
-          ADVANCE_SEC=$(( -4 + attempt_count * 2 ))
-          if [ $ADVANCE_SEC -lt 0 ]; then
-            echo "⏰ Attempt #${attempt_count}: ${ADVANCE_SEC} seconds (BEFORE target)"
-          else
-            echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
-          fi
+        # Chercher la registration pour aujourd'hui
+        registration=$(jq -r --arg day "$current_day" \
+          '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+          "$JSON_FILE" | head -1)
+          
+        # Vérifier si une registration existe
+        if [ -z "$registration" ]; then
+          echo "❌ No registration found for $current_day in $JSON_FILE"
+          echo "should_continue=false" >> $GITHUB_OUTPUT
+          exit 0
         fi
+          
+        # Split et afficher
+        IFS='|' read -r date time day level <<< "$registration"
+        echo "✅ Registration found:"
+        echo "   📅 Date: $date"
+        echo "   🕐 Time: $time"
+        echo "   📆 Day: $day"
+        echo "   🎾 Level: $level"
+      
         
-        # Créer le tag de tentative
-        run_tag="${prefix}_bot_run_${target_date}_${attempt_count}"
-        echo "🏷️  Creating tag: $run_tag"
-        git commit --allow-empty -m "✅ $run_tag"
-        git tag "$run_tag"
-        
-        echo "📤 Pushing tag to remote..."
-        git push origin HEAD "$run_tag"
-        echo "✅ Tag pushed successfully!"
-        
-        # Exporter les outputs
-        echo "ADVANCE_SEC=$ADVANCE_SEC" >> $GITHUB_OUTPUT
-        echo "attempt_number=$attempt_count" >> $GITHUB_OUTPUT
-        
-        echo "======================================"
+      # Exporter vers GITHUB_OUTPUT
+      echo "date=$date" >> $GITHUB_OUTPUT
+      echo "time=$time" >> $GITHUB_OUTPUT
+      echo "day=$day" >> $GITHUB_OUTPUT
+      echo "level=$level" >> $GITHUB_OUTPUT
+      echo "should_continue=true" >> $GITHUB_OUTPUT
+      
+      echo "======================================"

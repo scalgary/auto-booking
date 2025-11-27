@@ -4,6 +4,7 @@ env:
   TARGET_UTC_HOUR : 15
   MAX_WAIT_SECONDS: 500  
   TAG_PREFIX: 'his'  # ← Change 'my' ou 'his'
+  REGISTRATION_JSON_FILE: 'his_registrations.json'  # ← Change ici
    # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
@@ -52,6 +53,8 @@ jobs:
       - name: Load registration any parameters
         id: params                                           # ← ID du step
         uses: ./.github/actions/load-any-params
+        with: 
+          json_file="${{ env.REGISTRATION_JSON_FILE }}"
     
     
 
