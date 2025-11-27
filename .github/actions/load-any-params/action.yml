@@ -84,13 +84,12 @@ runs:
         echo "   🕐 Time: $time"
         echo "   📆 Day: $day"
         echo "   🎾 Level: $level"
-      
+
+        #Exporter vers GITHUB_OUTPUT
+        echo "date=$date" >> $GITHUB_OUTPUT
+        echo "time=$time" >> $GITHUB_OUTPUT
+        echo "day=$day" >> $GITHUB_OUTPUT
+        echo "level=$level" >> $GITHUB_OUTPUT
+        echo "should_continue=true" >> $GITHUB_OUTPUT
         
-      # Exporter vers GITHUB_OUTPUT
-      echo "date=$date" >> $GITHUB_OUTPUT
-      echo "time=$time" >> $GITHUB_OUTPUT
-      echo "day=$day" >> $GITHUB_OUTPUT
-      echo "level=$level" >> $GITHUB_OUTPUT
-      echo "should_continue=true" >> $GITHUB_OUTPUT
-      
-      echo "======================================"
+        echo "======================================"

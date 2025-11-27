@@ -54,7 +54,7 @@ jobs:
         id: params                                           # ← ID du step
         uses: ./.github/actions/load-any-params
         with: 
-          json_file="${{ env.REGISTRATION_JSON_FILE }}"
+          json_file=${{ env.REGISTRATION_JSON_FILE }}
     
     
 
