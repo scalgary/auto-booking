@@ -47,9 +47,11 @@ runs:
         echo "📂 Workspace: $WORKSPACE"
         echo "📂 Current dir: $(pwd)"
         
-        # Configuration Git avec -C pour spécifier le répertoire
+        # Configuration Git - ORDRE IMPORTANT!
         echo "🔧 Configuring Git..."
-        git -C "$WORKSPACE" config --global --add safe.directory "$WORKSPACE"
+        # 1. D'abord ajouter le safe.directory SANS -C
+        git config --global --add safe.directory "$WORKSPACE"
+        # 2. Ensuite configurer user avec -C
         git -C "$WORKSPACE" config user.name "bot"
         git -C "$WORKSPACE" config user.email "bot@github.com"
         

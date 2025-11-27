@@ -52,8 +52,7 @@ jobs:
       - name: Load registration his parameters
         id: params                                           # ← ID du step
         uses: ./.github/actions/load-his-params
-        with:
-          event_name: ${{ github.event_name }}
+
     
       - name: manage-attempt-tags action
         id: tags
