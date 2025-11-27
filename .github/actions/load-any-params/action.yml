@@ -41,28 +41,11 @@ runs:
         echo "🏷️  Managing attempt tags"
         echo "======================================"
         
-        WORKSPACE="${{ inputs.workspace_path }}"
-        
-        # Debug
-        echo "📂 Workspace: $WORKSPACE"
-        echo "📂 Current dir: $(pwd)"
-        
-        # Configuration Git - Écrire directement dans le fichier de config global
+        # Configuration Git
         echo "🔧 Configuring Git..."
-        mkdir -p ~/.gitconfig.d
-        echo "[safe]" > ~/.gitconfig.d/safe-directory
-        echo "    directory = $WORKSPACE" >> ~/.gitconfig.d/safe-directory
-        
-        # Inclure le fichier dans la config globale
-        git config --global --add include.path ~/.gitconfig.d/safe-directory
-        
-        # Configurer user
-        git config --global user.name "bot"
-        git config --global user.email "bot@github.com"
-        
-        # Vérifier qu'on peut accéder au repo
-        echo "🔍 Verifying Git access..."
-        cd "$WORKSPACE" || exit 1
+        git config --global --add safe.directory ${{ inputs.workspace_path }}
+        git config user.name "bot"
+        git config user.email "bot@github.com"
         
         # Configurer l'authentification avec le token
         echo "🔐 Setting up authentication..."

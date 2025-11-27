@@ -49,22 +49,69 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Load registration his parameters
+      - name: Load registration any parameters
         id: params                                           # ← ID du step
-        uses: ./.github/actions/load-his-params
-
+        uses: ./.github/actions/load-any-params
     
-      - name: manage-attempt-tags action
-        id: tags
-        if: steps.params.outputs.should_continue == 'true'
-        uses: ./.github/actions/manage-attempt-tags
-        with:
-          target_date: ${{ steps.params.outputs.date  }}
-          workspace_path: ${{ github.workspace }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_repository: ${{ github.repository }}  # ← OBLIGATOIRE
-          tag_prefix: ${{ env.TAG_PREFIX }}
+    
 
+      - name: Git setup and fetch tags
+        id: look_tag
+      
+        if: steps.params.outputs.should_continue == 'true'
+        run: |
+          pwd
+          ls -la
+          echo "🔧 Configuring Git..."
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config user.name "bot"
+          git config user.email "bot@github.com"
+          echo "🏷️ Fetching tags from remote..."
+          git fetch --tags
+          echo "✅ Tags fetched successfully"
+          target_date="${{ steps.params.outputs.date }}"
+          tag="bot_success_${target_date}"
+          echo "🔍 Looking for tag: $tag"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^${tag}$"; then
+            echo "🏷️ ✅ Success tag already exists: $tag"
+            echo "🛑 Stopping workflow (success already registered)"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "📝 Tag not found, continuing..."
+          echo "should_continue=true" >> $GITHUB_OUTPUT
+
+          # Compter les tentatives existantes
+          attempt_count=$(git tag -l "bot_run_${target_date}_*" | wc -l)
+          echo "📊 Existing attempts: $attempt_count"
+          echo "🎯 This will be attempt #$attempt_count"
+          
+          # Calculer l'avance : attempt 0 = -2, puis +2, +4, +6...
+          if [ $attempt_count -eq 0 ]; then
+            ADVANCE_SEC=-4
+            echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
+          else
+            ADVANCE_SEC=$(( -4 + attempt_count * 2 ))
+            echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
+          fi
+          
+          # Créer le tag
+          tag="bot_run_${target_date}_${attempt_count}"
+          echo "🏷️ Creating tag: $tag"
+          git commit --allow-empty -m "✅ $tag"
+          git tag "$tag"
+          
+          echo "📤 Pushing tag to remote..."
+          git push origin HEAD "$tag"
+          echo "✅ Tag pushed successfully!"
+          echo "======================================"
+
+          # Exporter les valeurs
+          echo "ADVANCE_SEC=$ADVANCE_SEC" >> $GITHUB_OUTPUT
+          echo "attempt_number=$attempt_count" >> $GITHUB_OUTPUT
+          echo "======================================"
 
 
 
@@ -269,17 +316,4 @@ jobs:
           echo "✅ Tag pushed successfully!"
           echo "======================================"
 
-              # ==========================================
-      # STEP 2: Test create-success-tag action
-      # ==========================================
-      - name: Test create-success-tag action
-        if: steps.check.outputs.should_continue == 'true'  && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
 
-        id: test
-        uses: ./.github/actions/create-success-tag
-        with:
-          target_date: ${{ steps.params.outputs.date }}
-          workspace_path: ${{ github.workspace }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_repository: ${{ github.repository }}
-          tag_prefix: ${{ env.TAG_PREFIX }}
