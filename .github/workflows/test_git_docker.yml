@@ -18,21 +18,23 @@ jobs:
       image: scalgary/selenium-env:latest
       options: --workdir /github/workspace
 
+
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true      # OBLIGATOIRE
 
-      - name: Fix git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Fetch all tags
+      - name: Fetch tags (sécurité)
         run: git fetch --tags --force
 
-      - name: Count tags
-        id: counttags
+
+      - name: Run count-tags
         uses: ./.github/actions/count-tags
+        id: count
 
       - name: Output
         run: echo "Tags = ${{ steps.counttags.outputs.tag_count }}"

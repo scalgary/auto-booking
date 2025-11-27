@@ -1,10 +1,17 @@
-name: "Count Tags"
-description: "Compte les tags du repo"
+name: "count tags"
+description: "Count git tags"
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - id: count
+    - name: Mark repo as safe (évite 'dubious ownership')
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+    - name: Fetch tags
+      run: git fetch --tags --force
+
+    - name: Count tags
+      id: count
       shell: bash
       run: |
         TAG_COUNT=$(git tag | wc -l)
-        echo "tag_count=$TAG_COUNT" >> $GITHUB_OUTPUT
+        echo "tag_count=$TAG_COUNT" >> "$GITHUB_OUTPUT"
