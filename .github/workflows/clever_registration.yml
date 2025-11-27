@@ -17,6 +17,7 @@ on:
 
     - cron: '59 14 * * *' # 23:55 Calgary
     - cron: '0 15 * * *' # 00:00 Calgary
+    - cron: '45 15 * * *' # 00:00 Calgary
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
   #  - cron: '0 14 * * *' # 00:00 Calgary
@@ -62,64 +63,15 @@ jobs:
         with:
           event_name: ${{ github.event_name }}
     
-
-      - name: Git setup and fetch tags
-        id: look_tag
-      
+      - name: manage-attempt-tags action
+        id: tags
         if: steps.params.outputs.should_continue == 'true'
-        run: |
-          pwd
-          ls -la
-          echo "🔧 Configuring Git..."
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config user.name "bot"
-          git config user.email "bot@github.com"
-          echo "🏷️ Fetching tags from remote..."
-          git fetch --tags
-          echo "✅ Tags fetched successfully"
-          target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
-          echo "🔍 Looking for tag: $tag"
-          
-          # Check if tag already exists
-          if git tag -l | grep -q "^${tag}$"; then
-            echo "🏷️ ✅ Success tag already exists: $tag"
-            echo "🛑 Stopping workflow (success already registered)"
-            echo "should_continue=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          echo "📝 Tag not found, continuing..."
-          echo "should_continue=true" >> $GITHUB_OUTPUT
+        uses: ./.github/actions/manage-attempt-tags
+        with:
+          target_date: ${{ steps.params.outputs.date  }}
+          workspace_path: ${{ github.workspace }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Compter les tentatives existantes
-          attempt_count=$(git tag -l "bot_run_${target_date}_*" | wc -l)
-          echo "📊 Existing attempts: $attempt_count"
-          echo "🎯 This will be attempt #$attempt_count"
-          
-          # Calculer l'avance : attempt 0 = -2, puis +2, +4, +6...
-          if [ $attempt_count -eq 0 ]; then
-            ADVANCE_SEC=-4
-            echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
-          else
-            ADVANCE_SEC=$(( -4 + attempt_count * 2 ))
-            echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
-          fi
-          
-          # Créer le tag
-          tag="bot_run_${target_date}_${attempt_count}"
-          echo "🏷️ Creating tag: $tag"
-          git commit --allow-empty -m "✅ $tag"
-          git tag "$tag"
-          
-          echo "📤 Pushing tag to remote..."
-          git push origin HEAD "$tag"
-          echo "✅ Tag pushed successfully!"
-          echo "======================================"
-
-          # Exporter les valeurs
-          echo "ADVANCE_SEC=$ADVANCE_SEC" >> $GITHUB_OUTPUT
-          echo "attempt_number=$attempt_count" >> $GITHUB_OUTPUT
-          echo "======================================"
 
 
 
@@ -129,7 +81,7 @@ jobs:
       - name: timing
         id: check
         shell: bash
-        if: steps.look_tag.outputs.should_continue == 'true'
+        if: steps.tags.outputs.should_continue == 'true'
         run: |
           echo "======================================"
           echo "🕐 Checking timing and tags"
@@ -222,14 +174,14 @@ jobs:
             echo "======================================"
             # Récupérer l'heure cible
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-            ADVANCE_SEC=${{ steps.look_tag.outputs.ADVANCE_SEC }}
+            ADVANCE_SEC=${{ steps.tags.outputs.ADVANCE_SEC }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
 
 
             echo "📋 Configuration:"
             echo "   🎯 Target: ${TARGET_HOUR}:00:00 UTC"
             echo "   ⏰ Advance: ${ADVANCE_SEC} seconds"
-            echo "   🔢 Attempt: #${{ steps.look_tag.outputs.attempt_number }}"
+            echo "   🔢 Attempt: #${{ steps.tags.outputs.attempt_number }}"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
             if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
