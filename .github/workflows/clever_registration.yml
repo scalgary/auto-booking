@@ -26,6 +26,7 @@ on:
   #  - cron: '50 13 * * *' # 23:55 Calgary
   #  - cron: '0 14 * * *' # 00:00 Calgary
 
+  workflow_dispatch:  # Ajoutez cette ligne
 
 
 
@@ -172,12 +173,12 @@ jobs:
             echo "   🔢 Attempt: #${{ steps.tags.outputs.attempt_number }}"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
-            
+
             current_hour=$((10#$(date -u +%H)))
             current_minute=$((10#$(date -u +%M)))
             current_second=$((10#$(date -u +%S)))
             current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
-            
+              
             # ADVANCE_SEC négatif = avant, positif = après
             target_total_seconds=$(( (TARGET_HOUR * 3600) ))
             diff_seconds=$(( target_total_seconds - current_total_seconds  + ADVANCE_SEC))
@@ -185,7 +186,7 @@ jobs:
             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             if [ $diff_seconds -gt 0 ]; then
               echo "⏰ Waiting $diff_seconds seconds..."
-              
+                
               # Calcul de l'heure de réveil prévue
               wake_hour=$(( (target_total_seconds / 3600) % 24 ))
               wake_minute=$(( (target_total_seconds % 3600) / 60 ))
@@ -193,7 +194,7 @@ jobs:
               printf "   Wake up scheduled at: %02d:%02d:%02d UTC\n" $wake_hour $wake_minute $wake_second
               
               sleep $diff_seconds
-              
+                
               # Afficher l'heure exacte du réveil
               actual_time=$(date -u +"%H:%M:%S")
               echo "✅ Woke up at: $actual_time UTC"
@@ -201,7 +202,7 @@ jobs:
             else
               echo "⚠️ Already past target time (by $((-diff_seconds)) seconds)"
             fi
-
+   
 
             echo "📅 Date: ${{ steps.params.outputs.date }}"
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
