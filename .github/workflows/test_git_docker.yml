@@ -24,16 +24,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Si ton image n'a pas git, active cette étape
-      - name: Ensure git is installed
-        run: |
-          if ! command -v git; then
-            apt-get update && apt-get install -y git
-          fi
+      - name: Fix git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Count tags
         id: counttags
         uses: ./.github/actions/count-tags
 
       - name: Output
-        run: echo "Le repo contient ${{ steps.counttags.outputs.tag_count }} tags"
+        run: echo "Tags = ${{ steps.counttags.outputs.tag_count }}"
