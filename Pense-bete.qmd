@@ -29,13 +29,46 @@ docker container prune
 docker exec my-selenium python reminder.py local
 
 
+# Voir tous les commits qui ont modifié ce fichier
+git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/workflows/clever_registration.yml
 
 
 backup-main-2024-11-27
 
 ff81d3d
 
-git show ff81d3d:.github/load-any-params/action.yml >> test.yml  
-git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/actions/load-any-params/action.yml
+git show 05b73ad:.github/workflows/clever_registration.yml > test.yml  
 git stash save -u "keep" 
 git stash show stash@{0}     
+
+
+# Voir tous les commits qui ont modifié ce fichier
+git log --oneline .github/workflows/clever_registration.yml
+
+# Ou avec plus de détails
+git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/workflows/clever_registration.yml
+
+# Comparer avec le commit précédent dans terminal
+git diff HEAD~1 HEAD -- .github/workflows/clever_registration.yml 
+
+
+# Créer des fichiers temporaires et les comparer
+git show f99c9c8:.github/workflows/clever_registration.yml > /tmp/workflow-old.yml
+cp .github/workflows/clever_registration.yml  /tmp/workflow-current.yml
+code -d /tmp/workflow-old.yml /tmp/workflow-current.yml
+
+
+# Sauver la vieille version
+git show f99c9c8:.github/workflows/clever_registration.yml > ~/Desktop/workflow-f99c9c8.yml
+
+# Ouvrir les deux dans VS Code
+code ~/Desktop/workflow-f99c9c8.yml .github/workflows/bot-his.yml
+
+
+FICHIER="docker-compose.yml" && git show jupyter:$FICHIER > /tmp/jupyter.txt && git show main:$FICHIER > /tmp/event.txt && /usr/local/bin/code --wait --diff /tmp/event.txt /tmp/jupyter.txt
+FICHIER="github/workflows/clever_registration.yml" && git show f99c9c8:$FICHIER > /tmp/f99c9c8.yml && git show HEAD:$FICHIER > /tmp/current.yml && code --wait --diff /tmp/f99c9c8.yml /tmp/current.yml
+
+FICHIER=".github/workflows/clever_registration.yml" && git show f99c9c8:$FICHIER > /tmp/f99c9c8.yml && git show HEAD:$FICHIER > /tmp/current.yml && code --wait --diff /tmp/f99c9c8.yml /tmp/current.yml
+
+
+git show f99c9c8::.github/workflows/clever_registration.yml
