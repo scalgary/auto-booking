@@ -20,6 +20,10 @@ on:
 
     - cron: '59 14 * * *' # 23:55 Calgary
     - cron: '0 15 * * *' # 00:00 Calgary
+    - cron: '10 16 * * *' # 00:00 Calgary
+    - cron: '20 16 * * *' # 00:00 Calgary
+
+
 
 
   workflow_dispatch:  # Ajoutez cette ligne
