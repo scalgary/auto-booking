@@ -69,9 +69,12 @@ jobs:
           git fetch --tags
           echo "✅ Tags fetched successfully"
           target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
+          prefix="${{ env.TAG_PREFIX }}"
+          tag="${prefix}_bot_success_${target_date}"
+          echo "🏷️ Tag prefix: $prefix"
           echo "🔍 Looking for tag: $tag"
-          
+
+
           # Check if tag already exists
           if git tag -l | grep -q "^${tag}$"; then
             echo "🏷️ ✅ Success tag already exists: $tag"
@@ -302,7 +305,8 @@ jobs:
           echo "🏷️ Creating success tag"
           echo "======================================"
           target_date="${{ steps.params.outputs.date }}"
-          tag="bot_success_${target_date}"
+          prefix="${{ env.TAG_PREFIX }}"
+          tag="${prefix}_bot_success_${target_date}"
 
           echo "📝 Tag to create: $tag"
           git pull
