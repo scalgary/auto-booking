@@ -103,6 +103,7 @@ jobs:
           git tag "$tag"
           
           echo "📤 Pushing tag to remote..."
+          git pull origin main
           git push origin HEAD "$tag"
           echo "✅ Tag pushed successfully!"
           echo "======================================"
@@ -208,14 +209,14 @@ jobs:
             echo "======================================"
             # Récupérer l'heure cible
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-            ADVANCE_SEC=${{ steps.tags.outputs.ADVANCE_SEC }}
+            ADVANCE_SEC=${{ steps.look_tag.outputs.ADVANCE_SEC }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
 
 
             echo "📋 Configuration:"
             echo "   🎯 Target: ${TARGET_HOUR}:00:00 UTC"
             echo "   ⏰ Advance: ${ADVANCE_SEC} seconds"
-            echo "   🔢 Attempt: #${{ steps.tags.outputs.attempt_number }}"
+            echo "   🔢 Attempt: #${{ steps.look_tag.outputs.attempt_number }}"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
 
