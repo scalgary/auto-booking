@@ -1,0 +1,24 @@
+name: Test Concurrency
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: auto-booking-bot  # MÊME groupe que ton vrai workflow
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate long booking process
+        run: |
+          echo "🚀 Workflow started at $(date -u '+%H:%M:%S')"
+          echo "⏳ Sleeping 60 seconds to simulate booking..."
+          
+          for i in {1..60}; do
+            echo "⏱️  Second $i/60"
+            sleep 1
+          done
+          
+          echo "✅ Workflow finished at $(date -u '+%H:%M:%S')"
