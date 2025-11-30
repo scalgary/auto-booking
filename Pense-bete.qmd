@@ -1,97 +1,153 @@
 ---
-title: "Untitled"
+title: "Commands used often"
 format: html
 ---
 
 # Commandes classiques
-## alias git
-1 - pour voir mes alias dans mon repo
+## Git
+### Alias
+1 - Pour voir mes alias dans mon repo
 git config --local --get-regexp alias
-2 - pour configurer des alias
+```
+alias.cj !git add -u "*.json" && git commit -m "update json files registrations"
+alias.ci !git add ".gitignore" && git commit -m "Improve Gitignore"
+alias.wk !git add -u ".github/workflows/" && git commit -m "improve workflows"
+```
+2 - Pour configurer des alias
+```
 git config --local alias.wk '!git add -u ".github/workflows/" && git commit -m "improve workflows"'
-3 - git stash - ne pas oublier les fichiers untrackers
-git stash push -u -m "WIP: convertisseur"
-## docker
-1 - lance le container
-docker-compose down && docker-compose up -d
-2 - jupyter
-docker exec my-selenium python -m ipykernel install --name=selenium --display-name="Selenium Python"
-3 - lance code
-docker exec my-selenium  python  main.py
-4 - get list kernels
-docker exec my-selenium jupyter kernelspec list
-http://localhost:8888
-5 voir les images
-docker image ls 
-6 - supprimer les containers arretes
-docker container prune
-
-docker exec my-selenium python reminder.py local
-
-
-# Voir tous les commits qui ont modifié ce fichier
-git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/workflows/clever_registration.yml
-
-
-backup-main-2024-11-27
-
-ff81d3d
-
-git show 05b73ad:.github/workflows/clever_registration.yml > test.yml  
-git stash save -u "keep" 
+```
+### Stash
+3 - Git stash - ne pas oublier les fichiers untrackes et ignores et mettre un comment 
+```
+git stash push -au -m "WIP: convertisseur"
+```
+```
 git stash show stash@{0}     
-
-
-# Voir tous les commits qui ont modifié ce fichier
-git log --oneline .github/workflows/clever_registration.yml
-
-# Ou avec plus de détails
+git stash drop stash@{0}
+git stash show -p stash@{0}
+git stash pop - aplique et delete un stash
+```
+### Look up in history
+4 - Voir tous les commits qui ont modifié ce fichier
+```
 git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/workflows/clever_registration.yml
 
-# Comparer avec le commit précédent dans terminal
+git show 05b73ad:.github/workflows/clever_registration.yml > 05b73ad.yml  
 git diff HEAD~1 HEAD -- .github/workflows/clever_registration.yml 
+FICHIER="README.md" && git show b2bbf63:$FICHIER > /tmp/jupyter.txt && git show main:$FICHIER > /tmp/event.txt && /usr/local/bin/code --wait --diff /tmp/event.txt /tmp/jupyter.txt
 
 
-# Créer des fichiers temporaires et les comparer
-git show f99c9c8:.github/workflows/clever_registration.yml > /tmp/workflow-old.yml
-cp .github/workflows/clever_registration.yml  /tmp/workflow-current.yml
-code -d /tmp/workflow-old.yml /tmp/workflow-current.yml
+FICHIER="README.md" && git show b2bbf63:$FICHIER > /tmp/jupyter.txt && /usr/local/bin/code --wait --diff $FICHIER /tmp/jupyter.txt
 
+```
 
-# Sauver la vieille version
-git show f99c9c8:.github/workflows/clever_registration.yml > ~/Desktop/workflow-f99c9c8.yml
-
-# Ouvrir les deux dans VS Code
-code ~/Desktop/workflow-f99c9c8.yml .github/workflows/bot-his.yml
-
-
-FICHIER="docker-compose.yml" && git show jupyter:$FICHIER > /tmp/jupyter.txt && git show main:$FICHIER > /tmp/event.txt && /usr/local/bin/code --wait --diff /tmp/event.txt /tmp/jupyter.txt
-FICHIER="github/workflows/clever_registration.yml" && git show f99c9c8:$FICHIER > /tmp/f99c9c8.yml && git show HEAD:$FICHIER > /tmp/current.yml && code --wait --diff /tmp/f99c9c8.yml /tmp/current.yml
-
-FICHIER=".github/workflows/clever_registration.yml" && git show f99c9c8:$FICHIER > /tmp/f99c9c8.yml && git show HEAD:$FICHIER > /tmp/current.yml && code --wait --diff /tmp/f99c9c8.yml /tmp/current.yml
-
-
-git show f99c9c8::.github/workflows/clever_registration.yml
-
-
-git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/actions/load-any-params/action.yml
-
-
-FICHIER=".github/actions/load-any-params/action.yml" && git show 34731ae:$FICHIER > 34731ae.yml && git show HEAD:$FICHIER > current.yml && code --wait --diff /tmp/34731ae.yml /tmp/current.yml
-
-git show f99c9c8:.github/workflows/clever_registration.yml > /tmp/workflow-old.yml
-
-FICHIER=".github/actions/load-any-params/action.yml" && git show dd8f27c:$FICHIER > dd8f27c.yml && git show HEAD:$FICHIER > current.yml
-
-
-# Voir tous les containers (même arrêtés)
+## Docker
+### Basic usage
+1 - relance le container
+```
+docker-compose down && docker-compose up -d
+```
+2 - jupyter
+```
+docker exec my-selenium python -m ipykernel install --name=selenium --display-name="Selenium Python"
+```
+3 - lance code
+```
+docker exec my-selenium  python  main.py
+```
+4 - get list kernels
+```
+docker exec my-selenium jupyter kernelspec list
+```
+http://localhost:8888
+5 - voir les images
+```
+docker image ls
+``` 
+### Cleaning
+6 - supprimer les containers arretes
+```
+docker container prune -f 
+```
+7 - Voir tous les containers (même arrêtés)
+```
 docker ps -a
-
-# Arrêter tous les containers
+```
+8 - Arrêter tous les containers
+```
 docker stop $(docker ps -aq)
+```
 
-# Nettoyer les containers arrêtés
-docker container prune -f
 
-# Relancer ton container
-docker compose up
+### Cherche
+```
+#!/bin/bash
+
+# Find files containing "{name}" in main branch
+echo "=== Files containing 'CALDAV' in main branch ==="
+git grep -l "CALDAV" main
+
+echo -e "\n=== Detailed search with line numbers ==="
+git grep -n "CALDAV" main
+
+echo -e "\n=== History of files containing 'CALDAV' ==="
+# Get list of files and show their history
+git grep -l "CALDAV" main | while read file; do
+    echo "--- History for: $file ---"
+    git log --oneline --follow main -- "$file"
+    echo ""
+done
+
+echo -e "\n=== Alternative: Combined history of all matching files ==="
+git log --oneline main -- $(git grep -l "CALDAV" main | tr '\n' ' ')
+```
+
+### work local
+```
+#!/bin/bash
+
+# Relance avec le .env
+docker run -d --platform linux/amd64 \
+  --name jupyter-selenium \
+  -v $(pwd):/workspace \
+  -w /workspace \
+  -p 8888:8888 \
+  --env-file .env \
+  scalgary/selenium-env:latest \
+  bash -c "pip install --root-user-action=ignore jupyter ipykernel && jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''"
+
+
+echo "Attendre que Jupyter démarre..."
+sleep 5
+docker logs jupyter-selenium
+
+
+# Arrête l'ancien
+#docker stop jupyter-selenium
+#docker rm jupyter-selenium
+
+
+# http://localhost:8888
+# docker-compose down && docker-compose up -d
+# # Sur ton Mac (pas dans le container)
+
+# Dans le container
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+➜  auto-booking git:(main) ✗ docker exec -it my-selenium python -m unittest tests/test_check_date.py -v
+➜  auto-booking git:(main) ✗ docker exec my-selenium python -m unittest tests.test_check_date.TestCheckDate.test_in_7_days -v    
