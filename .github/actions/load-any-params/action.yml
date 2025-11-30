@@ -49,41 +49,49 @@ runs:
         echo "======================================"
         echo "📖 Loading registration parameters"
         echo "======================================"
-        
-        JSON_FILE="${{ inputs.json_file }}"
-        echo "📄 Using JSON file: $JSON_FILE"
-        
+        # Si manuel, utiliser les inputs
+         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+           echo "🔧 Manual trigger - using inputs"
+           date="${{ inputs.date }}"
+           time="${{ inputs.time }}"
+           level="${{ inputs.level }}"
+           day=$(date -d "$date" +%A)
+         else
+          JSON_FILE="${{ inputs.json_file }}"
+          echo "📄 Using JSON file: $JSON_FILE"
+          
 
-          # Vérifier que le fichier existe
-        if [ ! -f "$JSON_FILE" ]; then
-          echo "❌ JSON file not found: $JSON_FILE"
-          echo "should_continue=false" >> $GITHUB_OUTPUT
-          exit 0
+            # Vérifier que le fichier existe
+          if [ ! -f "$JSON_FILE" ]; then
+            echo "❌ JSON file not found: $JSON_FILE"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+            
+          # Récupérer le jour actuel
+          current_day=$(date -u +%A)
+          echo "📅 Current day (UTC): $current_day"
+          
+          # Chercher la registration pour aujourd'hui
+          registration=$(jq -r --arg day "$current_day" \
+            '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
+            "$JSON_FILE" | head -1)
+            
+          # Vérifier si une registration existe
+          if [ -z "$registration" ]; then
+            echo "❌ No registration found for $current_day in $JSON_FILE"
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+            
+          # Split et afficher
+          IFS='|' read -r date time day level <<< "$registration"
+          echo "✅ Registration found:"
+          echo "   📅 Date: $date"
+          echo "   🕐 Time: $time"
+          echo "   📆 Day: $day"
+          echo "   🎾 Level: $level"
         fi
-          
-        # Récupérer le jour actuel
-        current_day=$(date -u +%A)
-        echo "📅 Current day (UTC): $current_day"
-        
-        # Chercher la registration pour aujourd'hui
-        registration=$(jq -r --arg day "$current_day" \
-          '.[] | select(.day == $day) | "\(.date)|\(.time)|\(.day)|\(.level)"' \
-          "$JSON_FILE" | head -1)
-          
-        # Vérifier si une registration existe
-        if [ -z "$registration" ]; then
-          echo "❌ No registration found for $current_day in $JSON_FILE"
-          echo "should_continue=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-          
-        # Split et afficher
-        IFS='|' read -r date time day level <<< "$registration"
-        echo "✅ Registration found:"
-        echo "   📅 Date: $date"
-        echo "   🕐 Time: $time"
-        echo "   📆 Day: $day"
-        echo "   🎾 Level: $level"
 
         #Exporter vers GITHUB_OUTPUT
         echo "date=$date" >> $GITHUB_OUTPUT

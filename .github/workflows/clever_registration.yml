@@ -3,9 +3,9 @@ name: Bot Pickleball for HIS
 env:
   TARGET_UTC_HOUR : 15
   MAX_WAIT_SECONDS: 500  
+  ADVANCE_SECONDS: 2
   TAG_PREFIX: 'his'  # ← Change 'my' ou 'his'
   REGISTRATION_JSON_FILE: 'his_registrations.json'  # ← Change ici
-   # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 permissions:
   contents: write
   actions: read
@@ -14,23 +14,32 @@ permissions:
 
 on:
   schedule:
-    - cron: '45 14 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '52 14 * * *' # 23:55 Calgary
-    - cron: '56 14 * * *' # 23:55 Calgary
-
-    - cron: '59 14 * * *' # 23:55 Calgary
-    - cron: '0 15 * * *' # 00:00 Calgary
-    - cron: '10 16 * * *' # 00:00 Calgary
-    - cron: '20 16 * * *' # 00:00 Calgary
-
-
-
-
+    # Fenêtre de booking: 14:45-14:59 UTC (23:45-23:59 Calgary MST)
+    - cron: '45 14 * * *'  # 23:45 Calgary
+    - cron: '52 14 * * *'  # 23:52 Calgary
+    - cron: '56 14 * * *'  # 23:56 Calgary
+    - cron: '59 14 * * *'  # 23:59 Calgary
   workflow_dispatch:  # Ajoutez cette ligne
+    inputs:
+      date:
+        description: 'Date (DD-Mth-YY)'
+        required: true
+      time:
+        description: 'Time (HH:MM)'
+        required: true
+      level:
+        description: 'Level'
+        required: true
+      name:
+        description: 'Name'
+        required: true
+# Empêche les exécutions concurrentes
+concurrency:
+  group: auto-booking-his-bot
+  cancel-in-progress: false  # Queue au lieu de cancel
 
 
 
-#limitation expect registration to begin a 6 UTC"
 
 jobs:
   register:
@@ -59,8 +68,6 @@ jobs:
     
 
       - name: Git setup and fetch tags
-        id: look_tag
-      
         if: steps.params.outputs.should_continue == 'true'
         run: |
           pwd
@@ -72,13 +79,39 @@ jobs:
           echo "🏷️ Fetching tags from remote..."
           git fetch --tags
           echo "✅ Tags fetched successfully"
+
+      # ==========================================
+      # STEP 2: Check tag and timing
+      # ==========================================
+      - name: Check tag & timing
+        id: check
+        shell: bash
+        if: steps.params.outputs.should_continue == 'true'
+        run: |
+          echo "======================================"
+          echo "🕐 Checking timing and tags"
+          echo "======================================"
+          # Récupérer les paramètres
+          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
+          ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
+          MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
+
+          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
+          echo "⏰ Will start ${ADVANCE_SEC} seconds early"
+
+          # POUR TEST MANUEL SEULEMENT
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🧪 Manual run detected - skipping timing check"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           target_date="${{ steps.params.outputs.date }}"
           prefix="${{ env.TAG_PREFIX }}"
           tag="${prefix}_bot_success_${target_date}"
           echo "🏷️ Tag prefix: $prefix"
           echo "🔍 Looking for tag: $tag"
-
-
+          
           # Check if tag already exists
           if git tag -l | grep -q "^${tag}$"; then
             echo "🏷️ ✅ Success tag already exists: $tag"
@@ -87,62 +120,6 @@ jobs:
             exit 0
           fi
           echo "📝 Tag not found, continuing..."
-          echo "should_continue=true" >> $GITHUB_OUTPUT
-
-          # Compter les tentatives existantes
-          attempt_count=$(git tag -l "bot_run_${target_date}_*" | wc -l)
-          echo "📊 Existing attempts: $attempt_count"
-          echo "🎯 This will be attempt #$attempt_count"
-          
-          # Calculer l'avance : attempt 0 = -2, puis +2, +4, +6...
-          if [ $attempt_count -eq 0 ]; then
-            ADVANCE_SEC=-4
-            echo "⏰ First attempt: ${ADVANCE_SEC} seconds (BEFORE target)"
-          else
-            ADVANCE_SEC=$(( -4 + attempt_count * 2 ))
-            echo "⏰ Attempt #${attempt_count}: +${ADVANCE_SEC} seconds (AFTER target)"
-          fi
-          
-          # Créer le tag
-          tag="bot_run_${target_date}_${attempt_count}"
-          echo "🏷️ Creating tag: $tag"
-          git commit --allow-empty -m "✅ $tag"
-          git tag "$tag"
-          
-          echo "📤 Pushing tag to remote..."
-          git pull origin main
-          git push origin HEAD "$tag"
-          echo "✅ Tag pushed successfully!"
-          echo "======================================"
-
-          # Exporter les valeurs
-          echo "ADVANCE_SEC=$ADVANCE_SEC" >> $GITHUB_OUTPUT
-          echo "attempt_number=$attempt_count" >> $GITHUB_OUTPUT
-          echo "======================================"
-
-
-
-      # ==========================================
-      # STEP 2: Check tag and timing
-      # ==========================================
-      - name: timing
-        id: check
-        shell: bash
-        if: steps.look_tag.outputs.should_continue == 'true'
-        run: |
-          echo "======================================"
-          echo "🕐 Checking timing and tags"
-          echo "======================================"
-          # Récupérer les paramètres
-          TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-          MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
-
-
-          echo "🎯 Target UTC hour: ${TARGET_HOUR}:00"
-
-
-
-
           
           # Get current UTC time
           current_hour=$((10#$(date -u +%H)))
@@ -152,15 +129,11 @@ jobs:
 
           echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
           
-          
-          # ADVANCE_SEC négatif = avant, positif = après
-          target_total_seconds=$(( (TARGET_HOUR * 3600) ))
+          # Calcul avec l'avance
+          target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
           diff_seconds=$(( target_total_seconds - current_total_seconds ))
           diff_minutes=$(( diff_seconds / 60 ))
           echo "⏱️ Difference: $diff_seconds seconds ($diff_minutes minutes) avant l'heure cible"
-          echo "⏱️ Seconds to wait: $diff_seconds"
-
-
 
           # Timing logic
           if [ $diff_seconds -gt $MAX_WAIT ]; then
@@ -178,6 +151,9 @@ jobs:
 
 
           echo "======================================"
+
+
+
 
  
 
@@ -215,15 +191,15 @@ jobs:
             echo "🎾 Pickleball Registration Attempt"
             echo "======================================"
             # Récupérer l'heure cible
+            # Récupérer l'heure cible
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
-            ADVANCE_SEC=${{ steps.look_tag.outputs.ADVANCE_SEC }}
+            ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
 
 
             echo "📋 Configuration:"
             echo "   🎯 Target: ${TARGET_HOUR}:00:00 UTC"
             echo "   ⏰ Advance: ${ADVANCE_SEC} seconds"
-            echo "   🔢 Attempt: #${{ steps.look_tag.outputs.attempt_number }}"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
 
@@ -232,9 +208,10 @@ jobs:
             current_second=$((10#$(date -u +%S)))
             current_total_seconds=$(( (current_hour * 3600) + (current_minute * 60) + current_second ))
               
-            # ADVANCE_SEC négatif = avant, positif = après
-            target_total_seconds=$(( (TARGET_HOUR * 3600) ))
-            diff_seconds=$(( target_total_seconds - current_total_seconds  + ADVANCE_SEC))
+            # Calcul avec l'avance
+            target_total_seconds=$(( (TARGET_HOUR * 3600) - ADVANCE_SEC ))
+            diff_seconds=$(( target_total_seconds - current_total_seconds ))
+              
             
             echo "🕐 Current UTC time: ${current_hour}:${current_minute}:${current_second}"
             if [ $diff_seconds -gt 0 ]; then
@@ -264,37 +241,22 @@ jobs:
 
             
             FINAL_CODE=1
-            for i in {1..3}; do
-              echo ""
-              echo "🔄 Attempt $i/3..."
-              python3 bot_execution_sleep.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME"
-              EXIT_CODE=$?
-              echo "📊 Python exit code: $EXIT_CODE"
-              
-              if [ $EXIT_CODE -eq 0 ]; then
-                echo "✅ Registration successful!"
-                FINAL_CODE=0
-                break
-              else
-                echo "❌ Attempt $i failed"
-                if [ $i -lt 3 ]; then
-                  echo "⌛ Waiting 10 seconds before next attempt..."
-                  sleep 10
-                fi
-              fi
-            done
+            echo ""
+            python3 bot_execution_sleep.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME"
+            EXIT_CODE=$?
+            echo "📊 Python exit code: $EXIT_CODE"
+            
+            if [ $EXIT_CODE -eq 0 ]; then
+              echo "✅ Registration successful!"
+              FINAL_CODE=0
+              break
+
+            fi
             
             echo ""
             echo "📊 Final code: $FINAL_CODE"
             echo "PYTHON_EXIT_CODE=$FINAL_CODE" >> $GITHUB_OUTPUT
             echo "======================================"
-            #            if [ $FINAL_CODE -eq 0 ]; then
-            #  echo "🚀 Running script2.py..."
-            #  python3 reminder.py
-
-            # else
-            #  echo "⏭️ Skipping reminder.py (execution.py failed)"
-            # fi
 
             exit 0
 
@@ -315,9 +277,9 @@ jobs:
           echo "📝 Tag to create: $tag"
           git pull
           # git add all_appointments.json
-          git commit --allow-empty -m "✅ $tag"
+          #git commit --allow-empty -m "✅ $tag"
           #git commit -m "✅ $tag"
-          git tag "$tag"
+          git tag "$tag" HEAD
           
           echo "📤 Pushing tag to remote..."
           git push origin HEAD "$tag"

@@ -377,6 +377,8 @@ class TennisBookingBot:
                         'available': False,
                         'spaces': 0
                     }
+                    logger.info(f"⏱️ Availability Slot {time.perf_counter() - overall_start:.3f}s")  # ← AJOUTER
+
         
         logger.warning("❌ Aucun créneau trouvé")
         self._debug_screenshot("no_slot_found")
@@ -468,51 +470,177 @@ class TennisBookingBot:
 
     def _click_book_slot(self, slot):
         """Cliquer pour réserver le créneau"""
-        start_time = time.perf_counter()  # ← AJOUTER
-
+        start_time = time.perf_counter()
         logger.info("📝 Réservation du créneau...")
         self._debug_screenshot("before_book_click")
-        
+
         wait = WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency)
-        
-        parent = slot['button'].find_element(By.XPATH, "./..")
+
+        # === DIAGNOSTIC: Analyser le slot reçu ===
+        logger.info("=== ANALYSE DU SLOT ===")
+        slot_button = slot['button']
+        logger.info(f"📊 Slot disponible: {slot.get('available')}")
+        logger.info(f"👥 Places: {slot.get('spaces')}")
+        logger.info(f"📍 Position: {slot_button.location}")
+        logger.info(f"📏 Taille: {slot_button.size}")
+        logger.info(f"👁️ Visible: {slot_button.is_displayed()}")
+        logger.info(f"✅ Activé: {slot_button.is_enabled()}")
+
+        # Attributs du slot button
+        slot_attrs = {
+            'class-name': slot_button.get_attribute('data-class-name'),
+            'class-date': slot_button.get_attribute('data-class-date'),
+            'class-time': slot_button.get_attribute('data-class-time'),
+            'class-code': slot_button.get_attribute('data-class-code'),
+            'tag': slot_button.tag_name
+        }
+        logger.info(f"🏷️ Attributs du slot: {slot_attrs}")
+
+        # === RECHERCHE DES BOUTONS BOOK ===
+        logger.info("=== RECHERCHE BOUTONS BOOK ===")
+        parent = slot_button.find_element(By.XPATH, "./..")
+        logger.info(f"📦 Parent tag: {parent.tag_name}")
+        logger.info(f"📦 Parent class: {parent.get_attribute('class')}")
+
+        # Chercher tous les boutons Book dans le parent
         book_buttons = parent.find_elements(
             By.XPATH, 
             ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
-        )
-        
-        if not book_buttons:
-            logger.error("❌ Bouton 'Book' non trouvé")
-            logger.info(f"⏱️ Bouton 'Book' non trouvé {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
+)
 
+        logger.info(f"🔍 Nombre de boutons 'Book' trouvés: {len(book_buttons)}")
+
+        if not book_buttons:
+            logger.error("❌ Aucun bouton 'Book' trouvé")
+            logger.info(f"⏱️ Échec en {time.perf_counter() - start_time:.3f}s")
+            
+            # Diagnostic supplémentaire
+            logger.info("🔎 HTML du parent:")
+            logger.info(parent.get_attribute('innerHTML')[:500])
+            
             self._debug_screenshot("book_button_not_found")
             return False
-        
-        try:
-            logger.info("✅ Bouton 'Book' trouvé")
-            logger.info(f"⏱️ Bouton 'Book' trouvé {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
 
+        # === ANALYSE DE TOUS LES BOUTONS TROUVÉS ===
+        logger.info("=== DÉTAILS DES BOUTONS BOOK ===")
+        for i, btn in enumerate(book_buttons):
+            logger.info(f"--- Bouton [{i}] ---")
+            logger.info(f"  Texte: {btn.text}")
+            logger.info(f"  Tag: {btn.tag_name}")
+            logger.info(f"  Class: {btn.get_attribute('class')}")
+            logger.info(f"  data-class-name: {btn.get_attribute('data-class-name')}")
+            logger.info(f"  data-class-code: {btn.get_attribute('data-class-code')}")
+            logger.info(f"  Position: {btn.location}")
+            logger.info(f"  Visible: {btn.is_displayed()}")
+            logger.info(f"  Activé: {btn.is_enabled()}")
+    
+            # Vérifier quel élément est physiquement au-dessus
+            top_element_html = self.driver.execute_script("""
+                var rect = arguments[0].getBoundingClientRect();
+                var centerX = rect.left + rect.width / 2;
+                var centerY = rect.top + rect.height / 2;
+                var topElement = document.elementFromPoint(centerX, centerY);
+                return topElement ? topElement.outerHTML.substring(0, 300) : 'null';
+            """, btn)
+            logger.info(f"  🎯 Élément au centre: {top_element_html[:100]}...")
+
+        # === SÉLECTION DU BON BOUTON ===
+        logger.info("=== SÉLECTION DU BOUTON ===")
+
+        # Essayer de filtrer par data-class-name si disponible
+        target_buttons = [
+            btn for btn in book_buttons 
+            if btn.get_attribute('data-class-name') and 
+                self.course_level in btn.get_attribute('data-class-name')
+        ]
+
+        if target_buttons:
+            logger.info(f"✅ Filtré par course_level: {len(target_buttons)} bouton(s)")
+            button = target_buttons[0]
+        else:
+            logger.warning(f"⚠️ Pas de filtre possible, utilisation du premier bouton")
+            button = book_buttons[0]
+
+        logger.info(f"🎯 Bouton sélectionné: {button.get_attribute('data-class-name') or button.text}")
+
+        # === TENTATIVE DE CLICK ===
+        try:
+            logger.info("=== PRÉPARATION DU CLICK ===")
             
             # Attendre que le bouton soit cliquable
-            button = wait.until(EC.element_to_be_clickable(book_buttons[0]))
-            current_url = self.driver.current_url
-            button.click()
+            button = wait.until(EC.element_to_be_clickable(button))
+            logger.info("✅ Bouton cliquable confirmé par WebDriverWait")
+            logger.info(f"⏱️ Bouton prêt en {time.perf_counter() - start_time:.3f}s")
             
-            # Attendre preuve du succès (page joueur OU checkout)
+            # Scroll le bouton au centre
+            logger.info("📜 Scroll vers le bouton...")
+            self.driver.execute_script("""
+                arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});
+                window.scrollBy(0, -100);
+            """, button)
+            time.sleep(0.3)
+            logger.info("✅ Scroll effectué")
+            
+            self._debug_screenshot("button_centered")
+    
+    # Vérifier à nouveau ce qui est au-dessus après scroll
+            top_after_scroll = self.driver.execute_script("""
+                var rect = arguments[0].getBoundingClientRect();
+                var centerX = rect.left + rect.width / 2;
+                var centerY = rect.top + rect.height / 2;
+                var topElement = document.elementFromPoint(centerX, centerY);
+                return {
+                    html: topElement ? topElement.outerHTML.substring(0, 200) : 'null',
+                    isSameElement: topElement === arguments[0]
+                };
+            """, button)
+    
+            logger.info(f"🔍 Après scroll - Même élément au centre: {top_after_scroll['isSameElement']}")
+            if not top_after_scroll['isSameElement']:
+                logger.warning(f"⚠️ ÉLÉMENT BLOQUANT: {top_after_scroll['html']}")
+            
+            current_url = self.driver.current_url
+            logger.info(f"📍 URL actuelle: {current_url}")
+            
+            # Essayer click normal d'abord
+            logger.info("🖱️ Tentative de click normal...")
+            try:
+                button.click()
+                logger.info("✅ Click normal réussi")
+            except Exception as e:
+                logger.warning(f"⚠️ Click normal échoué: {type(e).__name__}")
+                logger.warning(f"   Message: {str(e)[:200]}")
+                logger.info("🔧 Basculement vers JS click...")
+                self.driver.execute_script("arguments[0].click();", button)
+                logger.info("✅ JS click exécuté")
+    
+            self._debug_screenshot("after_click")
+            
+            # Attendre preuve du succès
+            logger.info("⏳ Attente de confirmation...")
             wait.until(lambda d: 
                 d.current_url != current_url or
                 len(d.find_elements(By.XPATH, f"//*[contains(text(), '{self.player_name}')]")) > 0 or
                 len(d.find_elements(By.XPATH, "//*[contains(text(), 'Select') or contains(text(), 'Choose')]")) > 0
             )
             
+            logger.info(f"📍 Nouvelle URL: {self.driver.current_url}")
             logger.info("✅ Slot booké, page suivante chargée")
-            logger.info(f"⏱️ Click book en {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
-
+            logger.info(f"⏱️ Click book total: {time.perf_counter() - start_time:.3f}s")
             self._debug_screenshot("book_button_clicked")
             return True
+    
+        except TimeoutException as e:
+            logger.error("❌ Timeout lors du click")
+            logger.error(f"   Temps écoulé: {time.perf_counter() - start_time:.3f}s")
+            logger.error(f"   URL finale: {self.driver.current_url}")
+            self._debug_screenshot("book_click_timeout")
+            return False
             
-        except TimeoutException:
-            logger.error("❌ Click échoué ou timeout")
+        except Exception as e:
+            logger.error(f"❌ Erreur inattendue: {type(e).__name__}")
+            logger.error(f"   Message: {str(e)}")
+            logger.error(f"   Temps écoulé: {time.perf_counter() - start_time:.3f}s")
             self._debug_screenshot("book_click_failed")
             return False
     
