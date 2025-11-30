@@ -361,32 +361,34 @@ def click_on_slot(driver, slot_available):
         return True
     return False
 
+if __name__ == "__main__":
 
-driver = access_login(logon_url, email, password) # navigate after login
-possible_to_book, next_week_booking = check_date(TARGET_DATE)
 
-success = False
-if possible_to_book:
-#if check_basket(driver, login_url): #check empty basket
-    driver.get(planning_url) #go to planning after login
+    driver = access_login(logon_url, email, password) # navigate after login
+    possible_to_book, next_week_booking = check_date(TARGET_DATE)
+
+    success = False
+    if possible_to_book:
+    #if check_basket(driver, login_url): #check empty basket
+        driver.get(planning_url) #go to planning after login
     
-    if next_week_booking:
-        next_week_btn = driver.find_element(By.XPATH, "//input[@value='Next Week']")
-        next_week_btn.click()
-    time.sleep(time_sleep)  # Attendre le chargement
-    # Screenshot
-    #driver.save_screenshot("5_planning_page.png")
-    #print("📸 Screenshot: planning_page.png")
-    slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
-    if slot_available:
-        if click_on_slot(driver, slot_available):
-            if click_for_me(driver, TARGET_DATE, my_name):
-                click_confirm_basket(driver)
-                success = True
+        if next_week_booking:
+            next_week_btn = driver.find_element(By.XPATH, "//input[@value='Next Week']")
+            next_week_btn.click()
+        time.sleep(time_sleep)  # Attendre le chargement
+        # Screenshot
+        #driver.save_screenshot("5_planning_page.png")
+        #print("📸 Screenshot: planning_page.png")
+        slot_available = look_for_slots(driver, TARGET_DATE, COURSE_LEVEL, TARGET_TIME)
+        if slot_available:
+            if click_on_slot(driver, slot_available):
+                if click_for_me(driver, TARGET_DATE, my_name):
+                    click_confirm_basket(driver)
+                    success = True
 
-driver.quit()
+    driver.quit()
 
-if success:
-    sys.exit(0)  # Success
-else:
-    sys.exit(1)
+    if success:
+        sys.exit(0)  # Success
+    else:
+        sys.exit(1)
