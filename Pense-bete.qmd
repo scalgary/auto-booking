@@ -72,3 +72,26 @@ FICHIER=".github/workflows/clever_registration.yml" && git show f99c9c8:$FICHIER
 
 
 git show f99c9c8::.github/workflows/clever_registration.yml
+
+
+git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/actions/load-any-params/action.yml
+
+
+FICHIER=".github/actions/load-any-params/action.yml" && git show 34731ae:$FICHIER > 34731ae.yml && git show HEAD:$FICHIER > current.yml && code --wait --diff /tmp/34731ae.yml /tmp/current.yml
+
+git show f99c9c8:.github/workflows/clever_registration.yml > /tmp/workflow-old.yml
+
+FICHIER=".github/actions/load-any-params/action.yml" && git show dd8f27c:$FICHIER > dd8f27c.yml && git show HEAD:$FICHIER > current.yml
+
+
+# Voir tous les containers (même arrêtés)
+docker ps -a
+
+# Arrêter tous les containers
+docker stop $(docker ps -aq)
+
+# Nettoyer les containers arrêtés
+docker container prune -f
+
+# Relancer ton container
+docker compose up

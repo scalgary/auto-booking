@@ -53,7 +53,7 @@ def setup_logger(debug_mode=False):
 
 
 # Initialize logger
-DEBUG = False  # Set to False in production
+DEBUG = True  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
 time_sleep=3
 implicit_wait=0.5
@@ -287,46 +287,35 @@ class TennisBookingBot:
     
     def _navigate_to_planning(self, next_week=False):
         """Naviguer vers la page de planning"""
-        start_time = time.perf_counter()  # ← AJOUTER
-
+        start_time = time.perf_counter()
         logger.info("🗓️ Navigation vers planning...")
-        # ❌ Attente aveugle (toujours 500ms même si chargé en 100ms)
-
-        #self.driver.get(self.planning_url)
-        #time.sleep(self.time_sleep)
-
-
-        # ✅ Attente intelligente (100ms si rapide, 3s si lent)
+        
         self.driver.get(self.planning_url)
-        WebDriverWait(self.driver, timeout = self.time_sleep, poll_frequency=self.poll_frequency).until(
+        WebDriverWait(self.driver, timeout=self.time_sleep, poll_frequency=self.poll_frequency).until(
             EC.presence_of_element_located((By.XPATH, "//button[@data-class-time]"))
-)
-        self._debug_screenshot("planning_page_loaded")
-        logger.info(f"⏱️ Planning semaine  chargé en {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
+        )
+        logger.info(f"⏱️ Planning chargé en {time.perf_counter() - start_time:.3f}s")
 
         if next_week:
-            logger.info("⏭️ Navigation vers semaine suivante...")
+            logger.info(f"⏭️ Next Week → recherche {self.target_date}...")
+            
             next_week_btn = self.driver.find_element(By.XPATH, "//input[@value='Next Week']")
+            self.driver.execute_script("arguments[0].click();", next_week_btn)
             
-            # Capturer un élément qui va changer
-            old_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
-            old_date = old_buttons[0].get_attribute('data-class-date') if old_buttons else None
-            
-            next_week_btn.click()
-            
-            # Attendre que les dates changent (au lieu de time.sleep aveugle)
-            WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency).until(
-                lambda d: (
-                    d.find_elements(By.XPATH, "//button[@data-class-time]") and
-                    d.find_elements(By.XPATH, "//button[@data-class-time]")[0].get_attribute('data-class-date') != old_date
+            # Attendre spécifiquement la target date
+            try:
+                WebDriverWait(self.driver, timeout=self.web_wait_time).until(
+                    EC.presence_of_element_located((
+                        By.XPATH, 
+                        f"//button[contains(@data-class-date, '{self.target_date}')]"
+                    ))
                 )
-            )
-            logger.info("✅ Planning semaine suivante chargé")
-            self._debug_screenshot("next_week_clicked")
+                logger.info(f"✅ Date {self.target_date} trouvée!")
+            except TimeoutException:
+                logger.error(f"❌ Date {self.target_date} non trouvée")
+                self._debug_screenshot("date_not_found")
             
-            logger.info(f"⏱️ Planning semaine suivante chargé en {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
-            
-            self._debug_screenshot("final_planning_view")
+            logger.info(f"⏱️ Total: {time.perf_counter() - start_time:.3f}s")
     
     def _find_available_slot(self):
         """Chercher un créneau disponible"""
@@ -372,12 +361,13 @@ class TennisBookingBot:
                 else:
                     logger.warning("❌ Créneau complet")
                     self._debug_screenshot("slot_full")
+                    logger.info(f"⏱️ Availability Slot {time.perf_counter() - overall_start:.3f}s")  # ← AJOUTER
+
                     return {
                         'button': button,
                         'available': False,
                         'spaces': 0
                     }
-                    logger.info(f"⏱️ Availability Slot {time.perf_counter() - overall_start:.3f}s")  # ← AJOUTER
 
         
         logger.warning("❌ Aucun créneau trouvé")
@@ -800,9 +790,9 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "27-Nov-25"
-DEFAULT_TIME = "8:00"
-DEFAULT_LEVEL = "Intermediate"
+DEFAULT_DATE = "06-Dec-25"
+DEFAULT_TIME = "2:45"
+DEFAULT_LEVEL = "Advanced"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_HIS_NAME', 'Player')
 
 
