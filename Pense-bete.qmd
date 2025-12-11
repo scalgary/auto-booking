@@ -11,7 +11,9 @@ git config --local --get-regexp alias
 ```
 alias.cj !git add -u "*.json" && git commit -m "update json files registrations"
 alias.ci !git add ".gitignore" && git commit -m "Improve Gitignore"
-alias.wk !git add -u ".github/workflows/" && git commit -m "improve workflows"
+
+
+git config alias.cj '!git add -u "*.json"; git commit -m "update json files registrations"'
 ```
 2 - Pour configurer des alias
 ```
@@ -36,6 +38,25 @@ git log --pretty=format:"%h %ad | %s%d [%an]" --date=short .github/workflows/cle
 git show 05b73ad:.github/workflows/clever_registration.yml > 05b73ad.yml  
 git diff HEAD~1 HEAD -- .github/workflows/clever_registration.yml 
 FICHIER="README.md" && git show b2bbf63:$FICHIER > /tmp/jupyter.txt && git show main:$FICHIER > /tmp/event.txt && /usr/local/bin/code --wait --diff /tmp/event.txt /tmp/jupyter.txt
+
+
+
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = git@github.com:scalgary/auto-booking.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	vscode-merge-base = origin/main
+[alias]
+    cj = !git add his_registrations.json my_registrations.json && git commit -m 'update json files registrations'
 
 
 FICHIER="README.md" && git show b2bbf63:$FICHIER > /tmp/jupyter.txt && /usr/local/bin/code --wait --diff $FICHIER /tmp/jupyter.txt
