@@ -1,9 +1,9 @@
 [
   {
-    "date": "16-Dec-25",
+    "date": "23-Dec-25",
     "time": "4:15",
     "day": "Tuesday",
-    "level": "Advanced"
+    "level": "Intermediate"
   },
   {
     "date": "17-Dec-25",
@@ -12,28 +12,28 @@
     "level": "Plus"
   },
   {
-    "date": "13-Dec-25",
+    "date": "20-Dec-25",
     "time": "8:30",
     "day": "Saturday",
-    "level": "Intermediate"
+    "level": "Plus"
 
   },
     {
-    "date": "14-Dec-25",
-    "time": "10:45",
+    "date": "21-Dec-25",
+    "time": "11:00",
     "day": "Sunday",
-    "level": "Intermediate"
+    "level": "Advanced"
 
   },
   {
-    "date": "12-Dec-25",
-    "time": "4:15",
+    "date": "19-Dec-25",
+    "time": "2:45",
     "day": "Friday",
     "level": "Advanced"
 
   },
   {
-    "date": "15-Dec-25",
+    "date": "22-Dec-25",
     "time": "2:30",
     "day": "Monday",
     "level": "Plus"
