@@ -1,6 +1,9 @@
 services:
   selenium-jupyter:
     container_name: my-selenium  # Add this line
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     image: scalgary/selenium-env:latest
     platform: linux/amd64
     volumes:
