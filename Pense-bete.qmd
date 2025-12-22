@@ -151,3 +151,14 @@ docker logs jupyter-selenium
 
 ➜  auto-booking git:(main) ✗ docker exec -it my-selenium python -m unittest tests/test_check_date.py -v
 ➜  auto-booking git:(main) ✗ docker exec my-selenium python -m unittest tests.test_check_date.TestCheckDate.test_in_7_days -v    
+
+
+➜  apollo git:(fresh-start) docker compose -f docker-compose.yml up --build # no override
+
+git show 05b73ad:.github/workflows/clever_registration.yml > 05b73ad.yml  
+git show 5139090:moi/apollo_db.png
+
+http://5dda1a881879:8888/lab?token=
+4a6f2b1670e1199674757a3db41ac56e77a60ecc0dce8f18
+
+docker compose -f docker-compose.yml up --build
