@@ -510,9 +510,9 @@ class TennisBookingBot:
         # 1. Vérifier la date
         can_book, next_week = self._check_date_validity()
         if not can_book:
-            logger.error("❌ Date non valide pour réservation")
+            logger.info("❌ Date non valide pour réservation")
             self._debug_screenshot("invalid_date")
-            return False
+            return True
         
         # 2. Vérifier panier vide
         #if not self._check_basket_empty():

@@ -53,7 +53,7 @@ def setup_logger(debug_mode=False):
 
 
 # Initialize logger
-DEBUG = True  # Set to False in production
+DEBUG = False  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
 time_sleep=3
 implicit_wait=0.5
