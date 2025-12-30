@@ -512,7 +512,7 @@ class TennisBookingBot:
         if not can_book:
             logger.info("❌ Date non valide pour réservation")
             self._debug_screenshot("invalid_date")
-            return True
+            return False #to avoid tag success if date in future
         
         # 2. Vérifier panier vide
         #if not self._check_basket_empty():
