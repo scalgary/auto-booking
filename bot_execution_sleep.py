@@ -57,7 +57,7 @@ DEBUG = False  # Set to False in production
 logger = setup_logger(debug_mode=DEBUG)
 time_sleep=3
 implicit_wait=0.5
-web_wait_time=3
+web_wait_time=4
 poll_frequency=0.1
 ##########
 
@@ -641,8 +641,9 @@ class TennisBookingBot:
         logger.info(f"👤 Sélection du joueur: {self.player_name}")
         self._debug_screenshot("before_player_selection")
         
-        # Attendre que les joueurs soient chargés
+        # Longer timeout for player page (can be slow)
         wait = WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency)
+        
         try:
             wait.until(EC.presence_of_element_located(
                 (By.XPATH, f"//*[contains(text(), '{self.player_name}')]")
@@ -663,21 +664,27 @@ class TennisBookingBot:
             
             if select_buttons:
                 logger.info(f"✅ Bouton trouvé pour {self.player_name}")
-                
-                # Attendre que le bouton soit cliquable
-                button = wait.until(EC.element_to_be_clickable(select_buttons[0]))
+                button = select_buttons[0]
                 current_url = self.driver.current_url
-                button.click()
                 
-                # Attendre changement d'URL ou élément "Checkout"
+                try:
+                    # Wait for clickable
+                    button = wait.until(EC.element_to_be_clickable(button))
+                    button.click()
+                    logger.info("✅ Click normal réussi")
+                except TimeoutException:
+                    # Fallback: force JS click
+                    logger.warning("⚠️ Timeout clickable, force JS click...")
+                    self.driver.execute_script("arguments[0].click();", button)
+                
+                # Wait for result
                 try:
                     wait.until(lambda d: 
                         d.current_url != current_url or 
                         len(d.find_elements(By.XPATH, "//*[contains(text(), 'Checkout')]")) > 0
                     )
                     logger.info("✅ Joueur sélectionné")
-                    logger.info(f"⏱️ Sélection joueur en {time.perf_counter() - start_time:.3f}s")  # ← AJOUTER
-
+                    logger.info(f"⏱️ Sélection joueur en {time.perf_counter() - start_time:.3f}s")
                     self._debug_screenshot("player_selected")
                     return True
                 except TimeoutException:
@@ -686,7 +693,6 @@ class TennisBookingBot:
         logger.error(f"❌ Sélection impossible")
         self._debug_screenshot("player_selection_failed")
         return False
-    
     def _confirm_booking(self):
         """Confirmer la réservation"""
         start_time = time.perf_counter()  # ← AJOUTER
@@ -790,9 +796,9 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "06-Dec-25"
-DEFAULT_TIME = "2:45"
-DEFAULT_LEVEL = "Advanced"
+DEFAULT_DATE = "10-Jan-26"
+DEFAULT_TIME = "8:30"
+DEFAULT_LEVEL = "Novice"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_HIS_NAME', 'Player')
 
 
