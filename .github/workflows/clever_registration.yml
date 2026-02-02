@@ -3,7 +3,7 @@ name: Bot Pickleball for HIS
 env:
   TARGET_UTC_HOUR : 15
   MAX_WAIT_SECONDS: 500  
-  ADVANCE_SECONDS: 1
+  ADVANCE_SECONDS: 0
   TAG_PREFIX: 'his'  # ← Change 'my' ou 'his'
   REGISTRATION_JSON_FILE: 'his_registrations.json'  # ← Change ici
 permissions:
