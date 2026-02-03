@@ -2,7 +2,7 @@ name: Bot Pickleball for HIS
 
 env:
   TARGET_UTC_HOUR : 15
-  MAX_WAIT_SECONDS: 500  
+  MAX_WAIT_SECONDS: 600  
   ADVANCE_SECONDS: 0
   TAG_PREFIX: 'his'  # ← Change 'my' ou 'his'
   REGISTRATION_JSON_FILE: 'his_registrations.json'  # ← Change ici
@@ -15,10 +15,13 @@ permissions:
 on:
   schedule:
     # Fenêtre de booking: 14:45-14:59 UTC (23:45-23:59 Calgary MST)
-    - cron: '45 14 * * *'  # 23:45 Calgary
-    - cron: '52 14 * * *'  # 23:52 Calgary
-    - cron: '56 14 * * *'  # 23:56 Calgary
-    - cron: '59 14 * * *'  # 23:59 Calgary
+    - cron: '00 14 * * *'  # 23:45 Calgary
+    - cron: '12 14 * * *'  # 23:52 Calgary
+    - cron: '24 14 * * *'  # 23:56 Calgary
+    - cron: '36 14 * * *'  # 23:59 Calgary
+    - cron: '48 14 * * *'  # 23:59 Calgary
+    - cron: '52 14 * * *'  # 23:59 Calgary
+
   workflow_dispatch:  # Ajoutez cette ligne
     inputs:
       date:
