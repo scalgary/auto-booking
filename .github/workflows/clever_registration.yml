@@ -23,19 +23,7 @@ on:
     - cron: '52 14 * * *'  # 23:59 Calgary
 
   workflow_dispatch:  # Ajoutez cette ligne
-    inputs:
-      date:
-        description: 'Date (DD-Mth-YY)'
-        required: true
-      time:
-        description: 'Time (HH:MM)'
-        required: true
-      level:
-        description: 'Level'
-        required: true
-      name:
-        description: 'Name'
-        required: true
+
 # Empêche les exécutions concurrentes
 concurrency:
   group: auto-booking-his-bot
