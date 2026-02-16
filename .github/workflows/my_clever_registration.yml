@@ -264,6 +264,7 @@ jobs:
               echo "   (${ADVANCE_SEC} seconds before ${TARGET_HOUR}:00:00)"
             else
               echo "⚠️ Already past target time (by $((-diff_seconds)) seconds)"
+            fi
 
 
             echo "📅 Date: ${{ steps.params.outputs.date }}"

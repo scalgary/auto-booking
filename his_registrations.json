@@ -2,7 +2,7 @@
 
 
     {
-    "date": "18-Feb-26",
+    "date": "25-Feb-26",
     "time": "2:30",
     "day": "Wednesday",
     "level": "Advanced"
@@ -31,15 +31,8 @@
     "day": "Monday",
     "level": "Plus"
   }
-  ,
+  
 
-
-    {
-    "date": "10-Feb-26",
-    "time": "4:30",
-    "day": "Tuesday",
-    "level": "Plus"
-  }
 
   
 ]
