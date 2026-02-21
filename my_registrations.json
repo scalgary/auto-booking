@@ -26,10 +26,16 @@
 
 
     {
-    "date": "23-Feb-26",
+    "date": "02-Mar-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Advanced"
+  },
+  {
+    "date": "03-Mar-26",
+    "time": "12:00",
+    "day": "Tuesday",
+    "level": "Plus"
   }
 
 

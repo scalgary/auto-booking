@@ -91,17 +91,26 @@ jobs:
          echo "   📆 Day: $day"
          echo "   🎾 Level: $level"
         
+         # Check if registration date is more than 10 days away
+         today_epoch=$(date -u +%s)
+         reg_date_epoch=$(date -u -d "$date" +%s)
+         days_diff=$(( (reg_date_epoch - today_epoch) / 86400 ))
+         echo "📅 Days until registration: $days_diff"
+        
+         if [ "$days_diff" -lt 0 ] || [ "$days_diff" -gt 10 ]; then
+          echo "⏳ Registration date is out of range ($days_diff days) — skipping"
+          echo "should_continue=false" >> $GITHUB_OUTPUT
+         else
+          echo "should_continue=true" >> $GITHUB_OUTPUT
+          # Exporter vers GITHUB_OUTPUT
+          echo "date=$date" >> $GITHUB_OUTPUT
+          echo "time=$time" >> $GITHUB_OUTPUT
+          echo "day=$day" >> $GITHUB_OUTPUT
+          echo "level=$level" >> $GITHUB_OUTPUT
+         fi 
 
-    
-         # Exporter vers GITHUB_OUTPUT
-         echo "date=$date" >> $GITHUB_OUTPUT
-         echo "time=$time" >> $GITHUB_OUTPUT
-         echo "day=$day" >> $GITHUB_OUTPUT
-         echo "level=$level" >> $GITHUB_OUTPUT
-
-         echo "should_continue=true" >> $GITHUB_OUTPUT
-    
          echo "======================================"
+
 
     
 
