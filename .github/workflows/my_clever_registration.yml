@@ -17,14 +17,20 @@ permissions:
 on:
   schedule:
     - cron: '00 14 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '12 14 * * *' # 23:55 Calgary
-    - cron: '24 14 * * *' # 23:55 Calgary
-    - cron: '36 14 * * *' # 23:55 Calgary
-    - cron: '48 14 * * *' # 23:55 Calgary
-    - cron: '55 14 * * *' # 23:55 Calgary
+    - cron: '05 14 * * *' # 23:55 Calgary
+    - cron: '10 14 * * *' # 23:55 Calgary
+    - cron: '15 14 * * *' # 23:55 Calgary
+    - cron: '20 14 * * *' # 23:55 Calgary
+    - cron: '25 14 * * *' # 23:55 Calgary
+    - cron: '30 14 * * *' # 23:55 Calgary
+    - cron: '35 14 * * *' # 23:55 Calgary
+    - cron: '40 14 * * *' # 23:55 Calgary
+    - cron: '45 14 * * *' # 23:55 Calgary
 
 
-    - cron: '0 15 * * *' # 00:00 Calgary
+    - cron: '50 15 * * *' # 00:00 Calgary
+    - cron: '55 15 * * *' # 00:00 Calgary
+
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
   #  - cron: '0 14 * * *' # 00:00 Calgary
@@ -34,6 +40,9 @@ on:
 
 #limitation expect registration to begin a 6 UTC"
 
+concurrency:
+  group: auto-booking-my-bot
+  cancel-in-progress: false  # Queue au lieu de cancel
 jobs:
   register:
     runs-on: ubuntu-latest
