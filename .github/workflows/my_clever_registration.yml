@@ -1,7 +1,7 @@
 name: Bot Pickleball For ME
 
 env:
-  TARGET_UTC_HOUR : 15
+  TARGET_UTC_HOUR : 14
   ADVANCE_SECONDS : 1
   MAX_WAIT_SECONDS: 600     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
   REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
@@ -16,16 +16,16 @@ permissions:
 
 on:
   schedule:
-    - cron: '00 14 * * *' # 23:45  Sunday is 0 Saturday 6
-    - cron: '05 14 * * *' # 23:55 Calgary
-    - cron: '10 14 * * *' # 23:55 Calgary
-    - cron: '15 14 * * *' # 23:55 Calgary
-    - cron: '20 14 * * *' # 23:55 Calgary
-    - cron: '25 14 * * *' # 23:55 Calgary
-    - cron: '30 14 * * *' # 23:55 Calgary
-    - cron: '35 14 * * *' # 23:55 Calgary
-    - cron: '40 14 * * *' # 23:55 Calgary
-    - cron: '45 14 * * *' # 23:55 Calgary
+    - cron: '00 13 * * *' # 23:45  Sunday is 0 Saturday 6
+    - cron: '05 13 * * *' # 23:55 Calgary
+    - cron: '10 13 * * *' # 23:55 Calgary
+    - cron: '15 13 * * *' # 23:55 Calgary
+    - cron: '20 13 * * *' # 23:55 Calgary
+    - cron: '25 13 * * *' # 23:55 Calgary
+    - cron: '30 13 * * *' # 23:55 Calgary
+    - cron: '35 13 * * *' # 23:55 Calgary
+    - cron: '40 13 * * *' # 23:55 Calgary
+    - cron: '45 13 * * *' # 23:55 Calgary
 
 
     - cron: '50 15 * * *' # 00:00 Calgary
