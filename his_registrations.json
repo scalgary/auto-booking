@@ -31,6 +31,15 @@
     "day": "Monday",
     "level": "Plus"
   }
+    ,
+
+
+    {
+    "date": "24-Mar-26",
+    "time": "4:30",
+    "day": "Tuesday",
+    "level": "Advanced"
+  }
   
 
 
