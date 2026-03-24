@@ -779,16 +779,18 @@ class TennisBookingBot:
         if not self._click_book_slot(slot):
             return False
         
-        # 6. Hold only mode → attendre puis quitter sans confirmer
+
+        
+        # 6. Sélectionner joueur
+        if not self._select_player():
+            return False
+        
+        # 7. Hold only mode → attendre puis quitter sans confirmer
         if self.hold_only:
             logger.info(f"⏸️ HOLD MODE: spot bloqué {self.hold_duration}s")
             time.sleep(self.hold_duration)
             logger.info("⏸️ Hold terminé → release du spot")
             return True        
-        
-        # 7. Sélectionner joueur
-        if not self._select_player():
-            return False
 
         # 7. Confirmer
         success = self._confirm_booking()
