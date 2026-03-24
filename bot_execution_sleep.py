@@ -112,7 +112,8 @@ else:
 class TennisBookingBot:
     """Bot de réservation de tennis/sport complet avec screenshots debug"""
     
-    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency, debug_mode=False):
+    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency, hold_only=True, hold_duration=300,
+                 debug_mode=False):
         # Paramètres de réservation
         self.target_date = target_date
         self.target_time = target_time
@@ -124,6 +125,8 @@ class TennisBookingBot:
         self.debug_mode = debug_mode
         self.screenshot_counter = 0
         self.implicit_wait=0.5
+        self.hold_only = hold_only
+        self.hold_duration = hold_duration
         
         # URLs et credentials depuis env
         self.email = os.getenv('YOUR_SECRET_EMAIL')
@@ -145,6 +148,8 @@ class TennisBookingBot:
         logger.info(f"🎾 Level: {self.course_level}")
         logger.info(f"👤 Player: {self.player_name}")
         logger.info(f"🐛 Debug mode: {'✅ ON' if self.debug_mode else '❌ OFF'}")
+        logger.info(f"⏸️ Hold only: {'✅ ON' if self.hold_only else '❌ OFF'}")
+        logger.info(f"⏱️ Hold duration: {self.hold_duration}s")
     
     def _check_secrets(self):
         """Vérifier que tous les secrets sont présents"""
@@ -774,10 +779,17 @@ class TennisBookingBot:
         if not self._click_book_slot(slot):
             return False
         
-        # 6. Sélectionner joueur
+        # 6. Hold only mode → attendre puis quitter sans confirmer
+        if self.hold_only:
+            logger.info(f"⏸️ HOLD MODE: spot bloqué {self.hold_duration}s")
+            time.sleep(self.hold_duration)
+            logger.info("⏸️ Hold terminé → release du spot")
+            return True        
+        
+        # 7. Sélectionner joueur
         if not self._select_player():
             return False
-        
+
         # 7. Confirmer
         success = self._confirm_booking()
         if success:

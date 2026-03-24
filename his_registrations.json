@@ -30,6 +30,12 @@
     "time": "2:30",
     "day": "Monday",
     "level": "Open"
+  },
+    {
+    "date": "31-Mar-26",
+    "time": "4:30",
+    "day": "Tuesday",
+    "level": "Advanced"
   }
     
   
