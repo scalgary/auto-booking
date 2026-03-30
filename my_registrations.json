@@ -2,14 +2,14 @@
 
 
     {
-    "date": "25-Feb-26",
-    "time": "4:30",
+    "date": "08-Apr-26",
+    "time": "4:15",
     "day": "Wednesday",
     "level": "Plus"
   },
 
     {
-    "date": "27-Mar-26",
+    "date": "10-Apr-26",
     "time": "2:45",
     "day": "Friday",
     "level": "Advanced"
@@ -32,10 +32,10 @@
     "level": "Plus"
   },
   {
-    "date": "31-Mar-26",
+    "date": "07-Apr-26",
     "time": "4:30",
     "day": "Tuesday",
-    "level": "Intermediate"
+    "level": "Advanced"
   },
   {
     "date": "05-Apr-26",
