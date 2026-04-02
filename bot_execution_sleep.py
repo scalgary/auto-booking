@@ -114,7 +114,7 @@ else:
 class TennisBookingBot:
     """Bot de réservation de tennis/sport complet avec screenshots debug"""
     
-    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency, hold_only=True, hold_duration=300,
+    def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency, hold_only=True, hold_duration=120,
                  debug_mode=False):
         # Paramètres de réservation
         self.target_date = target_date
@@ -192,6 +192,10 @@ class TennisBookingBot:
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')   # ADD
+        options.add_argument('--disable-gpu')              # ADD
+        options.add_argument('--disable-extensions')       # ADD
+        options.add_argument('--shm-size=2g')              # ADD
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=options)
         self.driver.set_window_size(1400, 900)
@@ -757,7 +761,7 @@ class TennisBookingBot:
         try:
             # First cancel
             cancel_btn = wait.until(EC.element_to_be_clickable(
-                (By.XPATH, "//*[contains(text(), 'Cancel Basket')]")
+             (By.XPATH, "//a[normalize-space(text())='Cancel Basket']")
             ))
             current_url = self.driver.current_url
 
@@ -770,7 +774,7 @@ class TennisBookingBot:
             logger.info(f"📍 New URL: {self.driver.current_url}")
             # Second cancel (confirmation)
             cancel_btn2 = wait.until(EC.element_to_be_clickable(
-                (By.XPATH, "//*[contains(text(), 'Cancel Basket')]")
+            (By.XPATH, "//input[@type='submit' and @value='Cancel Basket']")
             ))
             cancel_btn2.click()
             logger.info("✅ Second 'Cancel basket' clicked")
