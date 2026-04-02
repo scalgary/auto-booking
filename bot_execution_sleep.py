@@ -9,6 +9,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
+
 from datetime import datetime, timedelta
 import sys
 
@@ -397,11 +399,15 @@ class TennisBookingBot:
             logger.info(f"📋 {len(course_buttons)} slots trouvés (tentative {refresh_count + 1}/{max_refresh})")
             
             for button in course_buttons:
+                try:
                 # Extraire données
-                class_name = button.get_attribute('data-class-name') or ''
-                class_date = button.get_attribute('data-class-date') or ''
-                class_time = button.get_attribute('data-class-time') or ''
-                class_spaces = button.get_attribute('data-class-spaces') or '0'
+                    class_name = button.get_attribute('data-class-name') or ''
+                    class_date = button.get_attribute('data-class-date') or ''
+                    class_time = button.get_attribute('data-class-time') or ''
+                    class_spaces = button.get_attribute('data-class-spaces') or '0'
+                except StaleElementReferenceException:
+                    logger.warning("Satle")
+                    break
                 
                 # Match du slot
                 date_match = self.target_date in class_date
@@ -738,6 +744,44 @@ class TennisBookingBot:
             logger.error("❌ Bouton Checkout non trouvé")
             self._debug_screenshot("checkout_not_found")
             return False
+        
+    def _cancel_basket(self):
+        """Cancel basket (two confirmations required)"""
+        start_time = time.perf_counter()
+        logger.info("🗑️ Cancelling basket...")
+        self._debug_screenshot("before_cancel_basket")
+
+
+        wait = WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency)
+
+        try:
+            # First cancel
+            cancel_btn = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//*[contains(text(), 'Cancel Basket')]")
+            ))
+            current_url = self.driver.current_url
+
+            cancel_btn.click()
+            logger.info("✅ First 'Cancel Basket' clicked")
+            self._debug_screenshot("after_first_cancel")
+
+            # Wait for confirmation page to load
+            wait.until(EC.url_changes(current_url))
+            logger.info(f"📍 New URL: {self.driver.current_url}")
+            # Second cancel (confirmation)
+            cancel_btn2 = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//*[contains(text(), 'Cancel Basket')]")
+            ))
+            cancel_btn2.click()
+            logger.info("✅ Second 'Cancel basket' clicked")
+            logger.info(f"⏱️ Cancel basket en {time.perf_counter() - start_time:.3f}s")
+            self._debug_screenshot("after_second_cancel")
+            return True
+            
+        except TimeoutException:
+            logger.error("❌ Cancel basket button not found")
+            self._debug_screenshot("cancel_basket_failed")
+            return False
     
     def book(self):
         """Méthode principale de réservation"""
@@ -790,7 +834,8 @@ class TennisBookingBot:
             logger.info(f"⏸️ HOLD MODE: spot bloqué {self.hold_duration}s")
             time.sleep(self.hold_duration)
             logger.info("⏸️ Hold terminé → release du spot")
-            return True        
+            logger.info("⏸️ Hold terminé → cancelling basket")
+            return self._cancel_basket()
 
         # 7. Confirmer
         success = self._confirm_booking()
@@ -810,9 +855,9 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "10-Jan-26"
-DEFAULT_TIME = "8:30"
-DEFAULT_LEVEL = "Novice"
+DEFAULT_DATE = "03-Apr-26"
+DEFAULT_TIME = "2:30"
+DEFAULT_LEVEL = "Plus"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_HIS_NAME', 'Player')
 
 
