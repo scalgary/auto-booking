@@ -42,9 +42,15 @@
     "time": "11:00",
     "day": "Sunday",
     "level": "Intermediate"
+  },
+
+{
+    "date": "18-Apr-26",
+    "time": "4:30",
+    "day": "Thursday",
+    "level": "Open"
+
   }
-
-
   
 ]
 
