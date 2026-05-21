@@ -389,90 +389,89 @@ class TennisBookingBot:
                 
 
     
-    def _find_and_wait_for_bookable_slot(self, max_refresh=8):
-        """Trouver le slot et attendre qu'il devienne bookable"""
-        overall_start = time.perf_counter()  # ← AJOUTER
-
+    def _find_and_wait_for_bookable_slot(self, max_refresh=8, timeout=3):
+        """Trouver le slot correspondant et attendre qu'il soit bookable"""
         logger.info("🔍 Recherche du slot correspondant...")
         
         for refresh_count in range(max_refresh):
-            loop_start = time.perf_counter()  # ← AJOUTER
             self._debug_screenshot(f"search_attempt_{refresh_count + 1}")
             
             course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
             logger.info(f"📋 {len(course_buttons)} slots trouvés (tentative {refresh_count + 1}/{max_refresh})")
             
-            for button in course_buttons:
-                try:
-                # Extraire données
-                    class_name = button.get_attribute('data-class-name') or ''
-                    class_date = button.get_attribute('data-class-date') or ''
-                    class_time = button.get_attribute('data-class-time') or ''
-                    class_spaces = button.get_attribute('data-class-spaces') or '0'
-                except StaleElementReferenceException:
-                    logger.warning("Satle")
-                    break
+            matching_slots = []
+            
+            for i, button in enumerate(course_buttons):
+                class_name = button.get_attribute('data-class-name') or ''
+                class_date = button.get_attribute('data-class-date') or ''
+                class_time = button.get_attribute('data-class-time') or ''
+                class_spaces = button.get_attribute('data-class-spaces') or '0'
                 
-                # Match du slot
                 date_match = self.target_date in class_date
                 level_match = self.course_level in class_name
-                time_match = self.target_time in class_time.split("-")[0]
+                time_match = self.target_time in class_time.split("-")[0] or self.target_time.strip() in class_time.split("-")[0]
                 
-                if not (date_match and time_match and level_match):
-                    continue
-                    
-                logger.info(f"✅ SLOT TROUVÉ: {class_name} | {class_date} | {class_time}")
-                logger.info(f"⏱️ Slot trouvé en {time.perf_counter() - loop_start:.3f}s")  # ← AJOUTER
-
-                parent = button.find_element(By.XPATH, "./..")
-                poll_start = time.perf_counter()  # ← AJOUTER
-
-                # POLLER sans refresh d'abord (3s max)
-                wait = WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency)
-                try:
-                    wait.until(lambda d: len(parent.find_elements(
-                        By.XPATH, ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
-                    )) > 0)
-                    
-                    spaces = int(class_spaces)
-                    logger.info(f"🎉 BOOKABLE! ({spaces} places)")
-                    logger.info(f"⏱️ Polling réussi en {time.perf_counter() - poll_start:.3f}s")  # ← AJOUTER
-                    logger.info(f"⏱️ Total recherche: {time.perf_counter() - overall_start:.3f}s")  # ← AJOUTER
-
-                    self._debug_screenshot("slot_bookable")
-                    return {'button': button, 'available': spaces > 0, 'spaces': spaces}
-                    
-                except TimeoutException:
-                    logger.warning(f"⚠️ Unavailable après {self.web_wait_time}s polling")
-                
-                # REFRESH et retry
-                if refresh_count < max_refresh - 1:
-                    refresh_start = time.perf_counter()  # ← AJOUTER
-
-                    logger.info(f"🔄 Refresh {refresh_count + 1}/{max_refresh}")
-                    self.driver.refresh()
-                    
-                    # Attendre que les boutons se rechargent
-                    WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency).until(
-                        EC.presence_of_element_located((By.XPATH, "//button[@data-class-time]"))
-                    )
-                    logger.info(f"⏱️ Refresh en {time.perf_counter() - refresh_start:.3f}s")  # ← AJOUTER
-
-                break
+                if date_match and time_match and level_match:
+                    logger.info(f"✅ SLOT CORRESPONDANT TROUVÉ!")
+                    logger.info(f"  📛 {class_name}")
+                    logger.info(f"  📅 {class_date}")
+                    logger.info(f"  🕐 {class_time}")
+                    logger.info(f"  👥 Spaces: {class_spaces}")
+                    matching_slots.append({'button': button, 'spaces': int(class_spaces)})
             
-            else:
-                # Slot pas trouvé du tout
-                logger.warning("❌ Slot non trouvé")
-                if refresh_count < max_refresh - 1:
-                    self.driver.refresh()
-                    WebDriverWait(self.driver, timeout=self.web_wait_time, poll_frequency=self.poll_frequency).until(
-                        EC.presence_of_element_located((By.XPATH, "//button[@data-class-time]"))
-                    )
-        
-        logger.error(f"❌ Échec après {max_refresh} tentatives")
-        return None
-                        
+            # Chercher un slot bookable avec places dispo
+            for slot in matching_slots:
+                button = slot['button']
+                parent = button.find_element(By.XPATH, "./..")
+                
+                book_buttons = parent.find_elements(
+                    By.XPATH,
+                    ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
+                )
+                unavailable_buttons = parent.find_elements(
+                    By.XPATH,
+                    ".//*[contains(text(), 'Unavailable')]"
+                )
 
+                is_bookable = book_buttons and slot['spaces'] > 0 and (
+                    not unavailable_buttons or
+                    not unavailable_buttons[0].get_attribute('class').__contains__('disabled')
+                )
+
+                if is_bookable:
+                    spaces_available = slot['spaces']
+                    logger.info(f"🎉 SLOT BOOKABLE! ({spaces_available} places)")
+                    self._debug_screenshot("slot_bookable_ready")
+                    return {
+                        'button': button,
+                        'available': True,
+                        'spaces': spaces_available
+                    }
+            
+            # Aucun slot bookable dans cette passe → refresh
+            if matching_slots:
+                logger.warning(f"⚠️ Slots trouvés mais UNAVAILABLE - Refresh {refresh_count + 1}/{max_refresh}")
+                self._debug_screenshot(f"slot_unavailable_{refresh_count + 1}")
+            else:
+                logger.warning("❌ Slot non trouvé dans cette tentative")
+            
+            if refresh_count < max_refresh - 1:
+                wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=0.2)
+                try:
+                    self.driver.refresh()
+                    time.sleep(self.time_sleep)
+                    wait.until(EC.presence_of_element_located(
+                        (By.XPATH, "//*[contains(text(), 'Book Now') or contains(text(), 'Book')]")
+                    ))
+                    logger.info("✅ Book Now détecté après refresh!")
+                except TimeoutException:
+                    logger.warning(f"⏱️ Timeout après refresh {refresh_count + 1}")
+        
+        logger.error(f"❌ Impossible de trouver un slot bookable après {max_refresh} tentatives")
+        self._debug_screenshot("no_bookable_slot_found")
+        return None               
+
+   
     def _click_book_slot(self, slot):
         """Cliquer pour réserver le créneau"""
         start_time = time.perf_counter()

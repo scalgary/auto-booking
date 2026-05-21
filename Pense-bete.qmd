@@ -183,3 +183,4 @@ http://5dda1a881879:8888/lab?token=
 4a6f2b1670e1199674757a3db41ac56e77a60ecc0dce8f18
 
 docker compose -f docker-compose.yml up --build
+docker exec my-selenium  python  bot_execution.py
