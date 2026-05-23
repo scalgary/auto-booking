@@ -26,7 +26,7 @@
 
 
     {
-    "date": "27-Apr-26",
+    "date": "01-Jun-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Advanced"
@@ -42,7 +42,15 @@
     "time": "11:00",
     "day": "Sunday",
     "level": "Intermediate"
+  },
+  {
+    "date": "04-Jun-26",
+    "time": "4:15",
+    "day": "Thursday",
+    "level": "Advanced"
+
   }
+
 
 
   
