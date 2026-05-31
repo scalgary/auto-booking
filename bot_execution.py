@@ -293,145 +293,91 @@ class TennisBookingBot:
         logger.info("✅ Sur la page planning")
         self._debug_screenshot("final_planning_view")
     
-    def _find_available_slot(self):
-        """Chercher un créneau disponible"""
-        logger.info("🔍 Recherche de créneaux...")
-        self._debug_screenshot("before_slot_search")
-        
-        course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
-        logger.info(f"📋 {len(course_buttons)} boutons trouvés")
-        matching_slots = []  # ← collecter tous les slots matchants
-        logger.info(f"✅ matching_slot")
-
-        for i, button in enumerate(course_buttons):
-            # Extraire les données
-            class_name = button.get_attribute('data-class-name') or ''
-            class_date = button.get_attribute('data-class-date') or ''
-            class_time = button.get_attribute('data-class-time') or ''
-            class_spaces = button.get_attribute('data-class-spaces') or '0'
-            
-            # Vérifier correspondance
-            date_match = self.target_date in class_date
-            level_match = self.course_level in class_name
-            time_match = self.target_time in class_time.split("-")[0] or self.target_time.strip() in class_time.split("-")[0]
-            
-            logger.debug(f"Bouton {i}: {class_name} | {class_date} | {class_time} | Espaces: {class_spaces}")
-            logger.debug(f"  Date match: {date_match} | Level match: {level_match} | Time match: {time_match}")
-
-            if date_match and time_match and level_match:
-                spaces_available = int(class_spaces)
-                logger.info(f"✅ CRÉNEAU TROUVÉ!")
-                logger.info(f"  📛 Nom: {class_name}")
-                logger.info(f"  📅 Date: {class_date}")
-                logger.info(f"  🕐 Heure: {class_time}")
-                logger.info(f"  👥 Places: {spaces_available}")
-                
-                self._debug_screenshot("slot_found")
-                matching_slots.append({'button': button, 'spaces': spaces_available})
-
-        # Chercher un slot dispo parmi tous les matchants
-        for slot in matching_slots:
-            if slot['spaces'] > 0:
-                self._debug_screenshot("slot_found")
-                return {'button': slot['button'], 'available': True, 'spaces': slot['spaces']}
-        
-            # Slots trouvés mais tous complets
-        if matching_slots:
-            logger.warning("❌ Créneau complet")
-            self._debug_screenshot("slot_full")
-            return {'button': matching_slots[0]['button'], 'available': False, 'spaces': 0}
-        
-        logger.warning("❌ Aucun créneau trouvé")
-        self._debug_screenshot("no_slot_found")
-        return None
-
-    
-
 
 
     def _find_and_wait_for_bookable_slot(self, max_refresh=8, timeout=3):
-        """Trouver le slot correspondant et attendre qu'il soit bookable"""
         logger.info("🔍 Recherche du slot correspondant...")
-        
+
+        def get_matching_slots():
+            course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
+            slots = []
+            for button in course_buttons:
+                class_name   = button.get_attribute('data-class-name')  or ''
+                class_date   = button.get_attribute('data-class-date')  or ''
+                class_time   = button.get_attribute('data-class-time')  or ''
+                class_spaces = int(button.get_attribute('data-class-spaces') or '0')
+
+                date_match  = self.target_date  in class_date
+                level_match = self.course_level in class_name
+                time_match  = self.target_time  in class_time.split("-")[0]
+
+                if date_match and time_match and level_match:
+                    logger.info(f"✅ Match: {class_name} | {class_date} | {class_time} | spaces={class_spaces}")
+                    slots.append({'button': button, 'spaces': class_spaces})
+            return slots
+
+        # --- Step 1: initial fetch ---
+        matching_slots = get_matching_slots()
+
+        # --- Step 2: no match → return None ---
+        if not matching_slots:
+            logger.error("❌ Aucun slot correspondant trouvé")
+            self._debug_screenshot("no_matching_slot_found")
+            return None
+
+        # --- Step 3: all slots have 0 spaces → return available False ---
+        if all(slot['spaces'] == 0 for slot in matching_slots):
+            logger.warning("⚠️ Tous les slots ont 0 place disponible")
+            self._debug_screenshot("slot_no_spaces")
+            return {'button': matching_slots[0]['button'], 'available': False, 'spaces': 0}
+
+        # --- Step 4: refresh until bookable ---
         for refresh_count in range(max_refresh):
             self._debug_screenshot(f"search_attempt_{refresh_count + 1}")
-            
-            course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
-            logger.info(f"📋 {len(course_buttons)} slots trouvés (tentative {refresh_count + 1}/{max_refresh})")
-            
-            matching_slots = []
-            
-            for i, button in enumerate(course_buttons):
-                class_name = button.get_attribute('data-class-name') or ''
-                class_date = button.get_attribute('data-class-date') or ''
-                class_time = button.get_attribute('data-class-time') or ''
-                class_spaces = button.get_attribute('data-class-spaces') or '0'
-                
-                date_match = self.target_date in class_date
-                level_match = self.course_level in class_name
-                time_match = self.target_time in class_time.split("-")[0] or self.target_time.strip() in class_time.split("-")[0]
-                
-                if date_match and time_match and level_match:
-                    logger.info(f"✅ SLOT CORRESPONDANT TROUVÉ!")
-                    logger.info(f"  📛 {class_name}")
-                    logger.info(f"  📅 {class_date}")
-                    logger.info(f"  🕐 {class_time}")
-                    logger.info(f"  👥 Spaces: {class_spaces}")
-                    matching_slots.append({'button': button, 'spaces': int(class_spaces)})
-            
-            # Chercher un slot bookable avec places dispo
-            for slot in matching_slots:
-                button = slot['button']
-                parent = button.find_element(By.XPATH, "./..")
-                
-                book_buttons = parent.find_elements(
-                    By.XPATH,
-                    ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
-                )
-                unavailable_buttons = parent.find_elements(
-                    By.XPATH,
-                    ".//*[contains(text(), 'Unavailable')]"
-                )
+            logger.info(f"🔄 Tentative {refresh_count + 1}/{max_refresh}")
 
-                is_bookable = book_buttons and slot['spaces'] > 0 and (
-                    not unavailable_buttons or
-                    not unavailable_buttons[0].get_attribute('class').__contains__('disabled')
-                )
+            first_slot = matching_slots[0]
+            parent = first_slot['button'].find_element(By.XPATH, "./..")
+            book_buttons = parent.find_elements(
+                By.XPATH,
+                ".//*[contains(text(), 'Book Now') or contains(text(), 'Book')]"
+            )
 
-                if is_bookable:
-                    spaces_available = slot['spaces']
-                    logger.info(f"🎉 SLOT BOOKABLE! ({spaces_available} places)")
-                    self._debug_screenshot("slot_bookable_ready")
-                    return {
-                        'button': button,
-                        'available': True,
-                        'spaces': spaces_available
-                    }
-            
-            # Aucun slot bookable dans cette passe → refresh
-            if matching_slots:
-                logger.warning(f"⚠️ Slots trouvés mais UNAVAILABLE - Refresh {refresh_count + 1}/{max_refresh}")
+            if not bool(book_buttons):
+                logger.warning(f"⏳ Slot non bookable - Refresh {refresh_count + 1}/{max_refresh}")
                 self._debug_screenshot(f"slot_unavailable_{refresh_count + 1}")
             else:
-                logger.warning("❌ Slot non trouvé dans cette tentative")
-            
+                # --- Step 5: book first slot with spaces ---
+                for slot in matching_slots:
+                    if slot['spaces'] > 0:
+                        logger.info(f"🎉 SLOT BOOKABLE! ({slot['spaces']} places)")
+                        self._debug_screenshot("slot_bookable_ready")
+                        return {'button': slot['button'], 'available': True, 'spaces': slot['spaces']}
+
+                logger.warning("⚠️ Slots bookable mais aucune place disponible")
+                self._debug_screenshot("slot_no_spaces")
+                return {'button': first_slot['button'], 'available': False, 'spaces': 0}
+
+            # Refresh and re-fetch fresh references
             if refresh_count < max_refresh - 1:
-                wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=0.2)
                 try:
                     self.driver.refresh()
                     time.sleep(self.time_sleep)
-                    wait.until(EC.presence_of_element_located(
-                        (By.XPATH, "//*[contains(text(), 'Book Now') or contains(text(), 'Book')]")
-                    ))
+                    WebDriverWait(self.driver, timeout=timeout, poll_frequency=0.2).until(
+                        EC.presence_of_element_located(
+                            (By.XPATH, "//*[contains(text(), 'Book Now') or contains(text(), 'Book')]")
+                        )
+                    )
                     logger.info("✅ Book Now détecté après refresh!")
+                    matching_slots = get_matching_slots()  # fresh DOM references
                 except TimeoutException:
                     logger.warning(f"⏱️ Timeout après refresh {refresh_count + 1}")
-        
+                    matching_slots = get_matching_slots()  # still re-fetch
+
         logger.error(f"❌ Impossible de trouver un slot bookable après {max_refresh} tentatives")
         self._debug_screenshot("no_bookable_slot_found")
-        return None               
-
-   
+        return None
+       
     def _click_book_slot(self, slot):
         """Cliquer pour réserver le créneau"""
         logger.info("📝 Réservation du créneau...")
@@ -550,7 +496,7 @@ class TennisBookingBot:
             logger.info("🔒 Driver fermé")
 
 # Valeurs par défaut
-DEFAULT_DATE = "28-May-26"
+DEFAULT_DATE = "04-Jun-26"
 DEFAULT_TIME = "4:15"
 DEFAULT_LEVEL = "Advanced"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_HIS_NAME', 'Player')
