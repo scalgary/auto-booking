@@ -35,7 +35,7 @@ import sys
 CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
 CALDAV_URL = 'https://caldav.icloud.com'
-CALENDAR_NAME = "Family"
+CALENDAR_NAME = "All4"
 SEARCH_TERMS = ['🏓', '🏋️', '🔥']
 
 
@@ -57,8 +57,6 @@ smtp_port = int(os.environ.get('SMTP_PORT', '587'))
 # Configuration simple
 CALDAV_USER = os.getenv("CALDAV_USER")
 CALDAV_PASSWORD = os.getenv("CALDAV_PASSWORD")
-CALDAV_URL = 'https://caldav.icloud.com'
-CALENDAR_NAME = "Family"
 print("=== STATUS DES AUTRES SECRETS (MASQUÉS) ===")
 print(f"EMAIL: {'✅ DÉFINI' if email else '❌ MISSING'}")
 print(f"PASSWORD: {'✅ DÉFINI' if password else '❌ MISSING'}")
