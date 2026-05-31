@@ -18,10 +18,7 @@ on:
     - cron: '00 12 * * *'  # 23:45 Calgary
     - cron: '20 12 * * *'  # 23:52 Calgary
     - cron: '40 12 * * *'  # 23:56 Calgary
-    - cron: '00 13 * * *'  # 23:59 Calgary
-    - cron: '20 13 * * *'  # 23:59 Calgary
-    - cron: '40 13 * * *'  # 23:59 Calgary
-    - cron: '55 13 * * *'  # 23:59 Calgary
+
 
 
 
