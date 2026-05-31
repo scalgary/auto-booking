@@ -2,7 +2,7 @@
 
 
     {
-    "date": "03-Jun-26",
+    "date": "10-Jun-26",
     "time": "4:15",
     "day": "Wednesday",
     "level": "Plus"
@@ -17,7 +17,7 @@
   },
 
     {
-    "date": "06-Jun-26",
+    "date": "13-Jun-26",
     "time": "8:30",
     "day": "Saturday",
     "level": "Plus"
@@ -26,13 +26,13 @@
 
 
     {
-    "date": "01-Jun-26",
+    "date": "08-Jun-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Plus"
   },
   {
-    "date": "19-May-26",
+    "date": "09-Jun-26",
     "time": "4:30",
     "day": "Tuesday",
     "level": "Open"
@@ -45,10 +45,10 @@
   },
 
 {
-    "date": "04-Jun-26",
+    "date": "11-Jun-26",
     "time": "4:15",
     "day": "Thursday",
-    "level": "Open"
+    "level": "Advanced"
 
   }
   

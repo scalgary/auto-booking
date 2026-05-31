@@ -2,22 +2,22 @@
 
 
     {
-    "date": "03-Jun-26",
+    "date": "10-Jun-26",
     "time": "4:15",
     "day": "Wednesday",
     "level": "Advanced"
   },
 
     {
-    "date": "17-Apr-26",
-    "time": "4:15",
+    "date": "12-Jun-26",
+    "time": "4:00",
     "day": "Friday",
     "level": "Advanced"
 
   },
 
     {
-    "date": "06-Jun-26",
+    "date": "13-Jun-26",
     "time": "8:30",
     "day": "Saturday",
     "level": "Plus"
@@ -26,13 +26,13 @@
 
 
     {
-    "date": "01-Jun-26",
+    "date": "08-Jun-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Advanced"
   },
   {
-    "date": "28-Apr-26",
+    "date": "09-Jun-26",
     "time": "4:30",
     "day": "Tuesday",
     "level": "Plus"
@@ -44,10 +44,10 @@
     "level": "Intermediate"
   },
   {
-    "date": "04-Jun-26",
+    "date": "11-Jun-26",
     "time": "4:15",
     "day": "Thursday",
-    "level": "Intermediate"
+    "level": "Advanced"
 
   }
 
