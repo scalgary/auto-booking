@@ -816,7 +816,7 @@ class TennisBookingBot:
         slot = self._find_and_wait_for_bookable_slot()
         if not slot:
             logger.error("❌ Aucun créneau disponible")
-            return False
+            return True
         
         if not slot['available']:
             logger.info("❌ Créneau complet")
