@@ -79,13 +79,14 @@ DEFAULT_DATE = "02-Jun-26"
 DEFAULT_TIME = "4:30"
 DEFAULT_LEVEL = "Open"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_MY_NAME', 'Player')
-
+DEFAULT_HOLD = False
 
 # Arguments ou défauts
 target_date = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DATE
 target_time = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_TIME
 course_level = sys.argv[3] if len(sys.argv) > 3 else DEFAULT_LEVEL
 player_name = sys.argv[4] if len(sys.argv) > 4 else DEFAULT_NAME
+hold_status = sys.argv[5] if len(sys.argv) > 5 else DEFAULT_HOLD
 
 web_wait_time=25
 time_sleep=3
@@ -104,7 +105,7 @@ bot = TennisBookingBot(
         web_wait_time=web_wait_time,
         poll_frequency=poll_frequency,
         debug_mode=debug_mode,
-        hold_only=False
+        hold_only=hold_status
     )
 
 try:
