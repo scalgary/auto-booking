@@ -230,7 +230,7 @@ jobs:
             
             FINAL_CODE=1
             echo ""
-            python3 main_hold.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME" "${{env.HOLD_STATUS}}"
+            python3 main.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME" "${{env.HOLD_STATUS}}"
             EXIT_CODE=$?
             echo "📊 Python exit code: $EXIT_CODE"
             

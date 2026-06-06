@@ -7,6 +7,7 @@ env:
   REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
   TAG_PREFIX: 'my'  # ← Change 'my' ou 'his'
   TARGET_NAME_SECRET: 'YOUR_SECRET_MY_NAME'  # ← 'YOUR_SECRET_MY_NAME' ou 'YOUR_SECRET_HIS_NAME'
+  HOLD_STATUS: False
 
 permissions:
   contents: write
