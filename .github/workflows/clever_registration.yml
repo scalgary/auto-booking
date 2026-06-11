@@ -13,7 +13,7 @@ permissions:
 
 
 on:
-  schedule:
+  #schedule:
     # Fenêtre de booking: 14:45-14:59 UTC (23:45-23:59 Calgary MST)
     # - cron: '40 12 * * *'  # 23:56 Calgary
 

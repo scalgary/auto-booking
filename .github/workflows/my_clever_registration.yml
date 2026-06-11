@@ -16,14 +16,14 @@ permissions:
 
 
 on:
-  schedule:
+  #schedule:
 #    - cron: '00 12 * * *' # 23:45  Sunday is 0 Saturday 6
 #    - cron: '20 12 * * *' # 23:55 Calgary
 #    - cron: '40 12 * * *' # 23:55 Calgary
 #    - cron: '00 13 * * *' # 23:55 Calgary
 #    - cron: '20 13 * * *' # 23:55 Calgary
 #    - cron: '40 13 * * *' # 23:55 Calgary
-    - cron: '55 13 * * *' # 00:00 Calgary
+  #  - cron: '55 13 * * *' # 00:00 Calgary
 
   #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
   #  - cron: '50 13 * * *' # 23:55 Calgary
