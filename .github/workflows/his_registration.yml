@@ -10,15 +10,11 @@ env:
 permissions:
   contents: write
   actions: read
-
-
+  packages: read
 
 on:
   #schedule:
     # Fenêtre de booking: 14:45-14:59 UTC (23:45-23:59 Calgary MST)
-
-
-
 
   workflow_dispatch:  # Ajoutez cette ligne
 
@@ -27,15 +23,15 @@ concurrency:
   group: auto-booking-his-bot
   cancel-in-progress: false  # Queue au lieu de cancel
 
-
-
-
 jobs:
   register:
     runs-on: ubuntu-latest
-    # Utilise ton image Docker personnalisée
+    # Utilise ton image Docker personnalisée depuis GHCR
     container:
-      image: scalgary/selenium-env:latest
+      image: ghcr.io/scalgary/selenium-env:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --workdir ${{ github.workspace }}
     steps:
       # ==========================================
@@ -52,9 +48,7 @@ jobs:
         uses: ./.github/actions/load-params
         with: 
           json_file: ${{ env.REGISTRATION_JSON_FILE }}
-          event_name: ${{ github.event_name }}
-    
-    
+          event_name: ${{ github.event_name }}   
 
       - name: Git setup and fetch tags
         if: steps.params.outputs.should_continue == 'true'
