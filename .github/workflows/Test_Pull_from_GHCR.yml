@@ -1,0 +1,24 @@
+name: Test Pull from GHCR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-pull:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image from GHCR
+        run: docker pull ghcr.io/${{ github.repository_owner }}/selenium-env:latest
+
+      - name: Verify image
+        run: docker inspect ghcr.io/${{ github.repository_owner }}/selenium-env:latest
