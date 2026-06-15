@@ -20,7 +20,7 @@ class TennisBookingBot:
     """Bot de réservation de tennis/sport complet avec screenshots debug"""
     
     def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency,
-                  hold_only=False, hold_duration = 300,
+                  hold_only=False, hold_duration = 600,
                  debug_mode = False):
         # Paramètres de réservation
         self.target_date = target_date
