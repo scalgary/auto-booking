@@ -2,47 +2,42 @@ name: Bot Pickleball For ME
 
 env:
   TARGET_UTC_HOUR : 14
-  ADVANCE_SECONDS : 1
   MAX_WAIT_SECONDS: 1800     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
-  REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
+
+  ADVANCE_SECONDS : 1
   TAG_PREFIX: 'my'  # ← Change 'my' ou 'his'
-  TARGET_NAME_SECRET: 'YOUR_SECRET_MY_NAME'  # ← 'YOUR_SECRET_MY_NAME' ou 'YOUR_SECRET_HIS_NAME'
+
+  REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
   HOLD_STATUS: False
+
 
 permissions:
   contents: write
   actions: read
+  packages: read
 
 
 
 on:
-  schedule:
-#    - cron: '00 12 * * *' # 23:45  Sunday is 0 Saturday 6
-#    - cron: '20 12 * * *' # 23:55 Calgary
-#    - cron: '40 12 * * *' # 23:55 Calgary
-#    - cron: '00 13 * * *' # 23:55 Calgary
-#    - cron: '20 13 * * *' # 23:55 Calgary
-#    - cron: '40 13 * * *' # 23:55 Calgary
-    - cron: '55 13 * * *' # 00:00 Calgary
+  #schedule:
+    # Fenêtre de booking: 14:45-14:59 UTC (23:45-23:59 Calgary MST)
 
-  #  - cron: '40 13 * * *' # 23:45  Sunday is 0 Saturday 6
-  #  - cron: '50 13 * * *' # 23:55 Calgary
-  #  - cron: '0 14 * * *' # 00:00 Calgary
+  workflow_dispatch:  # Ajoutez cette ligne
 
-  workflow_dispatch:  # Manual trigger - same behavior as scheduled - v2# declenchement manuel quand je pense a le faire 10 minutes avant l'heure par prudence
-
-
-#limitation expect registration to begin a 6 UTC"
-
+# Empêche les exécutions concurrentes
 concurrency:
   group: auto-booking-my-bot
   cancel-in-progress: false  # Queue au lieu de cancel
+
 jobs:
   register:
     runs-on: ubuntu-latest
-    # Utilise ton image Docker personnalisée
+    # Utilise ton image Docker personnalisée depuis GHCR
     container:
-      image: scalgary/selenium-env:latest
+      image: ghcr.io/scalgary/selenium-env:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --workdir ${{ github.workspace }}
     steps:
       # ==========================================
@@ -233,14 +228,6 @@ jobs:
             TARGET_HOUR=${{ env.TARGET_UTC_HOUR }}
             ADVANCE_SEC=${{ env.ADVANCE_SECONDS }}
             MAX_WAIT=${{ env.MAX_WAIT_SECONDS }}
-            # Déterminer quel nom utiliser
-            if [ "${{ env.TARGET_NAME_SECRET }}" = "YOUR_SECRET_MY_NAME" ]; then
-            TARGET_NAME="${{ secrets.YOUR_SECRET_MY_NAME }}"
-            else
-            TARGET_NAME="${{ secrets.YOUR_SECRET_HIS_NAME }}"
-            fi
-
-            echo "👤 Using name from: ${{ env.TARGET_NAME_SECRET }}"
 
 
             echo "📋 Configuration:"
@@ -249,6 +236,8 @@ jobs:
             echo "   ⏳ Max wait: ${MAX_WAIT} seconds"
 
             # ⏰ ATTENTE JUSQU'À L'HEURE CIBLE (MOINS L'AVANCE)
+
+
             current_hour=$((10#$(date -u +%H)))
             current_minute=$((10#$(date -u +%M)))
             current_second=$((10#$(date -u +%S)))
@@ -304,7 +293,7 @@ jobs:
       # STEP 4: Create success tag
       # ==========================================
       - name: Tag success
-        if: steps.check.outputs.should_continue == 'true' && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
+        if: steps.check.outputs.should_continue == 'true'  && steps.registration.outputs.PYTHON_EXIT_CODE == '0'
         run: |
           echo "======================================"
           echo "🏷️ Creating success tag"
@@ -312,7 +301,6 @@ jobs:
           target_date="${{ steps.params.outputs.date }}"
           prefix="${{ env.TAG_PREFIX }}"
           tag="${prefix}_bot_success_${target_date}"
-
 
           echo "📝 Tag to create: $tag"
           git pull

@@ -21,7 +21,7 @@
     "date": "26-Jun-26",
     "time": "4:00",
     "day": "Friday",
-    "level": "Advanced"
+    "level": "Plus"
 
   },
 
@@ -35,13 +35,13 @@
 
 
     {
-    "date": "22-Jun-26",
+    "date": "06-Jul-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Plus"
   },
   {
-    "date": "23-Jun-26",
+    "date": "07-Jul-26",
     "time": "4:30",
     "day": "Tuesday",
     "level": "Open"
