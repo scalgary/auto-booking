@@ -221,7 +221,15 @@ jobs:
 
             echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
 
-            
+            # Override HOLD_STATUS: false le mercredi
+            HOLD_STATUS="${{ env.HOLD_STATUS }}"
+            TARGET_DAY_LOWER=$(echo "$TARGET_DAY" | tr '[:upper:]' '[:lower:]')
+            if [ "$TARGET_DAY_LOWER" == "wednesday" ]; then
+              HOLD_STATUS="False"
+              echo "📅 Wednesday detected → HOLD_STATUS forced to False"
+            fi
+            echo "🔒 HOLD_STATUS: $HOLD_STATUS"
+
             FINAL_CODE=1
             echo ""
             python3 main.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_HIS_NAME" "${{env.HOLD_STATUS}}"
