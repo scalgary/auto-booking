@@ -1,37 +1,37 @@
 [
 
   {
-    "date": "20-Jul-26",
+    "date": "27-Jul-26",
     "time": "4:30",
     "day": "Monday",
     "level": "Advanced"
   },
   {
-    "date": "21-Jul-26",
+    "date": "28-Jul-26",
     "time": "4:30",
     "day": "Tuesday",
     "level": "Advanced"
   },
   {
-    "date": "22-Jul-26",
+    "date": "29-Jul-26",
     "time": "4:30",
     "day": "Wednesday",
-    "level": "Intermediate"
+    "level": "Advanced"
   },
   {
-    "date": "24-Jul-26",
+    "date": "30-Jul-26",
     "time": "4:30",
     "day": "Thursday",
     "level": "Advanced"
   },
   {
-    "date": "25-Jul-26",
+    "date": "31-Jul-26",
     "time": "4:30",
     "day": "Friday",
     "level": "Advanced"
   },
   {
-    "date": "18-Jul-26",
+    "date": "25-Jul-26",
     "time": "8:30",
     "day": "Saturday",
     "level": "Plus"
@@ -40,6 +40,11 @@
 
   
 ]
+
+
+
+
+
 
 
 
