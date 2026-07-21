@@ -463,7 +463,9 @@ class PickleballCalendarManager:
     def find_events(self, start_date=None, days_ahead=16, search_terms=SEARCH_TERMS):
         """Trouve les événements avec les emojis recherchés"""
         if start_date is None:
-            start_date = datetime.now() + timedelta(days=1)
+            # start_date = datetime.now() + timedelta(days=1)
+            start_date = datetime.now()
+
         
         end_date = start_date + timedelta(days=days_ahead)
         
