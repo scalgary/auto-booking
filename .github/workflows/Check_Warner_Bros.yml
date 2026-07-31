@@ -5,8 +5,8 @@ permissions:
   actions: read
 
 on:
-  # schedule:
-  # - cron: "0 8 * * *"   # daily at 08:00 UTC
+  schedule:
+  - cron: "0 8 * * *"   # daily at 08:00 UTC
   workflow_dispatch:
 
 concurrency:
@@ -44,7 +44,7 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          TEST_MODE: "true"
+          #TEST_MODE: "true"
 
         run: python warner.py
 
