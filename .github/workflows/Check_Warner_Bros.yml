@@ -44,6 +44,8 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          TEST_MODE: "true"
+
         run: python warner.py
 
       - name: Commit updated snapshot and log
