@@ -6,7 +6,7 @@ permissions:
 
 on:
   schedule:
-  - cron: "0 8 * * *"   # daily at 08:00 UTC
+    - cron: "0 8 * * *"   # daily at 08:00 UTC
   workflow_dispatch:
 
 concurrency:
@@ -16,12 +16,6 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/scalgary/selenium-env:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-      options: --workdir ${{ github.workspace }}
 
     steps:
       - name: Checkout code
@@ -30,9 +24,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Git setup
         run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
           git config user.name "bot"
           git config user.email "bot@github.com"
 
@@ -44,11 +42,10 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          #TEST_MODE: "true"
-
+          TEST_MODE: "false"
         run: python warner.py
 
-      - name: Commit updated snapshot and log
+      - name: Commit updated snapshot
         run: |
           git add last_snapshot.json
           git diff --staged --quiet || git commit -m "Update news snapshot"
