@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import smtplib
+import time
 from email.mime.text import MIMEText
 
 URL = "https://www.wbstudiotour.com/news/"
@@ -42,12 +43,29 @@ def send_email(subject, body):
         server.sendmail(GMAIL_USER, [ALERT_TO], msg.as_string())
     logger.info("Email sent to %s", ALERT_TO)
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
+
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 10
+
 def fetch_page_lines():
-    response = requests.get(URL, timeout=15)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
-    full_text = soup.get_text(separator="\n", strip=True)
-    return [line for line in full_text.split("\n") if line.strip()]
+    last_error = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.get(URL, timeout=15, headers=HEADERS)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            full_text = soup.get_text(separator="\n", strip=True)
+            return [line for line in full_text.split("\n") if line.strip()]
+        except requests.exceptions.RequestException as e:
+            last_error = e
+            logger.warning("Attempt %d/%d failed: %s", attempt, MAX_RETRIES, e)
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_DELAY_SECONDS)
+    raise last_error
 
 def parse_news_items(lines):
     items = []
