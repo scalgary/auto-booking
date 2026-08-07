@@ -429,29 +429,31 @@ class TennisBookingBot:
             
             self._debug_screenshot("book_button_not_found")
             return False
+        
+        if self.debug_mode:
 
         # === ANALYSE DE TOUS LES BOUTONS TROUVÉS ===
-        self.logger.info("=== DÉTAILS DES BOUTONS BOOK ===")
-        for i, btn in enumerate(book_buttons):
-            self.logger.info(f"--- Bouton [{i}] ---")
-            self.logger.info(f"  Texte: {btn.text}")
-            self.logger.info(f"  Tag: {btn.tag_name}")
-            self.logger.info(f"  Class: {btn.get_attribute('class')}")
-            self.logger.info(f"  data-class-name: {btn.get_attribute('data-class-name')}")
-            self.logger.info(f"  data-class-code: {btn.get_attribute('data-class-code')}")
-            self.logger.info(f"  Position: {btn.location}")
-            self.logger.info(f"  Visible: {btn.is_displayed()}")
-            self.logger.info(f"  Activé: {btn.is_enabled()}")
-    
-            # Vérifier quel élément est physiquement au-dessus
-            top_element_html = self.driver.execute_script("""
-                var rect = arguments[0].getBoundingClientRect();
-                var centerX = rect.left + rect.width / 2;
-                var centerY = rect.top + rect.height / 2;
-                var topElement = document.elementFromPoint(centerX, centerY);
-                return topElement ? topElement.outerHTML.substring(0, 300) : 'null';
-            """, btn)
-            self.logger.info(f"  🎯 Élément au centre: {top_element_html[:100]}...")
+            self.logger.info("=== DÉTAILS DES BOUTONS BOOK ===")
+            for i, btn in enumerate(book_buttons):
+                self.logger.info(f"--- Bouton [{i}] ---")
+                self.logger.info(f"  Texte: {btn.text}")
+                self.logger.info(f"  Tag: {btn.tag_name}")
+                self.logger.info(f"  Class: {btn.get_attribute('class')}")
+                self.logger.info(f"  data-class-name: {btn.get_attribute('data-class-name')}")
+                self.logger.info(f"  data-class-code: {btn.get_attribute('data-class-code')}")
+                self.logger.info(f"  Position: {btn.location}")
+                self.logger.info(f"  Visible: {btn.is_displayed()}")
+                self.logger.info(f"  Activé: {btn.is_enabled()}")
+
+                # Vérifier quel élément est physiquement au-dessus
+                top_element_html = self.driver.execute_script("""
+                    var rect = arguments[0].getBoundingClientRect();
+                    var centerX = rect.left + rect.width / 2;
+                    var centerY = rect.top + rect.height / 2;
+                    var topElement = document.elementFromPoint(centerX, centerY);
+                    return topElement ? topElement.outerHTML.substring(0, 300) : 'null';
+                """, btn)
+                self.logger.info(f"  🎯 Élément au centre: {top_element_html[:100]}...")
 
         # === SÉLECTION DU BON BOUTON ===
         self.logger.info("=== SÉLECTION DU BOUTON ===")
