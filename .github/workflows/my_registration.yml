@@ -9,6 +9,7 @@ env:
 
   REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
   HOLD_STATUS: False
+  COURT4_PREF: True
 
 
 permissions:
@@ -272,7 +273,16 @@ jobs:
             echo "🕐 Time: ${{ steps.params.outputs.time }}"
 
             echo "Pickleball Registration: ${{ steps.params.outputs.day }}"
-            python3 main.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_MY_NAME" "${{env.HOLD_STATUS}}"
+
+            # Override COURT Preference: false le Thursday
+            COURT4_PREF="${{ env.COURT4_PREF }}"
+            TARGET_DAY_LOWER=$(echo "$TARGET_DAY" | tr '[:upper:]' '[:lower:]')
+            if [ "$TARGET_DAY_LOWER" == "thursday" ]; then
+            COURT4_PREF="False"
+            echo "📅 Thursday detected → COURT4_PREF forced to False"
+            fi
+
+            python3 main.py "${{ steps.params.outputs.date }}" "${{ steps.params.outputs.time }}" "${{ steps.params.outputs.level }}" "$YOUR_SECRET_MY_NAME" "${{env.HOLD_STATUS}}" "$COURT4_PREF"
             FINAL_CODE=$?
 
             if [ $FINAL_CODE -eq 0 ]; then
