@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from datetime import datetime, timedelta
+import re
 import sys
 
 
@@ -297,6 +298,9 @@ class TennisBookingBot:
 
     def _find_and_wait_for_bookable_slot(self, max_refresh=8, timeout=3):
         logger.info("🔍 Recherche du slot correspondant...")
+        def extract_court(location_html):
+            match = re.search(r'Court\s*(\d+)', location_html)
+            return int(match.group(1)) if match else None
 
         def get_matching_slots():
             course_buttons = self.driver.find_elements(By.XPATH, "//button[@data-class-time]")
@@ -306,6 +310,8 @@ class TennisBookingBot:
                 class_date   = button.get_attribute('data-class-date')  or ''
                 class_time   = button.get_attribute('data-class-time')  or ''
                 class_spaces = int(button.get_attribute('data-class-spaces') or '0')
+                class_location = button.get_attribute('data-class-location') or ''
+
 
                 date_match  = self.target_date  in class_date
                 level_match = self.course_level in class_name
@@ -314,7 +320,16 @@ class TennisBookingBot:
                 if date_match and time_match and level_match:
                     logger.info(f"✅ Match: {class_name} | {class_date} | {class_time} | spaces={class_spaces}")
                     slots.append({'button': button, 'spaces': class_spaces})
+
+            # Si plusieurs courts trouvés et que Court 3 en fait partie, on le met en premier
+            courts = {s['court'] for s in slots if s['court'] is not None}
+            if len(courts) > 1 and 3 in courts:
+                logger.info("🎯 Plusieurs courts disponibles → filtre sur Court 3")
+                slots.sort(key=lambda s: s['court'] != 3)
+                
             return slots
+
+        
 
         # --- Step 1: initial fetch ---
         matching_slots = get_matching_slots()
