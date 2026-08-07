@@ -13,6 +13,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 from datetime import datetime
 import sys
+import re
 
 
 
@@ -21,7 +22,7 @@ class TennisBookingBot:
     
     def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency,
                   hold_only=False, hold_duration = 600,
-                 debug_mode = False):
+                 debug_mode = False, court4_pref = True):
         # Paramètres de réservation
         self.target_date = target_date
         self.target_time = target_time
@@ -35,6 +36,7 @@ class TennisBookingBot:
         self.implicit_wait=0.5
         self.hold_only = hold_only
         self.hold_duration = hold_duration
+        self.court4_pref = court4_pref
         
         # URLs et credentials depuis env
         self.email = os.getenv('YOUR_SECRET_EMAIL')
@@ -574,6 +576,8 @@ class TennisBookingBot:
                         class_date   = button.get_attribute('data-class-date')  or ''
                         class_time   = button.get_attribute('data-class-time')  or ''
                         class_spaces = int(button.get_attribute('data-class-spaces') or '0')
+                        class_location = button.get_attribute('data-class-location') or ''
+
 
                         date_match  = self.target_date  in class_date
                         level_match = self.course_level in class_name
@@ -583,9 +587,26 @@ class TennisBookingBot:
                         self.logger.debug(f"  Date match: {date_match} | Level match: {level_match} | Time match: {time_match}")
 
                         if date_match and time_match and level_match:
-                            self.logger.info(f"✅ Match: {class_name} | {class_date} | {class_time} | spaces={class_spaces}")
-                            slots.append({'button': button, 'spaces': class_spaces})
+                            court_match = re.search(r'Court\s*(\d+)', class_location)
+                            court = int(court_match.group(1)) if court_match else None
+                            self.logger.info(f"✅ Match: {class_name} | {class_date} | {class_time} | spaces={class_spaces} | court={court}")
+                            slots.append({'button': button, 'spaces': class_spaces, 'court': court})
                             self._debug_screenshot("slot_found")
+
+                    courts = {s['court'] for s in slots if s['court'] is not None}
+
+
+                    if self.court4_pref and len(courts)>1 and 4 in courts:
+                    # Si plusieurs courts trouvés et que Court 4 en fait partie, on le met en premier
+                        self.logger.info("🎯 Plusieurs courts disponibles → filtre sur Court 4")
+                        slots.sort(key=lambda s: s['court'] != 4)
+                        self.logger.info("🔀 Slots triés par préférence Court 4")
+
+                    if self.debug_mode:
+                        with open(f"debug_slots_{self.target_date.replace('-', '_')}.txt", "w") as f:
+                            for s in slots:
+                                f.write(f"date = {self.target_date} | level = {self.course_level} | court={s['court']} | spaces={s['spaces']}\n")
+
 
                     return slots  # success
 
