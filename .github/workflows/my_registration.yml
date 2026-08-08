@@ -4,7 +4,7 @@ env:
   TARGET_UTC_HOUR : 14
   MAX_WAIT_SECONDS: 1800     # Seuil maximum d'attente (600 = 10 min, 1800 = 30 min, etc.)
 
-  ADVANCE_SECONDS : 0
+  ADVANCE_SECONDS : 2
   TAG_PREFIX: 'my'  # ← Change 'my' ou 'his'
 
   REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
