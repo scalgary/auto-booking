@@ -22,6 +22,8 @@ from email.mime.multipart import MIMEMultipart
 import json
 import logging
 import os
+from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
 
 from caldav import DAVClient
 from dotenv import load_dotenv
@@ -511,12 +513,15 @@ class PickleballCalendarManager:
         for event in events:
             try:
                 cal = icalendar.Calendar()
+                cal.add('version', '2.0')
+                cal.add('prodid', '-//Pickleball Sync//Calgary//FR')
                 ical_event = icalendar.Event()
                 
                 ical_event.add('summary', event['summary'])
                 ical_event.add('dtstart', event['start'])
                 ical_event.add('dtend', event['end'])
                 ical_event.add('uid', f"pickleball-{event['start'].strftime('%Y%m%d-%H%M')}")
+                ical_event.add('dtstamp', datetime.now(timezone.utc))
                 
                 cal.add_component(ical_event)
                 self.calendar.save_event(cal.to_ical())
@@ -566,11 +571,12 @@ class PickleballCalendarManager:
                 start = datetime.strptime(
                     f"{year}-{month:02d}-{day:02d} {time_parts[0].strip()}", 
                     "%Y-%m-%d %I:%M %p"
-                )
+                ).replace(tzinfo=ZoneInfo("America/Edmonton"))
+
                 end = datetime.strptime(
                     f"{year}-{month:02d}-{day:02d} {time_parts[1].strip()}", 
                     "%Y-%m-%d %I:%M %p"
-                )
+                ).replace(tzinfo=ZoneInfo("America/Edmonton"))
                 
                 # Garder seulement les futurs
                 if start.date() > today:
