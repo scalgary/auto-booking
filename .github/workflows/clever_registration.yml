@@ -1,4 +1,4 @@
-name: Bot Pickleball for HIS
+name: old Bot Pickleball for HIS
 
 env:
   TARGET_UTC_HOUR : 14

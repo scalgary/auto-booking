@@ -25,16 +25,22 @@
     "level": "Advanced"
   },
   {
-    "date": "14-Aug-26",
+    "date": "21-Aug-26",
     "time": "4:30",
     "day": "Friday",
     "level": "Advanced"
   },
   {
-    "date": "15-Aug-26",
+    "date": "22-Aug-26",
     "time": "8:30",
     "day": "Saturday",
     "level": "Plus"
+  },
+   {
+    "date": "16-Aug-26",
+    "time": "11:00",
+    "day": "Sunday",
+    "level": "Advanced"
   }
 
 
