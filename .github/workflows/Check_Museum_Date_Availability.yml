@@ -18,6 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+jobs:
   check:
     runs-on: ubuntu-latest
     container:
@@ -27,15 +28,6 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --workdir ${{ github.workspace }}
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: norton
-            script: check_norton.py
-          - name: getty
-            script: check_getty.py
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,17 +35,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Run ${{ matrix.script }}
+      - name: Run check_norton.py
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          NORTON_TARGET_DATE: ${{ env.NORTON_TARGET_DATE }}
-          GETTY_TARGET_DATE: ${{ env.GETTY_TARGET_DATE }}
-        run: |
-          if [ "${{ matrix.name }}" = "norton" ]; then
-            TARGET_DATE="$NORTON_TARGET_DATE"
-          else
-            TARGET_DATE="$GETTY_TARGET_DATE"
-          fi
-          python ${{ matrix.script }} --date "$TARGET_DATE"
+        run: python check_norton.py --date "$NORTON_TARGET_DATE"
+
+      - name: Run check_getty.py
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python check_getty.py --date "$GETTY_TARGET_DATE"
