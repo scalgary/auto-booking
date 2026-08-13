@@ -18,7 +18,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-jobs:
   check:
     runs-on: ubuntu-latest
     container:
