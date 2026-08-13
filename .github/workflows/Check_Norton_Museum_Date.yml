@@ -1,0 +1,44 @@
+name: Check Norton Museum Date Availability
+
+env:
+  TARGET_DATE: "2026-10-12" # <-- change manually here
+
+permissions:
+  contents: read
+  actions: read
+
+on:
+  schedule:
+    - cron: "0 8 * * 5" # every Friday at 8am UTC
+  workflow_dispatch:
+
+concurrency:
+  group: norton-checker
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/scalgary/selenium-env:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --workdir ${{ github.workspace }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install Python dependencies
+        run: pip install selenium python-dotenv webdriver-manager
+
+      - name: Run check_norton_november.py
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python check_norton.py --date "$TARGET_DATE"
