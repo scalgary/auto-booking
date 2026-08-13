@@ -15,3 +15,5 @@ selenium_env/
 uv.lock.tmp
 
 .envrc
+.python-version
+debug_*.txt
