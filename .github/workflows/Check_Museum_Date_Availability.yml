@@ -1,0 +1,59 @@
+name: Check Museum Date Availability
+
+env:
+  NORTON_TARGET_DATE: "2026-10-12"   # <-- change manually here
+  GETTY_TARGET_DATE: "2026-10-05"    # <-- change manually here
+
+permissions:
+  contents: read
+  actions: read
+
+on:
+  schedule:
+    - cron: "0 8 * * 5"   # every Friday at 8am UTC
+  workflow_dispatch:
+
+concurrency:
+  group: museum-checker
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/scalgary/selenium-env:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --workdir ${{ github.workspace }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: norton
+            script: check_norton.py
+          - name: getty
+            script: check_getty.py
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Run ${{ matrix.script }}
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          NORTON_TARGET_DATE: ${{ env.NORTON_TARGET_DATE }}
+          GETTY_TARGET_DATE: ${{ env.GETTY_TARGET_DATE }}
+        run: |
+          if [ "${{ matrix.name }}" = "norton" ]; then
+            TARGET_DATE="$NORTON_TARGET_DATE"
+          else
+            TARGET_DATE="$GETTY_TARGET_DATE"
+          fi
+          python ${{ matrix.script }} --date "$TARGET_DATE"
