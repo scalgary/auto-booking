@@ -9,8 +9,7 @@ env:
 
   REGISTRATION_JSON_FILE: 'my_registrations.json'  # ← Change ici
   HOLD_STATUS: False
-  COURT4_PREF: True
-
+  COURT4_PREF: False
 
 permissions:
   contents: write

@@ -80,7 +80,7 @@ DEFAULT_TIME = "2:30"
 DEFAULT_LEVEL = "Open"
 DEFAULT_NAME = os.getenv('YOUR_SECRET_MY_NAME', 'Player')
 DEFAULT_HOLD = False
-DEFAULT_COURT4 = True
+DEFAULT_COURT4 = False
 
 # Arguments ou défauts
 target_date = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DATE

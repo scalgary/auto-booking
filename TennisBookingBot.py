@@ -22,7 +22,7 @@ class TennisBookingBot:
     
     def __init__(self, target_date, target_time, course_level, player_name, time_sleep, web_wait_time, poll_frequency,
                   hold_only=False, hold_duration = 600,
-                 debug_mode = False, court4_pref = True):
+                 debug_mode = False, court4_pref = False, court3_pref = True):
         # Paramètres de réservation
         self.target_date = target_date
         self.target_time = target_time
@@ -37,6 +37,10 @@ class TennisBookingBot:
         self.hold_only = hold_only
         self.hold_duration = hold_duration
         self.court4_pref = court4_pref
+        self.court3_pref = court3_pref
+        if self.court4_pref and self.court3_pref:
+            self.logger.warning("⚠️ Les deux préférences Court 4 et Court 3 sont activées. Court 4 sera prioritaire.")      
+            self.court3_pref = False  # Désactiver Court 3 si Court 4 est activé
         
         # URLs et credentials depuis env
         self.email = os.getenv('YOUR_SECRET_EMAIL')
@@ -61,6 +65,12 @@ class TennisBookingBot:
         self.logger.info(f"🐛 Debug mode: {'✅ ON' if self.debug_mode else '❌ OFF'}")
         self.logger.info(f"⏸️ Hold only: {'✅ ON' if self.hold_only else '❌ OFF'}")
         self.logger.info(f"⏱️ Hold duration: {self.hold_duration}s")
+        if self.court4_pref:
+            self.logger.info("🎯 Préférence Court 4: ✅ ON" )
+        elif self.court3_pref:
+            self.logger.info("🎯 Préférence Court 3: ✅ ON")
+        else:
+            self.logger.info("🎯 Préférence Court: ❌ OFF")
 
 
     def _check_secrets(self):
@@ -597,12 +607,17 @@ class TennisBookingBot:
 
                     courts = {s['court'] for s in slots if s['court'] is not None}
 
+                    if len(courts) > 1:
+                        self.logger.info(f"🔀 Plusieurs courts trouvés")
+                        if self.court3_pref and 3 in courts:
+                            self.logger.info("🎯 Plusieurs courts disponibles → filtre sur Court 3")
+                            slots.sort(key=lambda s: s['court'] != 3)
+                            self.logger.info("🔀 Slots triés par préférence Court 3")
+                        if self.court4_pref and 4 in courts:
+                            self.logger.info("🎯 Plusieurs courts disponibles → filtre sur Court 4")
+                            slots.sort(key=lambda s: s['court'] != 4)
+                            self.logger.info("🔀 Slots triés par préférence Court 4")   
 
-                    if self.court4_pref and len(courts)>1 and 4 in courts:
-                    # Si plusieurs courts trouvés et que Court 4 en fait partie, on le met en premier
-                        self.logger.info("🎯 Plusieurs courts disponibles → filtre sur Court 4")
-                        slots.sort(key=lambda s: s['court'] != 4)
-                        self.logger.info("🔀 Slots triés par préférence Court 4")
 
                     if self.debug_mode:
                         with open(f"debug_slots_{self.target_date.replace('-', '_')}.txt", "w") as f:
@@ -640,6 +655,7 @@ class TennisBookingBot:
             self.logger.info(f"🔄 Tentative {refresh_count + 1}/{max_refresh}")
 
             first_slot = matching_slots[0]
+            self.logger.info(f"📍spaces={first_slot['spaces']} | court={first_slot['court']}")
             parent = first_slot['button'].find_element(By.XPATH, "./..")
             book_buttons = parent.find_elements(
                 By.XPATH,
