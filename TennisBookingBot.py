@@ -38,9 +38,6 @@ class TennisBookingBot:
         self.hold_duration = hold_duration
         self.court4_pref = court4_pref
         self.court3_pref = court3_pref
-        if self.court4_pref and self.court3_pref:
-            self.logger.warning("⚠️ Les deux préférences Court 4 et Court 3 sont activées. Court 4 sera prioritaire.")      
-            self.court3_pref = False  # Désactiver Court 3 si Court 4 est activé
         
         # URLs et credentials depuis env
         self.email = os.getenv('YOUR_SECRET_EMAIL')
@@ -65,12 +62,16 @@ class TennisBookingBot:
         self.logger.info(f"🐛 Debug mode: {'✅ ON' if self.debug_mode else '❌ OFF'}")
         self.logger.info(f"⏸️ Hold only: {'✅ ON' if self.hold_only else '❌ OFF'}")
         self.logger.info(f"⏱️ Hold duration: {self.hold_duration}s")
+        if self.court4_pref and self.court3_pref:
+            self.logger.warning("⚠️ Les deux préférences Court 4 et Court 3 sont activées. Court 4 sera prioritaire.")      
+            self.court3_pref = False  # Désactiver Court 3 si Court 4 est activé   
         if self.court4_pref:
             self.logger.info("🎯 Préférence Court 4: ✅ ON" )
         elif self.court3_pref:
             self.logger.info("🎯 Préférence Court 3: ✅ ON")
         else:
             self.logger.info("🎯 Préférence Court: ❌ OFF")
+  
 
 
     def _check_secrets(self):
