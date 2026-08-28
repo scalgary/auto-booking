@@ -17,3 +17,6 @@ uv.lock.tmp
 .envrc
 .python-version
 debug_*.txt
+
+test*.json
+temp*.json
