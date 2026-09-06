@@ -636,8 +636,8 @@ secure_login.login()  # ✅ D'abord se connecter
 secure_login.save_appointments_json()
 secure_login.quit()
 send_all_appointments_email(load_appointments())
-if len(sys.argv) > 1 and sys.argv[1].lower() == 'local':
-    update_calendar()
+# if len(sys.argv) > 1 and sys.argv[1].lower() == 'local':
+update_calendar()
 
 
 
