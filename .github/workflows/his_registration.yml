@@ -6,7 +6,7 @@ env:
   ADVANCE_SECONDS: 2
   TAG_PREFIX: 'his'  # ← Change 'my' ou 'his'
   REGISTRATION_JSON_FILE: 'his_registrations.json'  # ← Change ici
-  HOLD_STATUS: False
+  HOLD_STATUS: True
   COURT4_PREF: True
 permissions:
   contents: write
