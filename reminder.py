@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
@@ -249,31 +249,40 @@ class SecureWebLogin:
     def save_appointments_json(self):
         self.go_appointment()
         wait = WebDriverWait(self.driver, time_sleep)
-
+        selector = "tbody tr.align-middle"
 
         try:
-            # 🕐 Attendre que le tableau soit visible
-            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "tbody tr.align-middle")))
-            rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody tr.align-middle")
+            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, selector)))
         except TimeoutException:
             logger.error("❌ Aucun rendez-vous trouvé (timeout)")
-            rows = []
-
-        appointments = []
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, "td")
-            if len(cells) >= 2:
-                appointments.append({
-                    "date": cells[0].text,
-                    "time": cells[1].text,
-                    "name": cells[4].text,
-                    "type": SecureWebLogin.transform_text(cells[3].text)
-                })
+            appointments = []
+        else:
+            appointments = self._read_rows(selector)
 
         with open('all_appointments.json', 'w', encoding='utf-8') as f:
             json.dump(appointments, f, indent=2)
 
         logger.info(f"✓ {len(appointments)} appointments saved!")
+
+    def _read_rows(self, selector, retries=3):
+        for attempt in range(retries):
+            try:
+                appointments = []
+                for row in self.driver.find_elements(By.CSS_SELECTOR, selector):
+                    cells = row.find_elements(By.TAG_NAME, "td")
+                    if len(cells) < 5:
+                        continue
+                    appointments.append({
+                        "date": cells[0].text,
+                        "time": cells[1].text,
+                        "name": cells[4].text,
+                        "type": SecureWebLogin.transform_text(cells[3].text),
+                    })
+                return appointments
+            except StaleElementReferenceException:
+                logger.warning(f"⚠️ Stale element, retry {attempt + 1}/{retries}")
+                time.sleep(0.5)
+        return []
 
     def delete_appointment(self, date_cancellation=None, time_cancellation=None, name_cancellation=None, type_cancellation=None):
         """Delete a specific appointment by matching criteria"""
@@ -636,7 +645,6 @@ secure_login.login()  # ✅ D'abord se connecter
 secure_login.save_appointments_json()
 secure_login.quit()
 send_all_appointments_email(load_appointments())
-# if len(sys.argv) > 1 and sys.argv[1].lower() == 'local':
 update_calendar()
 
 
